@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react';
-import { AppState, Problem, MockInterview, WeekTask, StarStory, KnowledgeItem, DailyLog, KnowledgeCategory, ProjectRecord, DSASheetItem } from '@/lib/types';
+import { AppState, Problem, MockInterview, WeekTask, StarStory, KnowledgeItem, DailyLog, KnowledgeCategory, CSSubcategory, ProjectRecord, DSASheetItem } from '@/lib/types';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuth } from './AuthContext';
 import { syncService } from '@/lib/syncService';
@@ -108,7 +108,7 @@ interface AppContextType {
 
   // Knowledge Base
   updateKnowledgeItem: (id: string, answer: string) => void;
-  addKnowledgeItem: (question: string, category: KnowledgeCategory) => void;
+  addKnowledgeItem: (question: string, category: KnowledgeCategory, subcategory?: CSSubcategory) => void;
   deleteKnowledgeItem: (id: string) => void;
  
   // Projects
@@ -202,6 +202,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       loadCloudData();
     }
   }, [user, initialized, setState]);
+
+  // KB Migration: merge any new seed questions the user doesn't have yet (preserves answers)
+  useEffect(() => {
+    if (!initialized) return;
+    setState((prev) => {
+      const existing = prev.knowledgeBase || [];
+      const existingIds = new Set(existing.map((k) => k.id));
+      const newItems = DEFAULT_KNOWLEDGE.filter((k) => !existingIds.has(k.id));
+      if (newItems.length === 0) return prev;
+      return { ...prev, knowledgeBase: [...existing, ...newItems] };
+    });
+  }, [initialized, setState]);
 
   // 2. Debounced Cloud Backup on State Changes
   useEffect(() => {
@@ -427,8 +439,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     mutate((s) => ({ ...s, knowledgeBase: (s.knowledgeBase || []).map((h) => (h.id === id ? { ...h, answer } : h)) }));
   }, [mutate]);
 
-  const addKnowledgeItem = useCallback((question: string, category: KnowledgeCategory) => {
-    mutate((s) => ({ ...s, knowledgeBase: [...(s.knowledgeBase || []), { id: generateId(), question, answer: '', category }] }));
+  const addKnowledgeItem = useCallback((question: string, category: KnowledgeCategory, subcategory?: CSSubcategory) => {
+    mutate((s) => ({ ...s, knowledgeBase: [...(s.knowledgeBase || []), { id: generateId(), question, answer: '', category, subcategory }] }));
   }, [mutate]);
 
   const deleteKnowledgeItem = useCallback((id: string) => {

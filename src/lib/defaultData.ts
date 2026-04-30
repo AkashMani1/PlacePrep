@@ -1,5 +1,5 @@
 /* Developed by Akash Mani - This site is developed by Akash Mani. Original watermark of Akash Mani. */
-import { Problem, WeekPlan, MockInterview, StarStory, KnowledgeItem } from './types';
+import { Problem, WeekPlan, MockInterview, StarStory, KnowledgeItem, CSSubcategory } from './types';
 
 export const DEFAULT_WEEKS: WeekPlan[] = [
   {
@@ -142,32 +142,148 @@ export const DEFAULT_STARS: StarStory[] = [
 ];
 
 export const DEFAULT_KNOWLEDGE: KnowledgeItem[] = [
-  // --- CORE CS: OOPs ---
-  { id: 'k1', category: 'Core CS', question: 'What are the 4 pillars of OOPs?', answer: '1. Encapsulation: Wrapping data and methods into a single class.\n2. Abstraction: Hiding internal details and showing only functionality.\n3. Inheritance: Adopting properties/methods from a parent class.\n4. Polymorphism: Same entity behaving differently based on context (Method Overloading/Overriding).' },
-  { id: 'k2', category: 'Core CS', question: 'Difference between Abstract Class and Interface (Java)?', answer: 'Abstract Class: Can have both abstract and concrete methods. Can have instance variables. A class can extend only one abstract class.\nInterface: Only abstract methods (until Java 8). Cannot have instance variables (only static final). A class can implement multiple interfaces.' },
-  
-  // --- CORE CS: DBMS ---
-  { id: 'k3', category: 'Core CS', question: 'What are ACID properties?', answer: 'Atomicity: Entire transaction takes place at once or doesn\'t happen at all.\nConsistency: Database must be consistent before and after transaction.\nIsolation: Multiple transactions occur independently without interference.\nDurability: Changes of a successful transaction are permanent even after system failure.' },
-  { id: 'k4', category: 'Core CS', question: 'Explain SQL Joins.', answer: 'Inner Join: Returns records with matching values in both tables.\nLeft Join: Returns all records from left table, and matched records from right.\nRight Join: Returns all records from right table, and matched from left.\nFull Outer: Returns all records when there is a match in either left or right.' },
-  { id: 'k5', category: 'Core CS', question: 'What is Normalization?', answer: 'Process of organizing data to minimize redundancy. 1NF (atomic values), 2NF (no partial dependency), 3NF (no transitive dependency), BCNF (stricter 3NF).' },
+  // ── OOPs ──
+  { id: 'k_oops1', category: 'Core CS', subcategory: 'OOPs', question: 'Define basic principles of OOPs', answer: '' },
+  { id: 'k_oops2', category: 'Core CS', subcategory: 'OOPs', question: 'What is Polymorphism?', answer: '' },
+  { id: 'k_oops3', category: 'Core CS', subcategory: 'OOPs', question: 'Difference between overloading and overriding', answer: '' },
+  { id: 'k_oops4', category: 'Core CS', subcategory: 'OOPs', question: 'What is meant by Interface?', answer: '' },
+  { id: 'k_oops5', category: 'Core CS', subcategory: 'OOPs', question: 'What is meant by Abstract class?', answer: '' },
+  { id: 'k_oops6', category: 'Core CS', subcategory: 'OOPs', question: 'Define types of inheritance', answer: '' },
+  { id: 'k_oops7', category: 'Core CS', subcategory: 'OOPs', question: 'Difference between interface and abstract class', answer: '' },
+  { id: 'k_oops8', category: 'Core CS', subcategory: 'OOPs', question: 'What is a Class?', answer: '' },
+  { id: 'k_oops9', category: 'Core CS', subcategory: 'OOPs', question: 'Explain about Public and Private access specifiers', answer: '' },
+  { id: 'k_oops10', category: 'Core CS', subcategory: 'OOPs', question: 'Difference between Default and Protected access specifiers', answer: '' },
 
-  // --- CORE CS: OS ---
-  { id: 'k6', category: 'Core CS', question: 'Process vs Thread?', answer: 'Process: Program in execution. Heavyweight, isolated memory space, higher context switching overhead.\nThread: Segment of a process. Lightweight, shares memory with other threads in the same process, faster context switching.' },
-  { id: 'k7', category: 'Core CS', question: 'What is a Deadlock? Give the 4 necessary conditions.', answer: 'A situation where a set of processes are blocked because each is holding a resource and waiting for another resource acquired by another process.\nConditions (Coffman):\n1. Mutual Exclusion\n2. Hold and Wait\n3. No Preemption\n4. Circular Wait' },
+  // ── Java ──
+  { id: 'k_java1', category: 'Core CS', subcategory: 'Java', question: 'What is JAVA? What are its features?', answer: '' },
+  { id: 'k_java2', category: 'Core CS', subcategory: 'Java', question: 'Why is Java platform independent?', answer: '' },
+  { id: 'k_java3', category: 'Core CS', subcategory: 'Java', question: 'Why do we not install JVM directly?', answer: '' },
+  { id: 'k_java4', category: 'Core CS', subcategory: 'Java', question: 'How does Java enable high performance?', answer: '' },
+  { id: 'k_java5', category: 'Core CS', subcategory: 'Java', question: 'What are the Java IDEs?', answer: '' },
+  { id: 'k_java6', category: 'Core CS', subcategory: 'Java', question: 'What do you mean by Constructor?', answer: '' },
+  { id: 'k_java7', category: 'Core CS', subcategory: 'Java', question: 'What is meant by Local variable and Instance variable?', answer: '' },
+  { id: 'k_java8', category: 'Core CS', subcategory: 'Java', question: 'What do you mean by constructor overloading?', answer: '' },
+  { id: 'k_java9', category: 'Core CS', subcategory: 'Java', question: 'Diff between final, finally, finalize?', answer: '' },
+  { id: 'k_java10', category: 'Core CS', subcategory: 'Java', question: 'Difference between Array and ArrayList', answer: '' },
+  { id: 'k_java11', category: 'Core CS', subcategory: 'Java', question: 'Difference between String, StringBuilder, and StringBuffer', answer: '' },
+  { id: 'k_java12', category: 'Core CS', subcategory: 'Java', question: 'Define mutable and immutable string', answer: '' },
+  { id: 'k_java13', category: 'Core CS', subcategory: 'Java', question: 'Difference between HashMap and HashTable', answer: '' },
+  { id: 'k_java14', category: 'Core CS', subcategory: 'Java', question: 'Difference between HashSet and TreeSet', answer: '' },
+  { id: 'k_java15', category: 'Core CS', subcategory: 'Java', question: 'What is meant by Collections in Java?', answer: '' },
+  { id: 'k_java16', category: 'Core CS', subcategory: 'Java', question: 'What are all the Classes and Interfaces available in collections?', answer: '' },
+  { id: 'k_java17', category: 'Core CS', subcategory: 'Java', question: 'Explain about the different lists available in the collection', answer: '' },
+  { id: 'k_java18', category: 'Core CS', subcategory: 'Java', question: 'What do you mean by public static void main(String args[])?', answer: '' },
+  { id: 'k_java19', category: 'Core CS', subcategory: 'Java', question: 'Difference between IO and UTIL package in Java', answer: '' },
 
-  // --- CORE CS: Computer Networks ---
-  { id: 'k8', category: 'Core CS', question: 'TCP vs UDP?', answer: 'TCP (Transmission Control Protocol): Connection-oriented, reliable, guarantees delivery (acknowledgments), slower. Used in HTTP, FTP, Email.\nUDP (User Datagram Protocol): Connectionless, unreliable (no acks), faster. Used in Video streaming, Gaming, DNS.' },
-  { id: 'k9', category: 'Core CS', question: 'Explain the OSI Model layers.', answer: '7. Application (HTTP/FTP)\n6. Presentation (Encryption/Data format)\n5. Session (Sync/Ports)\n4. Transport (TCP/UDP, Segments)\n3. Network (IP, Routers, Packets)\n2. Data Link (MAC, Switches, Frames)\n1. Physical (Cables, Bits)' },
+  // ── DBMS ──
+  { id: 'k_dbms1', category: 'Core CS', subcategory: 'DBMS', question: 'What are advantages of DBMS over traditional file based systems?', answer: '' },
+  { id: 'k_dbms2', category: 'Core CS', subcategory: 'DBMS', question: 'What are super, primary, candidate and foreign keys?', answer: '' },
+  { id: 'k_dbms3', category: 'Core CS', subcategory: 'DBMS', question: 'Difference between primary key and unique constraints', answer: '' },
+  { id: 'k_dbms4', category: 'Core CS', subcategory: 'DBMS', question: 'What is database normalization? Define Normal Forms.', answer: '' },
+  { id: 'k_dbms5', category: 'Core CS', subcategory: 'DBMS', question: 'What are the differences between DDL, DML and DCL in SQL?', answer: '' },
+  { id: 'k_dbms6', category: 'Core CS', subcategory: 'DBMS', question: 'Difference between HAVING and WHERE clause', answer: '' },
+  { id: 'k_dbms7', category: 'Core CS', subcategory: 'DBMS', question: 'What is Join? Types of Joins in SQL?', answer: '' },
+  { id: 'k_dbms8', category: 'Core CS', subcategory: 'DBMS', question: 'What is Identity in SQL?', answer: '' },
+  { id: 'k_dbms9', category: 'Core CS', subcategory: 'DBMS', question: 'What is a view in SQL? How to create one? What are its uses?', answer: '' },
+  { id: 'k_dbms10', category: 'Core CS', subcategory: 'DBMS', question: 'What is a Trigger? What is a Stored Procedure? Difference between them?', answer: '' },
+  { id: 'k_dbms11', category: 'Core CS', subcategory: 'DBMS', question: 'What is a transaction? What are ACID properties?', answer: ''},
+  { id: 'k_dbms12', category: 'Core CS', subcategory: 'DBMS', question: 'What are indexes? Difference between clustered and non-clustered indexes?', answer: '' },
+  { id: 'k_dbms13', category: 'Core CS', subcategory: 'DBMS', question: 'Query to find 2nd highest salary of an employee', answer: 'SELECT MAX(salary) FROM employees WHERE salary < (SELECT MAX(salary) FROM employees);\n-- OR using LIMIT/OFFSET:\nSELECT DISTINCT salary FROM employees ORDER BY salary DESC LIMIT 1 OFFSET 1;' },
+  { id: 'k_dbms14', category: 'Core CS', subcategory: 'DBMS', question: 'Why can we not use WHERE clause with aggregate functions? (HAVING)', answer: '' },
+  { id: 'k_dbms15', category: 'Core CS', subcategory: 'DBMS', question: 'Difference between primary key and unique key. Why use unique key if it allows only one null?', answer: '' },
+  { id: 'k_dbms16', category: 'Core CS', subcategory: 'DBMS', question: "What's the difference between materialized and dynamic view?", answer: '' },
+  { id: 'k_dbms17', category: 'Core CS', subcategory: 'DBMS', question: 'What is embedded and dynamic SQL?', answer: '' },
+  { id: 'k_dbms18', category: 'Core CS', subcategory: 'DBMS', question: 'What is the difference between CHAR and VARCHAR?', answer: '' },
+  { id: 'k_dbms19', category: 'Core CS', subcategory: 'DBMS', question: 'What is cardinality in DBMS?', answer: '' },
+  { id: 'k_dbms20', category: 'Core CS', subcategory: 'DBMS', question: 'View Serializable and View Equivalence', answer: '' },
+  { id: 'k_dbms21', category: 'Core CS', subcategory: 'DBMS', question: 'Cascadeless Recoverable Schedules', answer: '' },
+  { id: 'k_dbms22', category: 'Core CS', subcategory: 'DBMS', question: 'Tell the list of data structures used in RDBMS, Network Data Model, and Hierarchical Data Model', answer: '' },
 
-  // --- APTITUDE TRICKS ---
-  { id: 'k10', category: 'Aptitude', question: 'Time & Work Shortcut: Two people working together', answer: 'If A can do work in X days and B can do it in Y days:\nTogether they take: (X * Y) / (X + Y) days.' },
-  { id: 'k11', category: 'Aptitude', question: 'Speed & Distance Shortcut: Average Speed', answer: 'If a person covers a distance at speed X and returns at speed Y:\nAverage speed = (2 * X * Y) / (X + Y)\nNote: Not just (X+Y)/2!' },
-  { id: 'k12', category: 'Aptitude', question: 'Percentage Shortcut: A is x% more than B', answer: 'If A is x% more than B, then B is less than A by: [x / (100 + x)] * 100 %\nIf A is x% less than B, then B is more than A by: [x / (100 - x)] * 100 %' },
+  // ── Data Structures ──
+  { id: 'k_ds1', category: 'Core CS', subcategory: 'Data Structures', question: 'What is a Data Structure? Linear vs Non-linear?', answer: '' },
+  { id: 'k_ds2', category: 'Core CS', subcategory: 'Data Structures', question: 'What are the various operations that can be performed on different Data Structures?', answer: '' },
+  { id: 'k_ds3', category: 'Core CS', subcategory: 'Data Structures', question: 'What are the area of applications of Data Structures?', answer: '' },
+  { id: 'k_ds4', category: 'Core CS', subcategory: 'Data Structures', question: 'What is the difference between file structure and storage structure?', answer: '' },
+  { id: 'k_ds5', category: 'Core CS', subcategory: 'Data Structures', question: 'What is an Array? How is an Array different from Linked List?', answer: '' },
+  { id: 'k_ds6', category: 'Core CS', subcategory: 'Data Structures', question: 'What is a multidimensional array? How are elements of a 2D array stored in memory?', answer: '' },
+  { id: 'k_ds7', category: 'Core CS', subcategory: 'Data Structures', question: 'Calculate the address of a random element in a 2D array given base address BA', answer: '' },
+  { id: 'k_ds8', category: 'Core CS', subcategory: 'Data Structures', question: 'What is Stack and where can it be used? Stack overflow condition?', answer: '' },
+  { id: 'k_ds9', category: 'Core CS', subcategory: 'Data Structures', question: 'Difference between PUSH and POP. Steps for insertion and deletion in stack.', answer: '' },
+  { id: 'k_ds10', category: 'Core CS', subcategory: 'Data Structures', question: 'List the area of applications where stack data structure can be used', answer: '' },
+  { id: 'k_ds11', category: 'Core CS', subcategory: 'Data Structures', question: 'Which notations are used in evaluation of arithmetic expressions (prefix and postfix)?', answer: '' },
+  { id: 'k_ds12', category: 'Core CS', subcategory: 'Data Structures', question: 'What is a Queue? How is it different from Stack? What is FIFO? What is a dequeue?', answer: '' },
+  { id: 'k_ds13', category: 'Core CS', subcategory: 'Data Structures', question: 'Drawbacks of array implementation of Queue. Scenarios for circular queue insertion.', answer: '' },
+  { id: 'k_ds14', category: 'Core CS', subcategory: 'Data Structures', question: 'What is minimum number of queues to implement a priority queue?', answer: '' },
+  { id: 'k_ds15', category: 'Core CS', subcategory: 'Data Structures', question: 'What is a Linked List and what are its types? Are linked lists linear or non-linear?', answer: '' },
+  { id: 'k_ds16', category: 'Core CS', subcategory: 'Data Structures', question: 'Advantages of Linked List over an array', answer: '' },
+  { id: 'k_ds17', category: 'Core CS', subcategory: 'Data Structures', question: 'What is a doubly linked list?', answer: '' },
+  { id: 'k_ds18', category: 'Core CS', subcategory: 'Data Structures', question: 'Which data structure is used to perform recursion?', answer: '' },
+  { id: 'k_ds19', category: 'Core CS', subcategory: 'Data Structures', question: 'Which data structures are used for BFS and DFS of a graph?', answer: '' },
+  { id: 'k_ds20', category: 'Core CS', subcategory: 'Data Structures', question: 'How to implement a stack using queue? How to implement a queue using stack?', answer: '' },
+  { id: 'k_ds21', category: 'Core CS', subcategory: 'Data Structures', question: 'Which Data Structure should be used for implementing LRU cache?', answer: '' },
+  { id: 'k_ds22', category: 'Core CS', subcategory: 'Data Structures', question: 'How to check if a given Binary Tree is BST or not?', answer: '' },
+  { id: 'k_ds23', category: 'Core CS', subcategory: 'Data Structures', question: 'Define the tree data structure. List types of tree.', answer: '' },
+  { id: 'k_ds24', category: 'Core CS', subcategory: 'Data Structures', question: 'What are Binary Trees? Maximum number of nodes in a binary tree of height k?', answer: '' },
+  { id: 'k_ds25', category: 'Core CS', subcategory: 'Data Structures', question: 'How can AVL Tree be useful compared to Binary Search Tree?', answer: '' },
+  { id: 'k_ds26', category: 'Core CS', subcategory: 'Data Structures', question: 'State the properties of B Tree. Differences between B tree and B+ tree.', answer: '' },
+  { id: 'k_ds27', category: 'Core CS', subcategory: 'Data Structures', question: 'List some applications of Tree data structure', answer: '' },
+  { id: 'k_ds28', category: 'Core CS', subcategory: 'Data Structures', question: 'Differentiate among cycle, path, and circuit in graphs', answer: '' },
+  { id: 'k_ds29', category: 'Core CS', subcategory: 'Data Structures', question: 'Mention data structures used in graph implementation', answer: '' },
+  { id: 'k_ds30', category: 'Core CS', subcategory: 'Data Structures', question: 'What are the applications of Graph data structure?', answer: '' },
+  { id: 'k_ds31', category: 'Core CS', subcategory: 'Data Structures', question: 'List some applications of Multilinked Structures', answer: '' },
+  { id: 'k_ds32', category: 'Core CS', subcategory: 'Data Structures', question: 'What is the difference between NULL and VOID?', answer: '' },
+  { id: 'k_ds33', category: 'Core CS', subcategory: 'Data Structures', question: 'What is a Linked List? What are its types?', answer: '' },
+  { id: 'k_ds34', category: 'Core CS', subcategory: 'Data Structures', question: 'What is FIFO? How does a Queue implement it?', answer: '' },
+  { id: 'k_ds35', category: 'Core CS', subcategory: 'Data Structures', question: 'Which data structure suits the most in tree construction?', answer: '' },
+  { id: 'k_ds36', category: 'Core CS', subcategory: 'Data Structures', question: 'How to reference all the elements in a one-dimension array?', answer: '' },
 
-  // --- HR INTERVIEW ---
-  { id: 'k13', category: 'HR', question: 'Tell me about yourself (Framework)', answer: '1. Present: Current status (Branch, College, CGPA).\n2. Past: Relevant projects/internships and the tech stack used.\n3. Alignment: Why your skills align with the company (mentioning specific interests like Cloud or full-stack).\nKeep it under 90 seconds.' },
-  { id: 'k14', category: 'HR', question: 'Why Our Company?', answer: 'The company offers an unmatched learning ecosystem and diverse projects across domains. I value job stability, global exposure, and a structured career progression path. (Add a reference to a recent company achievement to stand out).' },
-  { id: 'k15', category: 'HR', question: 'Where do you see yourself in 3-5 years?', answer: 'In the short term, I want to become a fundamentally strong full-stack developer contributing to enterprise applications. Within 3-5 years, I see myself taking on architectural responsibilities and mentoring junior team members.' },
+  // ── C Programming ──
+  { id: 'k_c1', category: 'Core CS', subcategory: 'C Programming', question: 'What are local static variables? What is their use?', answer: '' },
+  { id: 'k_c2', category: 'Core CS', subcategory: 'C Programming', question: 'Difference between i++ and ++i', answer: '' },
+  { id: 'k_c3', category: 'Core CS', subcategory: 'C Programming', question: 'Difference between ++*p, *p++ and *++p', answer: '' },
+  { id: 'k_c4', category: 'Core CS', subcategory: 'C Programming', question: 'Write the syntax in C to create a node in singly linked list', answer: '' },
+  { id: 'k_c5', category: 'Core CS', subcategory: 'C Programming', question: 'What pointer type to use for heterogeneous linked list in C?', answer: '' },
+  { id: 'k_c6', category: 'Core CS', subcategory: 'C Programming', question: 'Write C program to insert a node in circular singly list at beginning', answer: '' },
+  { id: 'k_c7', category: 'Core CS', subcategory: 'C Programming', question: 'Write C code to perform in-order traversal on a binary tree', answer: '' },
+  { id: 'k_c8', category: 'Core CS', subcategory: 'C Programming', question: 'Write recursive C function to count nodes in a binary tree', answer: '' },
+  { id: 'k_c9', category: 'Core CS', subcategory: 'C Programming', question: 'Write recursive C function to calculate height of a binary tree', answer: '' },
+  { id: 'k_c10', category: 'Core CS', subcategory: 'C Programming', question: 'What Are The Different Types Of Control Structures In Programming?', answer: '' },
+  { id: 'k_c11', category: 'Core CS', subcategory: 'C Programming', question: 'What Is || Operator and how does it function?', answer: '' },
+  { id: 'k_c12', category: 'Core CS', subcategory: 'C Programming', question: 'Can the "if" function be used in comparing strings?', answer: '' },
+  { id: 'k_c13', category: 'Core CS', subcategory: 'C Programming', question: 'What Are Preprocessor Directives?', answer: '' },
+  { id: 'k_c14', category: 'Core CS', subcategory: 'C Programming', question: 'Describe the order of precedence with regards to operators in C', answer: '' },
+  { id: 'k_c15', category: 'Core CS', subcategory: 'C Programming', question: 'How do you determine the length of a string value stored in a variable?', answer: '' },
+  { id: 'k_c16', category: 'Core CS', subcategory: 'C Programming', question: 'Why is C language considered a Middle Level Language?', answer: '' },
+  { id: 'k_c17', category: 'Core CS', subcategory: 'C Programming', question: 'What are the different file extensions involved when programming in C?', answer: '' },
+  { id: 'k_c18', category: 'Core CS', subcategory: 'C Programming', question: 'What Are Reserved Words?', answer: '' },
+  { id: 'k_c19', category: 'Core CS', subcategory: 'C Programming', question: 'Write a C program to count number of words in a given sentence until EOF', answer: '' },
+  { id: 'k_c20', category: 'Core CS', subcategory: 'C Programming', question: 'What will be the outcome of the conditional statement if the value of variable S is 10?', answer: '' },
+  { id: 'k_c21', category: 'Core CS', subcategory: 'C Programming', question: 'What is wrong with this statement? myName = "robin";', answer: '' },
+  { id: 'k_c22', category: 'Core CS', subcategory: 'C Programming', question: 'Is it possible to initialize a variable at the time it was declared?', answer: '' },
+
+  // ── Algorithms ──
+  { id: 'k_algo1', category: 'Core CS', subcategory: 'Algorithms', question: 'In what scenario can Binary Search be used?', answer: '' },
+  { id: 'k_algo2', category: 'Core CS', subcategory: 'Algorithms', question: 'Advantages of Binary search over linear search', answer: '' },
+  { id: 'k_algo3', category: 'Core CS', subcategory: 'Algorithms', question: 'What are the advantages of Selection Sort?', answer: '' },
+  { id: 'k_algo4', category: 'Core CS', subcategory: 'Algorithms', question: 'Which data structures are used in BFS and DFS algorithm?', answer: '' },
+
+  // ── Computer Networks ──
+  { id: 'k_cn1', category: 'Core CS', subcategory: 'Computer Networks', question: 'TCP vs UDP?', answer: 'TCP: Connection-oriented, reliable, guarantees delivery, slower. Used in HTTP, FTP, Email.\nUDP: Connectionless, unreliable, faster. Used in Video streaming, Gaming, DNS.' },
+  { id: 'k_cn2', category: 'Core CS', subcategory: 'Computer Networks', question: 'Explain the OSI Model layers.', answer: '7. Application (HTTP/FTP)\n6. Presentation (Encryption)\n5. Session (Sync/Ports)\n4. Transport (TCP/UDP)\n3. Network (IP, Routers)\n2. Data Link (MAC, Switches)\n1. Physical (Cables, Bits)' },
+
+  // ── Operating Systems ──
+  { id: 'k_os1', category: 'Core CS', subcategory: 'Operating Systems', question: 'Process vs Thread?', answer: 'Process: Program in execution. Heavyweight, isolated memory.\nThread: Segment of a process. Lightweight, shares memory, faster context switching.' },
+  { id: 'k_os2', category: 'Core CS', subcategory: 'Operating Systems', question: 'What is a Deadlock? Give the 4 necessary conditions (Coffman).', answer: '1. Mutual Exclusion\n2. Hold and Wait\n3. No Preemption\n4. Circular Wait' },
+
+  // --- APTITUDE ---
+  { id: 'k10', category: 'Aptitude', question: 'Time & Work Shortcut: Two people working together', answer: 'If A can do work in X days and B in Y days:\nTogether: (X * Y) / (X + Y) days.' },
+  { id: 'k11', category: 'Aptitude', question: 'Speed & Distance Shortcut: Average Speed', answer: 'Average speed = (2 * X * Y) / (X + Y)\nNot just (X+Y)/2!' },
+  { id: 'k12', category: 'Aptitude', question: 'Percentage Shortcut: A is x% more than B', answer: 'B is less than A by: [x / (100 + x)] * 100 %\nIf A is x% less than B: [x / (100 - x)] * 100 %' },
+
+  // --- HR ---
+  { id: 'k13', category: 'HR', question: 'Tell me about yourself (Framework)', answer: '1. Present: Branch, College, CGPA.\n2. Past: Projects/internships and tech stack.\n3. Alignment: Why your skills fit the company.\nKeep under 90 seconds.' },
+  { id: 'k14', category: 'HR', question: 'Why Our Company?', answer: 'The company offers an unmatched learning ecosystem and diverse projects. I value job stability, global exposure, and structured career progression.' },
+  { id: 'k15', category: 'HR', question: 'Where do you see yourself in 3-5 years?', answer: 'Short term: Become a strong full-stack developer. Within 3-5 years: Take architectural responsibilities and mentor junior team members.' },
 ];
 
 export const HABIT_TEMPLATES = [

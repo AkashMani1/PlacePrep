@@ -72,12 +72,14 @@ export interface StarStory {
 }
 
 export type KnowledgeCategory = 'HR' | 'Core CS' | 'Aptitude';
+export type CSSubcategory = 'OOPs' | 'Java' | 'DBMS' | 'Data Structures' | 'C Programming' | 'Algorithms' | 'Computer Networks' | 'Operating Systems' | 'General';
 
 export interface KnowledgeItem {
   id: string;
   question: string;
   answer: string;
   category: KnowledgeCategory;
+  subcategory?: CSSubcategory;
 }
 
 export interface DailyLog {

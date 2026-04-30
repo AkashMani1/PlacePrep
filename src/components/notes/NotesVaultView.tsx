@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
-import { StarStory, KnowledgeCategory } from '@/lib/types';
+import { StarStory, KnowledgeCategory, CSSubcategory } from '@/lib/types';
 import { BentoCard, ActivityRing } from '@/components/ui/Bento';
 
 // ── Animation Variants ────────────────────────────────────────────────────────
@@ -132,6 +132,15 @@ export default function NotesVaultView() {
   const [kbDraft, setKbDraft] = useState('');
   const [newKbQ, setNewKbQ] = useState('');
   const [addingKb, setAddingKb] = useState(false);
+  const [selectedSubcat, setSelectedSubcat] = useState<CSSubcategory | 'All'>('All');
+
+  const CS_SUBCATS: Array<CSSubcategory | 'All'> = ['All', 'OOPs', 'Java', 'DBMS', 'Data Structures', 'C Programming', 'Algorithms', 'Computer Networks', 'Operating Systems'];
+
+  const SUBCAT_ICONS: Record<string, string> = {
+    'All': '🗂️', 'OOPs': '🔷', 'Java': '☕', 'DBMS': '🗄️',
+    'Data Structures': '🌲', 'C Programming': '⚙️', 'Algorithms': '📐',
+    'Computer Networks': '🌐', 'Operating Systems': '💻',
+  };
 
   const TABS = [
      { id: 'star' as const, label: 'STAR Stories', icon: Star },
@@ -142,7 +151,11 @@ export default function NotesVaultView() {
 
   const currentTabConfig = TABS.find((t) => t.id === tab);
   const filteredKnowledge = currentTabConfig?.filter
-    ? (state.knowledgeBase || []).filter((k) => k.category === currentTabConfig.filter)
+    ? (state.knowledgeBase || []).filter((k) => {
+        if (k.category !== currentTabConfig.filter) return false;
+        if (tab === 'core' && selectedSubcat !== 'All') return k.subcategory === selectedSubcat;
+        return true;
+      })
     : [];
 
   const STORIES_COUNT = state.stars.length;
@@ -191,12 +204,13 @@ export default function NotesVaultView() {
       </BentoCard>
 
       {/* Row 2: Navigation Segmented Control - Notion Style */}
-      <div className="col-span-12 flex flex-col lg:flex-row items-center justify-between gap-6 pb-6">
+      <div className="col-span-12 flex flex-col gap-4 pb-6">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
          <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/20 border border-border/5">
             {TABS.map(({ id, label, icon: Icon }) => (
                <button
                   key={id}
-                  onClick={() => { setTab(id); setAddingKb(false); setEditKbId(null); }}
+                  onClick={() => { setTab(id); setAddingKb(false); setEditKbId(null); setSelectedSubcat('All'); }}
                   className={`relative px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2.5 ${
                     tab === id 
                       ? 'text-primary' 
@@ -247,6 +261,42 @@ export default function NotesVaultView() {
              )
            )}
          </AnimatePresence>
+        </div>
+
+        {/* Subcategory filter pills — only for Computer Science tab */}
+        <AnimatePresence>
+          {tab === 'core' && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="flex flex-wrap gap-2"
+            >
+              {CS_SUBCATS.map((sub) => (
+                <button
+                  key={sub}
+                  onClick={() => setSelectedSubcat(sub)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] border transition-all duration-200 ${
+                    selectedSubcat === sub
+                      ? 'bg-secondary text-foreground border-secondary shadow-[0_4px_15px_rgba(var(--secondary-rgb),0.3)]'
+                      : 'bg-muted/20 text-muted-foreground border-border/10 hover:border-secondary/30 hover:text-foreground'
+                  }`}
+                >
+                  <span>{SUBCAT_ICONS[sub]}</span>
+                  <span>{sub}</span>
+                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${
+                    selectedSubcat === sub ? 'bg-white/20' : 'bg-muted/40'
+                  }`}>
+                    {sub === 'All'
+                      ? (state.knowledgeBase || []).filter(k => k.category === 'Core CS').length
+                      : (state.knowledgeBase || []).filter(k => k.category === 'Core CS' && k.subcategory === sub).length
+                    }
+                  </span>
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Main Content Area */}
@@ -358,7 +408,7 @@ export default function NotesVaultView() {
                     className="w-full bg-card/60 border border-border/20 rounded-[28px] px-8 py-5 text-foreground text-xl font-black focus:outline-none focus:border-secondary transition-all placeholder:opacity-20 shadow-inner"
                   />
                   <div className="flex gap-6">
-                    <button onClick={() => { if (newKbQ.trim() && currentTabConfig.filter) { addKnowledgeItem(newKbQ.trim(), currentTabConfig.filter); setNewKbQ(''); setAddingKb(false); } }}
+                    <button onClick={() => { if (newKbQ.trim() && currentTabConfig.filter) { addKnowledgeItem(newKbQ.trim(), currentTabConfig.filter, tab === 'core' && selectedSubcat !== 'All' ? selectedSubcat as CSSubcategory : undefined); setNewKbQ(''); setAddingKb(false); } }}
                       className="px-10 py-5 bg-secondary text-foreground rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] shadow-[0_10px_30px_rgba(var(--secondary-rgb),0.2)] transition-all hover:scale-[1.03] active:scale-95">Save Topic</button>
                     <button onClick={() => { setAddingKb(false); setNewKbQ(''); }}
                       className="px-10 py-5 border border-border/10 text-muted-foreground hover:text-foreground rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all">Cancel setup</button>
@@ -372,13 +422,20 @@ export default function NotesVaultView() {
                 <motion.div key={qa.id} variants={itemVariants} className="bg-card border border-border/10 rounded-[40px] p-10 space-y-8 group/kb hover:border-secondary/40 transition-all shadow-xl shadow-black/5 relative overflow-hidden">
                   <div className={`absolute top-0 right-0 w-32 h-32 bg-secondary/5 blur-[80px] opacity-0 group-hover/kb:opacity-100 transition-opacity duration-1000`} />
                   <div className="flex items-start justify-between gap-6 relative z-10">
-                    <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 bg-secondary/10 rounded-2xl flex items-center justify-center border border-secondary/20 shadow-[0_0_10px_rgba(var(--secondary-rgb),0.1)] group-hover/kb:scale-110 transition-all duration-500">
+                    <div className="flex items-start gap-5 flex-1 min-w-0">
+                      <div className="w-12 h-12 bg-secondary/10 rounded-2xl flex items-center justify-center border border-secondary/20 shadow-[0_0_10px_rgba(var(--secondary-rgb),0.1)] group-hover/kb:scale-110 transition-all duration-500 shrink-0">
                         <Terminal className="w-6 h-6 text-secondary" />
                       </div>
-                      <h4 className="text-foreground text-lg font-black tracking-tight leading-snug uppercase">{qa.question}</h4>
+                      <div className="min-w-0">
+                        {qa.subcategory && (
+                          <span className="inline-flex items-center gap-1 mb-2 px-2.5 py-1 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-[9px] font-black uppercase tracking-[0.25em]">
+                            {SUBCAT_ICONS[qa.subcategory]} {qa.subcategory}
+                          </span>
+                        )}
+                        <h4 className="text-foreground text-lg font-black tracking-tight leading-snug uppercase">{qa.question}</h4>
+                      </div>
                     </div>
-                    <button onClick={() => deleteKnowledgeItem(qa.id)} className="p-3 text-muted-foreground hover:text-rose-500 bg-muted/40 hover:bg-rose-500/10 rounded-[14px] transition-all"><Trash2 className="w-5 h-5" /></button>
+                    <button onClick={() => deleteKnowledgeItem(qa.id)} className="p-3 text-muted-foreground hover:text-rose-500 bg-muted/40 hover:bg-rose-500/10 rounded-[14px] transition-all shrink-0"><Trash2 className="w-5 h-5" /></button>
                   </div>
 
                   {editKbId === qa.id ? (
