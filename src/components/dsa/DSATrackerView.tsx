@@ -69,10 +69,9 @@ const ProblemItem = memo(({
   
   return (
     <motion.div 
-      layout
       variants={itemVariants}
-      whileHover={{ scale: 1.005 }}
-      className="bento-card !p-6 hover:border-primary/30 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-8 group/card relative overflow-hidden mb-4"
+      whileHover={{ scale: 1.002 }}
+      className="bento-card !p-5 hover:border-primary/30 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6 group/card relative overflow-hidden h-full"
     >
       {isDone && (
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" />
@@ -430,7 +429,7 @@ export default function DSATrackerView() {
                           );
                         }
                         return (
-                          <div style={style} className="px-1">
+                          <div style={style} className="px-2 pt-1 pb-3">
                             <ProblemItem 
                               problem={item.problem} 
                               onUpdate={updateProblem} 
@@ -447,7 +446,7 @@ export default function DSATrackerView() {
                       return (
                         <List
                           rowCount={flatList.length}
-                          rowHeight={(index: number) => flatList[index].type === 'header' ? 80 : 130}
+                          rowHeight={(index: number) => flatList[index].type === 'header' ? 72 : 152}
                           style={{ height: 600, width: '100%' }}
                           className="scrollbar-hide"
                           rowComponent={Row as any}
