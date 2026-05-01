@@ -462,9 +462,9 @@ export default function DSATrackerView() {
       </div>
 
       {/* Sidebar Metrics */}
-      <div className="col-span-12 lg:col-span-3 space-y-10">
-         <BentoCard title="Study Load" icon={BookOpen} className="h-fit">
-            <div className="space-y-8 py-4">
+      <div className="col-span-12 lg:col-span-3 flex flex-col gap-6">
+         <BentoCard title="Study Load" icon={BookOpen} className="h-fit w-full">
+            <div className="space-y-5 py-2">
                {[
                  { label: 'Completed', count: stats.done, color: 'text-emerald-500', total: stats.total },
                  { label: 'High Priority', count: stats.prio, color: 'text-primary', total: stats.total },
@@ -472,16 +472,16 @@ export default function DSATrackerView() {
                ].map((item) => {
                  const percentage = item.total ? Math.round((item.count / item.total) * 100) : 0;
                  return (
-                   <div key={item.label} className="space-y-3">
-                      <div className="flex justify-between items-center px-1">
-                         <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">{item.label}</span>
-                         <span className={`text-lg font-black ${item.color} tabular-nums`}>{item.count}</span>
+                   <div key={item.label} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                         <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground opacity-60 leading-none">{item.label}</span>
+                         <span className={`text-base font-black ${item.color} tabular-nums leading-none`}>{item.count}</span>
                       </div>
-                      <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden border border-border/5">
+                      <div className="w-full h-2 bg-muted/40 rounded-full overflow-hidden">
                          <motion.div 
                            initial={{ width: 0 }} 
                            animate={{ width: `${percentage}%` }} 
-                           className={`h-full ${item.color.replace('text', 'bg')} rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]`} 
+                           className={`h-full ${item.color.replace('text', 'bg')} rounded-full`} 
                          />
                       </div>
                    </div>
@@ -490,32 +490,44 @@ export default function DSATrackerView() {
             </div>
          </BentoCard>
 
-         <BentoCard className="aspect-square flex flex-col justify-center gap-8 !p-8 relative overflow-hidden group">
+         {/* Elite Mastery — High Priority Topics */}
+         <div className="bento-card !p-6 relative overflow-hidden group w-full">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-            <div className="flex items-center gap-5 relative z-10">
-               <div className="w-12 h-12 bg-primary/20 rounded-[20px] flex items-center justify-center border border-primary/30 shadow-xl group-hover:scale-110 transition-all">
-                  <Star className="w-6 h-6 text-primary" />
+
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-5 relative z-10">
+               <div className="w-10 h-10 shrink-0 bg-primary/20 rounded-[16px] flex items-center justify-center border border-primary/30 shadow-lg group-hover:scale-105 transition-transform">
+                  <Star className="w-5 h-5 text-primary" />
                </div>
-               <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Elite Mastery</p>
-                  <p className="text-sm font-black text-foreground">High Priority Topics</p>
+               <div className="min-w-0">
+                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground opacity-60 leading-none mb-1">Elite Mastery</p>
+                  <p className="text-[13px] font-black text-foreground leading-none">High Priority Topics</p>
                </div>
             </div>
-            <div className="space-y-4 relative z-10">
-               {uniqueTopics.slice(0, 4).map((t, i) => (
-                  <motion.div 
-                    key={t}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="flex items-center justify-between p-4 rounded-[20px] bg-muted/40 border border-border/10 hover:border-primary/30 transition-all group/item"
-                  >
-                     <span className="text-[12px] font-black text-muted-foreground uppercase tracking-wider truncate pr-4 group-hover/item:text-foreground">{t}</span>
-                     <LayoutGrid className="w-4 h-4 text-primary opacity-20 group-hover/item:opacity-100 transition-all" />
-                  </motion.div>
-               ))}
+
+            {/* Topic list */}
+            <div className="space-y-2.5 relative z-10">
+               {uniqueTopics.length === 0 ? (
+                 <p className="text-[11px] text-muted-foreground opacity-40 font-bold text-center py-4">No topics yet</p>
+               ) : (
+                 uniqueTopics.slice(0, 5).map((t, i) => (
+                    <motion.div 
+                      key={t}
+                      initial={{ opacity: 0, x: 8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.08 }}
+                      className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-[14px] bg-muted/30 border border-border/10 hover:border-primary/30 hover:bg-muted/50 transition-all group/item cursor-default"
+                    >
+                       <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide truncate group-hover/item:text-foreground transition-colors">{t}</span>
+                       <LayoutGrid className="w-3.5 h-3.5 text-primary shrink-0 opacity-20 group-hover/item:opacity-80 transition-opacity" />
+                    </motion.div>
+                 ))
+               )}
+               {uniqueTopics.length > 5 && (
+                 <p className="text-[10px] text-muted-foreground/40 font-bold text-center pt-1">+{uniqueTopics.length - 5} more topics</p>
+               )}
             </div>
-         </BentoCard>
+         </div>
       </div>
     </motion.div>
   );
