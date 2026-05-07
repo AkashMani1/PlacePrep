@@ -10,15 +10,21 @@ export const syncService = {
   async pushLocalState(userId: string, state: AppState) {
     try {
       // 1. Sync DSA Sheet Items
-      if (state.dsaSheetItems) {
-        const dsaData = state.dsaSheetItems.map(item => ({
-          user_id: userId,
-          problem_slug: item.id,
-          status: item.completed ? 'solved' : 'unsolved',
-          submission_date: item.submissionDate || null,
-          revision_date: item.revisionDate || null,
-          notes: item.notes || null,
-        }));
+      if (state.dsaSheetItems && state.dsaSheetItems.length > 0) {
+        // Deduplicate items by problem_slug (id)
+        const uniqueDsaMap = new Map();
+        state.dsaSheetItems.forEach(item => {
+          uniqueDsaMap.set(item.id, {
+            user_id: userId,
+            problem_slug: item.id,
+            status: item.completed ? 'solved' : 'unsolved',
+            submission_date: item.submissionDate || null,
+            revision_date: item.revisionDate || null,
+            notes: item.notes || null,
+          });
+        });
+
+        const dsaData = Array.from(uniqueDsaMap.values());
 
         const { error: dsaError } = await supabase
           .from('dsa_progress')
@@ -28,15 +34,21 @@ export const syncService = {
       }
 
       // 2. Sync Daily Logs
-      if (state.dailyLogs) {
-        const logData = state.dailyLogs.map(log => ({
-          user_id: userId,
-          log_date: log.date,
-          content: log.struggles || '',
-          tasks: log.completedHabits || [],
-          mood: log.confidence.toString(), // Mapping confidence to mood for now
-          productivity_score: log.energy,
-        }));
+      if (state.dailyLogs && state.dailyLogs.length > 0) {
+        // Deduplicate logs by log_date
+        const uniqueLogMap = new Map();
+        state.dailyLogs.forEach(log => {
+          uniqueLogMap.set(log.date, {
+            user_id: userId,
+            log_date: log.date,
+            content: log.struggles || '',
+            tasks: log.completedHabits || [],
+            mood: log.confidence.toString(),
+            productivity_score: log.energy,
+          });
+        });
+
+        const logData = Array.from(uniqueLogMap.values());
 
         const { error: logError } = await supabase
           .from('daily_logs')
