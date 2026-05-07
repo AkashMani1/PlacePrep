@@ -38,3 +38,7 @@
     at UrlNode.smoosh (/Users/akashmani/Placement/study-os/node_modules/next/dist/shared/lib/router/utils/sorted-routes.js:16:21)
     at getSortedRoutes (/Users/akashmani/Placement/study-os/node_modules/next/dist/shared/lib/router/utils/sorted-routes.js:167:17)
     at Watchpack.<anonymous> (/Users/akashmani/Placement/study-os/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js:1598:65)
+   Reload env: .env.local
+   Reload env: .env.local
+   Reload env: .env.local
+   Reload env: .env.local
