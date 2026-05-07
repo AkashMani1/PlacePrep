@@ -11,12 +11,14 @@ export const syncService = {
     try {
       // 1. Sync DSA Sheet Items
       if (state.dsaSheetItems && state.dsaSheetItems.length > 0) {
-        // Deduplicate items by problem_slug (id)
+        // Deduplicate items by problem_slug (id), trimmed to avoid whitespace issues
         const uniqueDsaMap = new Map();
         state.dsaSheetItems.forEach(item => {
-          uniqueDsaMap.set(item.id, {
+          if (!item.id) return;
+          const cleanId = item.id.trim();
+          uniqueDsaMap.set(cleanId, {
             user_id: userId,
-            problem_slug: item.id,
+            problem_slug: cleanId,
             status: item.completed ? 'solved' : 'unsolved',
             submission_date: item.submissionDate || null,
             revision_date: item.revisionDate || null,
@@ -35,16 +37,18 @@ export const syncService = {
 
       // 2. Sync Daily Logs
       if (state.dailyLogs && state.dailyLogs.length > 0) {
-        // Deduplicate logs by log_date
+        // Deduplicate logs by log_date, trimmed
         const uniqueLogMap = new Map();
         state.dailyLogs.forEach(log => {
-          uniqueLogMap.set(log.date, {
+          if (!log.date) return;
+          const cleanDate = log.date.trim();
+          uniqueLogMap.set(cleanDate, {
             user_id: userId,
-            log_date: log.date,
+            log_date: cleanDate,
             content: log.struggles || '',
             tasks: log.completedHabits || [],
-            mood: log.confidence.toString(),
-            productivity_score: log.energy,
+            mood: (log.confidence || 6).toString(),
+            productivity_score: log.energy || 7,
           });
         });
 
