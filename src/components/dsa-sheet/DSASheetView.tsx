@@ -234,8 +234,8 @@ function toFormState(item?: DSASheetItem): FormState {
     resourceLinks: item?.resourceLinks.join('\n') || '',
     videoUrl: item?.videoUrl || '',
     companies: item?.companies.join(', ') || '',
-    submissionDate: item?.submissionDate || '',
-    revisionDate: item?.revisionDate || '',
+    submissionDate: item?.submissionDate?.split('T')[0] || '',
+    revisionDate: item?.revisionDate?.split('T')[0] || '',
     notes: item?.notes || '',
   };
 }
@@ -492,7 +492,7 @@ export default function DSASheetView() {
           (difficultyFilter === 'All' || item.difficulty === difficultyFilter) &&
           (sectionFilter === 'All' || item.section === sectionFilter) &&
           (!savedOnly || item.saved) &&
-          (!revisionDueOnly || (item.completed && item.revisionDate && item.revisionDate <= today()))
+          (!revisionDueOnly || (item.completed && item.revisionDate && item.revisionDate.split('T')[0] <= today()))
         );
       })
       .sort((a, b) => (a.sectionOrder === b.sectionOrder ? a.order - b.order : a.sectionOrder - b.sectionOrder));
@@ -778,7 +778,7 @@ export default function DSASheetView() {
                               if (isCompleting && !item.revisionDate) {
                                 revPhase = 0;
                                 revDate = addDays(subDate, SRS_INTERVALS[item.difficulty][0]);
-                              } else if (isCompleting && item.revisionDate && item.revisionDate <= today()) {
+                              } else if (isCompleting && item.revisionDate && item.revisionDate.split('T')[0] <= today()) {
                                 // Background SRS Trigger on toggle
                                 revPhase = Math.min(revPhase + 1, SRS_INTERVALS[item.difficulty].length - 1);
                                 revDate = addDays(subDate, SRS_INTERVALS[item.difficulty][revPhase]);
@@ -877,14 +877,14 @@ export default function DSASheetView() {
                                </span>
                                <input 
                                  type="date" 
-                                 value={item.submissionDate || ''} 
+                                 value={item.submissionDate?.split('T')[0] || ''} 
                                  onChange={(e) => {
                                    const newSubDate = e.target.value;
                                    let revPhase = item.revisionPhase || 0;
                                    let revDate = item.revisionDate || '';
                                    
                                    // Background SRS Engine
-                                   if (item.completed && newSubDate && revDate && revDate <= today()) {
+                                   if (item.completed && newSubDate && revDate && revDate.split('T')[0] <= today()) {
                                      revPhase = Math.min(revPhase + 1, SRS_INTERVALS[item.difficulty].length - 1);
                                      revDate = addDays(newSubDate, SRS_INTERVALS[item.difficulty][revPhase]);
                                    }
@@ -920,7 +920,7 @@ export default function DSASheetView() {
                                  )}
                                  <input 
                                    type="date" 
-                                   value={item.revisionDate || ''} 
+                                   value={item.revisionDate?.split('T')[0] || ''} 
                                    onChange={(e) => updateDsaSheetItem(item.id, { revisionDate: e.target.value })}
                                    onClick={(e) => {
                                      try {

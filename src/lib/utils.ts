@@ -18,8 +18,13 @@ export function addDays(dateStr: string, days: number): string {
 
 export function formatDisplayDate(dateStr: string | undefined): string {
   if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}-${m}-${y}`;
+  const datePart = dateStr.split('T')[0];
+  const parts = datePart.split('-');
+  if (parts.length === 3) {
+    const [y, m, d] = parts;
+    return `${d}-${m}-${y}`;
+  }
+  return dateStr;
 }
 
 export function calcStreak(dailyLogs: { date: string; completedHabits: string[]; hours?: number }[]): number {
