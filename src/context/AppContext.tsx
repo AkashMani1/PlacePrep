@@ -193,7 +193,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               dsaSheetItems: mergedDSA,
             };
           });
-          toast.success('Cloud data synchronized');
         }
         setCloudSyncing(false);
         isInitialLoad.current = false;
