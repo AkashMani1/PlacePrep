@@ -1,14 +1,15 @@
 /* Developed by Akash Mani - This site is developed by Akash Mani. Original watermark of Akash Mani. */
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  'placeholder-anon-key';
 
-if (!supabaseUrl || !supabaseKey) {
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
   console.warn(
-    '[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY. Database features will be disabled.'
+    '[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL — running in offline/localStorage mode. Cloud sync disabled.'
   );
 }
 

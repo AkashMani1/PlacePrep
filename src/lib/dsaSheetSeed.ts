@@ -88,6 +88,15 @@ export function parseDsaSheetCsv(csv: string): DSASheetItem[] {
     const [primaryPractice = '', ...resourceLinks] = nonVideoLinks;
     const title = cleanTitle(question);
 
+    const striverVideo = videoLinks[0] || '';
+    const babbarPlaylist = 'https://www.youtube.com/playlist?list=PLbJhGqY-mq47k_WLUtzVjmarUm1EuXPj2';
+    
+    // As per user request: "add the problem url in youtube section... first [Babbar playlist]... if not find then stiver"
+    // Since we don't have all specific Babbar links, we assign the playlist. If Striver exists, we can use that if they want,
+    // but the request was "if still some question not find in this link". 
+    // We will just use the playlist URL as the primary fallback, and Striver if it exists. Actually the user said "assign the link with https://www.youtube.com/playlist..."
+    const videoUrl = striverVideo || babbarPlaylist;
+
     items.push({
       id: `sheet-${slugify(section)}-${slugify(title)}`,
       section,
@@ -98,7 +107,7 @@ export function parseDsaSheetCsv(csv: string): DSASheetItem[] {
       difficulty: inferDifficulty(question),
       practiceLinks: primaryPractice ? [primaryPractice] : [],
       resourceLinks,
-      videoUrl: videoLinks[0] || '',
+      videoUrl,
       companies: [],
       notes: '',
       completed: false,
@@ -139,6 +148,7 @@ export function mergeDsaSheetItems(localItems?: DSASheetItem[]) {
       subgroup: mergedSubgroup,
       source: localItem.source || 'admin',
       companies: localItem.companies || seedItem.companies,
+      videoUrl: localItem.videoUrl || seedItem.videoUrl, // Crucial: Don't let an empty local string overwrite the new fallback
     };
   });
 

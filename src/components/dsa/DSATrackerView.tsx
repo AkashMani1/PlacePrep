@@ -2,13 +2,14 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Target, Filter, Search, ChevronUp, ChevronDown, X, ShieldCheck, Zap, Activity, BookOpen, Star, AlertTriangle, FileText, LayoutGrid } from 'lucide-react';
+import { Plus, Trash2, Pencil, Target, Search, X, ShieldCheck, Zap, Activity, BookOpen, Star, AlertTriangle, ExternalLink, LayoutGrid, BookMarked } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Problem, Difficulty, ProblemStatus, Platform } from '@/lib/types';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { BentoCard, ActivityRing } from '@/components/ui/Bento';
 import { List } from 'react-window';
 import React, { memo } from 'react';
+import { getReferenceUrl, getPlatformLabel } from '@/lib/referenceLinks';
 
 // ── Animation Variants ────────────────────────────────────────────────────────
 
@@ -51,7 +52,8 @@ const STATUS_COLORS: Record<ProblemStatus, string> = {
 const ProblemItem = memo(({ 
   problem, 
   onUpdate, 
-  onDelete, 
+  onDelete,
+  onEdit,
   editingNote, 
   setEditingNote,
   noteDraft,
@@ -60,6 +62,7 @@ const ProblemItem = memo(({
   problem: Problem, 
   onUpdate: (id: string, p: Partial<Problem>) => void,
   onDelete: (id: string) => void,
+  onEdit: (p: Problem) => void,
   editingNote: string | null,
   setEditingNote: (id: string | null) => void,
   noteDraft: string,
@@ -67,6 +70,10 @@ const ProblemItem = memo(({
 }) => {
   const isDone = problem.status === 'Done';
   
+  const refUrl = getReferenceUrl(problem.name, problem.category, problem.topic);
+  const platformLabel = refUrl ? getPlatformLabel(refUrl) : null;
+  const isAptitude = problem.category === 'Aptitude';
+
   return (
     <motion.div 
       variants={itemVariants}
@@ -80,7 +87,7 @@ const ProblemItem = memo(({
          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border transition-all duration-500 ${
             isDone ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-muted/40 border-border/10 text-muted-foreground'
          }`}>
-            {isDone ? <ShieldCheck className="w-7 h-7" /> : <FileText className="w-7 h-7" />}
+            {isDone ? <ShieldCheck className="w-7 h-7" /> : isAptitude ? <BookMarked className="w-7 h-7" /> : <ExternalLink className="w-7 h-7" />}
          </div>
          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-4 mb-2 flex-wrap">
@@ -88,6 +95,30 @@ const ProblemItem = memo(({
                {problem.isPriority && (
                   <span className="bg-rose-500/10 text-rose-500 border border-rose-500/30 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">High Priority</span>
                )}
+            </div>
+            {/* Reference Link Row */}
+            <div className="flex items-center gap-3 flex-wrap mb-1">
+              {refUrl ? (
+                <a
+                  href={refUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all hover:scale-105 active:scale-95 ${
+                    isAptitude
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20 hover:border-amber-500/50'
+                      : 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 hover:border-primary/50'
+                  }`}
+                >
+                  {isAptitude ? <BookOpen className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
+                  {isAptitude ? `Read — ${platformLabel}` : `Solve — ${platformLabel}`}
+                </a>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-border/10 text-muted-foreground/30 bg-muted/10">
+                  {isAptitude ? <BookOpen className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
+                  {isAptitude ? 'Reading Material' : 'Practice Link'}
+                </span>
+              )}
             </div>
             {editingNote === problem.id ? (
                <input
@@ -118,9 +149,12 @@ const ProblemItem = memo(({
             </select>
          </div>
 
-         <div className="flex items-center gap-4 opacity-0 group-hover/card:opacity-100 transition-all duration-300">
-            <button onClick={() => onDelete(problem.id)} className="p-3 bg-rose-500/10 text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/20 rounded-xl transition-all border border-transparent hover:border-rose-500/30">
-               <Trash2 className="w-5 h-5" />
+         <div className="flex items-center gap-3 opacity-0 group-hover/card:opacity-100 transition-all duration-300">
+            <button onClick={() => onEdit(problem)} className="p-3 bg-primary/10 text-primary/60 hover:text-primary hover:bg-primary/20 rounded-xl transition-all border border-transparent hover:border-primary/30" title="Edit problem">
+               <Pencil className="w-4 h-4" />
+            </button>
+            <button onClick={() => onDelete(problem.id)} className="p-3 bg-rose-500/10 text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/20 rounded-xl transition-all border border-transparent hover:border-rose-500/30" title="Delete problem">
+               <Trash2 className="w-4 h-4" />
             </button>
          </div>
       </div>
@@ -149,10 +183,10 @@ TopicHeader.displayName = 'TopicHeader';
 function AddProblemModal({ onClose, activeCategory }: { onClose: () => void, activeCategory: 'Aptitude' | 'DSA' }) {
   const { addProblem } = useApp();
   const [form, setForm] = useState<Omit<Problem, 'id' | 'addedAt'>>({
-    name: '', category: activeCategory, topic: activeCategory === 'DSA' ? 'Arrays' : 'Quant: Percentages', difficulty: 'Medium', platform: activeCategory === 'DSA' ? 'LeetCode' : 'Other', status: 'Todo', notes: '',
+    name: '', category: activeCategory, topic: activeCategory === 'DSA' ? 'Arrays' : 'Quant: Percentages', difficulty: 'Medium', platform: activeCategory === 'DSA' ? 'LeetCode' : 'Other', status: 'Todo', notes: '', isPriority: false,
   });
 
-  const set = (k: keyof typeof form, v: string) => setForm((p) => ({ ...p, [k]: v }));
+  const set = (k: keyof typeof form, v: string | boolean) => setForm((p) => ({ ...p, [k]: v }));
 
   const submit = () => {
     if (!form.name.trim() || !form.topic.trim()) return;
@@ -161,11 +195,11 @@ function AddProblemModal({ onClose, activeCategory }: { onClose: () => void, act
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4 overflow-y-auto">
       <motion.div 
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="bg-card border border-border/20 rounded-[40px] shadow-2xl w-full max-w-lg overflow-hidden"
+        className="bg-card border border-border/20 rounded-[32px] shadow-2xl w-full max-w-lg my-auto"
       >
         <div className="flex items-center justify-between px-10 py-8 border-b border-border/10 bg-muted/20">
           <div className="flex items-center gap-4">
@@ -179,7 +213,7 @@ function AddProblemModal({ onClose, activeCategory }: { onClose: () => void, act
           </button>
         </div>
         
-        <div className="p-10 space-y-8">
+        <div className="px-8 py-6 space-y-5">
           <div>
             <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">Problem Title</label>
             <input
@@ -217,20 +251,157 @@ function AddProblemModal({ onClose, activeCategory }: { onClose: () => void, act
             <textarea
               value={form.notes} onChange={(e) => set('notes', e.target.value)}
               placeholder="Record the core algorithmic logic or key blockers encountered..."
+              rows={2}
+              className="w-full bg-muted/40 border border-border/10 rounded-[20px] px-5 py-4 text-foreground text-sm font-medium focus:outline-none focus:border-primary transition-all resize-none leading-relaxed placeholder:opacity-30"
+            />
+          </div>
+          <div className="flex items-center justify-between px-4 py-3 bg-rose-500/5 border border-rose-500/20 rounded-[16px]">
+            <div>
+              <p className="text-sm font-black text-foreground">High Priority</p>
+              <p className="text-[10px] text-muted-foreground opacity-60 font-bold uppercase tracking-wider">Flag as must-do before placement</p>
+            </div>
+            <button onClick={() => set('isPriority', !form.isPriority)} className={`w-11 h-6 rounded-full transition-all duration-300 relative ${form.isPriority ? 'bg-rose-500' : 'bg-muted/60'}`}>
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${form.isPriority ? 'left-6' : 'left-1'}`} />
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-muted/20 px-8 py-6 flex gap-4">
+           <button onClick={onClose} className="flex-1 py-4 rounded-[20px] border border-border/10 text-muted-foreground font-black uppercase tracking-[0.3em] text-[11px] hover:text-foreground hover:bg-muted/40 transition-all">Cancel</button>
+           <button 
+             onClick={submit} disabled={!form.name.trim() || !form.topic.trim()}
+             className="flex-[2] py-4 rounded-[20px] bg-primary text-foreground font-black uppercase tracking-[0.3em] text-[11px] shadow-[0_8px_24px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+           >
+             Add Problem
+           </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Edit Problem Modal ────────────────────────────────────────────────────────
+
+function EditProblemModal({ problem, onClose }: { problem: Problem, onClose: () => void }) {
+  const { updateProblem } = useApp();
+  const [form, setForm] = useState<Omit<Problem, 'id' | 'addedAt'>>({
+    name: problem.name,
+    category: problem.category,
+    topic: problem.topic,
+    difficulty: problem.difficulty,
+    platform: problem.platform,
+    status: problem.status,
+    notes: problem.notes,
+    isPriority: problem.isPriority ?? false,
+  });
+
+  const set = (k: keyof typeof form, v: string | boolean) => setForm((p) => ({ ...p, [k]: v }));
+
+  const submit = () => {
+    if (!form.name.trim() || !form.topic.trim()) return;
+    updateProblem(problem.id, form);
+    onClose();
+  };
+
+  const isAptitude = problem.category === 'Aptitude';
+
+  return (
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4 overflow-y-auto">
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="bg-card border border-border/20 rounded-[32px] shadow-2xl w-full max-w-lg my-auto"
+      >
+        <div className="flex items-center justify-between px-10 py-8 border-b border-border/10 bg-muted/20">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-amber-500/20 rounded-2xl flex items-center justify-center border border-amber-500/30">
+              <Pencil className="w-6 h-6 text-amber-400" />
+            </div>
+            <div>
+              <h2 className="text-foreground font-black uppercase tracking-[0.2em] text-sm">Edit Problem</h2>
+              <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider opacity-60">{problem.category} — {problem.topic}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-muted/50 rounded-2xl transition-all">
+            <X className="w-6 h-6 text-muted-foreground" />
+          </button>
+        </div>
+
+        <div className="px-8 py-6 space-y-5">
+          {/* Name */}
+          <div>
+            <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">Problem Title</label>
+            <input
+              autoFocus value={form.name} onChange={(e) => set('name', e.target.value)}
+              placeholder="Problem name..."
+              className="w-full bg-muted/40 border border-border/10 rounded-[20px] px-6 py-4 text-foreground text-md font-bold focus:outline-none focus:border-primary transition-all placeholder:opacity-30"
+            />
+          </div>
+
+          {/* Topic */}
+          <div>
+            <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">{isAptitude ? 'Aptitude Topic' : 'DSA Topic'}</label>
+            <input value={form.topic} onChange={(e) => set('topic', e.target.value)}
+              placeholder={isAptitude ? 'e.g. Quant: Percentages' : 'e.g. Arrays, Dynamic Programming...'}
+              className="w-full bg-muted/40 border border-border/10 rounded-[20px] px-6 py-4 text-foreground text-sm font-bold focus:outline-none focus:border-primary transition-all" />
+          </div>
+
+          {/* Difficulty + Platform */}
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">Difficulty</label>
+              <select value={form.difficulty} onChange={(e) => set('difficulty', e.target.value as Difficulty)}
+                className="w-full bg-muted/40 border border-border/10 rounded-[20px] px-6 py-4 text-foreground text-sm font-bold focus:outline-none focus:border-primary appearance-none cursor-pointer">
+                {(['Easy', 'Medium', 'Hard'] as Difficulty[]).map((d) => <option key={d} className="bg-card text-foreground">{d} Level</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">Platform</label>
+              <select value={form.platform} onChange={(e) => set('platform', e.target.value as Platform)}
+                className="w-full bg-muted/40 border border-border/10 rounded-[20px] px-6 py-4 text-foreground text-sm font-bold focus:outline-none focus:border-primary appearance-none cursor-pointer">
+                {(['LeetCode', 'GFG', 'CodeVita', 'Other'] as Platform[]).map((p) => <option key={p} className="bg-card text-foreground">{p}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Priority toggle */}
+          <div className="flex items-center justify-between px-5 py-4 bg-rose-500/5 border border-rose-500/20 rounded-[20px]">
+            <div>
+              <p className="text-sm font-black text-foreground">High Priority</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider opacity-60">Mark as must-do before placement</p>
+            </div>
+            <button
+              onClick={() => set('isPriority', !form.isPriority)}
+              className={`w-12 h-6 rounded-full transition-all duration-300 relative ${
+                form.isPriority ? 'bg-rose-500 shadow-[0_0_12px_rgba(239,68,68,0.4)]' : 'bg-muted/60'
+              }`}
+            >
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${
+                form.isPriority ? 'left-7' : 'left-1'
+              }`} />
+            </button>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">Notes & Solution Logic</label>
+            <textarea
+              value={form.notes} onChange={(e) => set('notes', e.target.value)}
+              placeholder="Record the core logic or key blockers..."
               rows={3}
               className="w-full bg-muted/40 border border-border/10 rounded-[24px] px-6 py-5 text-foreground text-sm font-medium focus:outline-none focus:border-primary transition-all resize-none leading-relaxed placeholder:opacity-30"
             />
           </div>
         </div>
 
-        <div className="bg-muted/20 p-10 flex gap-6">
-           <button onClick={onClose} className="flex-1 py-5 rounded-[24px] border border-border/10 text-muted-foreground font-black uppercase tracking-[0.3em] text-[11px] hover:text-foreground hover:bg-muted/40 transition-all">Cancel</button>
-           <button 
-             onClick={submit} disabled={!form.name.trim() || !form.topic.trim()}
-             className="flex-[2] py-5 rounded-[24px] bg-primary text-foreground font-black uppercase tracking-[0.3em] text-[11px] shadow-[0_10px_30px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-           >
-             Complete & Save
-           </button>
+        <div className="bg-muted/20 px-8 py-6 flex gap-4">
+          <button onClick={onClose} className="flex-1 py-4 rounded-[20px] border border-border/10 text-muted-foreground font-black uppercase tracking-[0.3em] text-[11px] hover:text-foreground hover:bg-muted/40 transition-all">Cancel</button>
+          <button
+            onClick={submit} disabled={!form.name.trim() || !form.topic.trim()}
+            className="flex-[2] py-4 rounded-[20px] bg-amber-500 text-foreground font-black uppercase tracking-[0.3em] text-[11px] shadow-[0_8px_24px_rgba(245,158,11,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            Save Changes
+          </button>
         </div>
       </motion.div>
     </div>
@@ -243,6 +414,7 @@ export default function DSATrackerView() {
   const { state, updateProblem, deleteProblem } = useApp();
   const [activeTab, setActiveTab] = useState<'Aptitude' | 'DSA'>('DSA');
   const [showModal, setShowModal] = useState(false);
+  const [editingProblem, setEditingProblem] = useState<Problem | null>(null);
   const [search, setSearch] = useState('');
   const [filterTopic, setFilterTopic] = useState('All');
   const [filterDiff, setFilterDiff] = useState<Difficulty | 'All'>('All');
@@ -296,6 +468,7 @@ export default function DSATrackerView() {
       className="grid grid-cols-12 gap-10"
     >
       {showModal && <AddProblemModal onClose={() => setShowModal(false)} activeCategory={activeTab} />}
+      {editingProblem && <EditProblemModal problem={editingProblem} onClose={() => setEditingProblem(null)} />}
 
       {/* Hero Stats */}
       <BentoCard className="col-span-12 lg:col-span-8 overflow-hidden relative">
@@ -434,6 +607,7 @@ export default function DSATrackerView() {
                               problem={item.problem} 
                               onUpdate={updateProblem} 
                               onDelete={deleteProblem}
+                              onEdit={setEditingProblem}
                               editingNote={editingNote}
                               setEditingNote={setEditingNote}
                               noteDraft={noteDraft}

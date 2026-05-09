@@ -819,17 +819,13 @@ export default function DSASheetView() {
                                 href={item.videoUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                title={isYouTubeUrl(item.videoUrl) ? 'Open YouTube video' : 'Open video link'}
-                                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors ${
-                                  isYouTubeUrl(item.videoUrl)
-                                    ? 'border-red-500/30 bg-red-500/12 text-red-500 dark:text-red-300 hover:bg-red-500/18'
-                                    : 'border-border/30 text-muted-foreground hover:border-border/60'
-                                }`}
+                                title="Open video link"
+                                className="w-10 h-10 rounded-full border border-red-500/30 bg-red-500/12 text-red-500 dark:text-red-300 hover:bg-red-500/18 flex items-center justify-center transition-colors"
                               >
                                 <PlayCircle className="w-5 h-5" />
                               </a>
                             ) : (
-                              <button onClick={() => openEdit(item)} className="w-10 h-10 rounded-full border border-dashed border-border/30 flex items-center justify-center text-muted-foreground">
+                              <button onClick={() => openEdit(item)} className="w-10 h-10 rounded-full border border-dashed border-border/30 flex items-center justify-center text-muted-foreground hover:bg-muted/10">
                                 <Plus className="w-4 h-4" />
                               </button>
                             )}
