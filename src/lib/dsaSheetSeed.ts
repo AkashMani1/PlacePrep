@@ -91,7 +91,7 @@ export function parseDsaSheetCsv(csv: string): DSASheetItem[] {
     const striverVideo = videoLinks[0] || '';
     
     // Fallback to a smart YouTube search for the specific problem to ensure they get the "best video"
-    const smartSearchFallback = `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}+DSA+Solution+Love+Babbar`;
+    const smartSearchFallback = `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}+DSA+Solution+by+Padho+with+Pratyush`;
     
     const videoUrl = striverVideo || smartSearchFallback;
 
