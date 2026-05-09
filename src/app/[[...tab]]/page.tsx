@@ -34,23 +34,42 @@ export default function Home() {
   
   // Derive active tab from pathname, default to 'dashboard'
   const currentTab = (pathname.split('/').filter(Boolean)[0] || 'dashboard') as TabId;
-  const [activeTab, setActiveTab] = useState<TabId>(currentTab);
+  const resolvedTab = TAB_LABELS[currentTab] ? currentTab : 'dashboard';
+  const [activeTab, setActiveTab] = useState<TabId>(resolvedTab);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   // Sync state with URL changes
   useEffect(() => {
-    if (currentTab !== activeTab && TAB_LABELS[currentTab]) {
+    if (!TAB_LABELS[currentTab]) {
+      setActiveTab('dashboard');
+      router.replace('/');
+      return;
+    }
+
+    if (currentTab !== activeTab) {
       setActiveTab(currentTab);
     }
-  }, [currentTab, activeTab]);
+  }, [currentTab, activeTab, router]);
+
+  useEffect(() => {
+    const syncViewport = () => {
+      setIsMobileViewport(window.innerWidth < 768);
+    };
+
+    syncViewport();
+    window.addEventListener('resize', syncViewport);
+    return () => window.removeEventListener('resize', syncViewport);
+  }, []);
 
   const handleTabChange = (id: TabId) => {
     setActiveTab(id);
     router.push(id === 'dashboard' ? '/' : `/${id}`);
   };
 
-  const { label, icon: Icon } = TAB_LABELS[activeTab];
+  const { label, icon: Icon } = TAB_LABELS[activeTab] ?? TAB_LABELS.dashboard;
   const collapsed = state.sidebarCollapsed;
+  const mainPaddingLeft = isMobileViewport ? '0px' : (isSidebarHovered ? '240px' : (collapsed ? '80px' : '240px'));
 
   return (
     <div className="flex min-h-screen bg-obsidian selection:bg-neon-indigo/30 selection:text-white">
@@ -60,9 +79,7 @@ export default function Home() {
       {/* Main content */}
       <motion.main 
         initial={false}
-        animate={{ 
-          paddingLeft: typeof window !== 'undefined' && window.innerWidth < 768 ? '0px' : (isSidebarHovered ? '240px' : (collapsed ? '80px' : '240px')) 
-        }}
+        animate={{ paddingLeft: mainPaddingLeft }}
         transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
         className="flex-1 min-w-0 min-h-screen relative pb-24 md:pb-0 transition-all duration-300"
       >

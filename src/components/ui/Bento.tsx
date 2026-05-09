@@ -59,7 +59,9 @@ export function ActivityRing({ value, max, color, label, size = 'md' }: Activity
   
   const { w, h, r, sw, text, label: labelSize } = sizes[size];
   const circumference = 2 * Math.PI * r;
-  const progress = Math.min(value / max, 1);
+  const safeValue = Number.isFinite(value) ? value : 0;
+  const safeMax = Number.isFinite(max) && max > 0 ? max : 1;
+  const progress = Math.min(Math.max(safeValue / safeMax, 0), 1);
   const offset = circumference - progress * circumference;
 
   return (
