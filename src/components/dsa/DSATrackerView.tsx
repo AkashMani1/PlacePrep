@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Pencil, Target, Search, X, ShieldCheck, Zap, Activity, BookOpen, Star, AlertTriangle, ExternalLink, LayoutGrid, BookMarked } from 'lucide-react';
+import { Plus, Trash2, Pencil, Target, Search, X, ShieldCheck, Zap, Activity, BookOpen, Star, AlertTriangle, ExternalLink, LayoutGrid, BookMarked, ChevronDown, ArrowUpDown } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Problem, Difficulty, ProblemStatus, Platform } from '@/lib/types';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
@@ -47,6 +47,38 @@ const STATUS_COLORS: Record<ProblemStatus, string> = {
   Todo: 'text-muted-foreground bg-muted/20 border-border/10',
 };
 
+function SelectField({
+  label,
+  className = '',
+  selectClassName = '',
+  children,
+  ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement> & {
+  label?: string;
+  className?: string;
+  selectClassName?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className={`block ${className}`}>
+      {label && (
+        <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">
+          {label}
+        </span>
+      )}
+      <div className="relative">
+        <select
+          {...props}
+          className={`w-full appearance-none rounded-[18px] border border-border/10 bg-card/70 px-4 py-3 pr-11 text-sm font-black text-foreground outline-none transition-all focus:border-primary/40 focus:bg-card ${selectClassName}`}
+        >
+          {children}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+      </div>
+    </label>
+  );
+}
+
 // ── Sub-components for Virtualization ────────────────────────────────────────
 
 const ProblemItem = memo(({ 
@@ -70,6 +102,7 @@ const ProblemItem = memo(({
 }) => {
   const isDone = problem.status === 'Done';
   const isAptitude = problem.category === 'Aptitude';
+  const hasNotes = problem.notes.trim().length > 0;
   const fallbackUrl = getReferenceUrl(problem.name, problem.category, problem.topic);
   const videoUrl = isAptitude ? problem.videoUrl : undefined;
   const readingUrl = isAptitude ? (problem.readingUrl || fallbackUrl) : undefined;
@@ -80,30 +113,28 @@ const ProblemItem = memo(({
     <motion.div 
       variants={itemVariants}
       whileHover={{ scale: 1.002 }}
-      className="bento-card !p-5 hover:border-primary/30 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6 group/card relative overflow-hidden h-full"
+      className="bento-card !p-6 hover:border-primary/30 transition-all flex flex-col gap-5 group/card relative overflow-hidden h-full bg-gradient-to-br from-card via-card to-muted/5"
     >
       {isDone && (
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" />
       )}
-      <div className="flex items-start gap-6 flex-1 min-w-0 relative z-10">
-         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border transition-all duration-500 ${
+      <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5 relative z-10">
+      <div className="flex items-start gap-5 flex-1 min-w-0">
+         <div className={`mt-1 w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 border transition-all duration-500 ${
             isDone ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-muted/40 border-border/10 text-muted-foreground'
          }`}>
-            {isDone ? <ShieldCheck className="w-7 h-7" /> : isAptitude ? <BookMarked className="w-7 h-7" /> : <ExternalLink className="w-7 h-7" />}
+            {isDone ? <ShieldCheck className="w-6 h-6" /> : isAptitude ? <BookMarked className="w-6 h-6" /> : <ExternalLink className="w-6 h-6" />}
          </div>
          <div className="flex-1 min-w-0">
             <div className="flex items-start gap-3 mb-3 flex-wrap">
-               <h4 className={`text-[17px] font-black tracking-tight leading-[1.18] max-w-4xl ${isDone ? 'text-muted-foreground/50' : 'text-foreground'}`}>{problem.name}</h4>
+               <h4 className={`text-[17px] font-black tracking-tight leading-[1.24] max-w-4xl text-balance ${isDone ? 'text-muted-foreground/50' : 'text-foreground'}`}>{problem.name}</h4>
             </div>
-            {problem.subtopic && (
-              <div className="mb-3">
+            <div className="flex flex-wrap items-center gap-3 mb-3">
+              {problem.subtopic && (
                 <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary">
                   {problem.subtopic}
                 </span>
-              </div>
-            )}
-            {/* Reference Link Row */}
-            <div className="flex items-center gap-3 flex-wrap mb-3">
+              )}
               {isAptitude ? (
                 <>
                   {readingUrl && (
@@ -156,29 +187,38 @@ const ProblemItem = memo(({
                  onKeyDown={(e) => { if (e.key === 'Enter') { onUpdate(problem.id, { notes: noteDraft }); setEditingNote(null); } }}
                  className="w-full bg-muted/50 border border-primary/30 rounded-xl px-4 py-2.5 text-sm font-bold text-foreground focus:outline-none"
                />
-            ) : (
+            ) : hasNotes ? (
                <p onClick={() => { setEditingNote(problem.id); setNoteDraft(problem.notes); }} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer max-w-4xl italic opacity-60 hover:opacity-100 whitespace-pre-wrap leading-relaxed">
-                  {problem.notes || '+ Add Topic Note'}
+                  {problem.notes}
                </p>
+            ) : (
+              <button
+                onClick={() => { setEditingNote(problem.id); setNoteDraft(problem.notes); }}
+                className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/55 transition-colors hover:text-primary"
+              >
+                Add topic note
+              </button>
             )}
          </div>
       </div>
-
-      <div className="flex flex-wrap items-center gap-6 lg:gap-10 relative z-10">
+      <div className="flex flex-col gap-3 xl:w-[240px] xl:flex-shrink-0">
          <span className={`text-[11px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl border ${DIFF_COLORS[problem.difficulty]}`}>
             {problem.difficulty} TIER
          </span>
-         
-         <div className="flex items-center">
-            <select 
-              value={problem.status} onChange={(e) => onUpdate(problem.id, { status: e.target.value as ProblemStatus })}
-              className={`text-[11px] font-black uppercase tracking-[0.2em] px-5 py-2.5 rounded-xl border bg-card/60 backdrop-blur-sm cursor-pointer transition-all shadow-sm ${STATUS_COLORS[problem.status]}`}
-            >
-               {(['Todo', 'Done', 'Revisit'] as ProblemStatus[]).map(s => <option key={s} value={s} className="bg-card text-foreground">{s} Status</option>)}
-            </select>
-         </div>
-
-         <div className="flex items-center gap-3 opacity-0 group-hover/card:opacity-100 transition-all duration-300">
+         <SelectField
+           aria-label="Update problem status"
+           value={problem.status}
+           onChange={(e) => onUpdate(problem.id, { status: e.target.value as ProblemStatus })}
+           className="w-full"
+           selectClassName={`text-[11px] uppercase tracking-[0.2em] shadow-sm ${STATUS_COLORS[problem.status]}`}
+         >
+           {(['Todo', 'Done', 'Revisit'] as ProblemStatus[]).map((s) => (
+             <option key={s} value={s} className="bg-card text-foreground">
+               {s} Status
+             </option>
+           ))}
+         </SelectField>
+         <div className="flex items-center gap-3 xl:justify-end opacity-100 xl:opacity-0 xl:group-hover/card:opacity-100 transition-all duration-300">
             <button onClick={() => onEdit(problem)} className="p-3 bg-primary/10 text-primary/60 hover:text-primary hover:bg-primary/20 rounded-xl transition-all border border-transparent hover:border-primary/30" title="Edit problem">
                <Pencil className="w-4 h-4" />
             </button>
@@ -186,6 +226,7 @@ const ProblemItem = memo(({
                <Trash2 className="w-4 h-4" />
             </button>
          </div>
+      </div>
       </div>
     </motion.div>
   );
@@ -198,7 +239,7 @@ const TopicHeader = memo(({ topic, count, variant = 'topic' }: { topic: string, 
     layout
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
-    className={`flex items-center gap-4 px-4 py-2 ${variant === 'topic' ? 'mt-8 mb-4 sticky top-0 bg-background/80 backdrop-blur-md z-20' : 'mt-4 mb-3 ml-4'}`}
+    className={`flex items-center gap-4 px-4 py-2 ${variant === 'topic' ? 'mt-6 mb-3 sticky top-0 z-20 rounded-2xl bg-background/90 backdrop-blur-xl' : 'mt-4 mb-2 ml-4'}`}
   >
      <div className={`${variant === 'topic' ? 'w-2.5 h-8 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]' : 'w-2 h-6 bg-amber-500/70'} rounded-full`} />
      <span className={`${variant === 'topic' ? 'text-sm tracking-[0.3em]' : 'text-xs tracking-[0.2em]'} font-black text-foreground uppercase`}>
@@ -613,28 +654,55 @@ export default function DSATrackerView() {
       <div className="col-span-12 lg:col-span-9 space-y-8">
          {/* Filters Bento */}
          <motion.div variants={itemVariants} className="bento-card !p-6 bg-muted/10 backdrop-blur-sm">
-            <div className="flex flex-col xl:flex-row gap-6 items-center">
-               <div className="relative flex-1 w-full">
-                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground opacity-40" />
-                  <input
-                    value={search} onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search problems..."
-                    className="w-full bg-card/60 border border-border/10 rounded-[18px] pl-14 pr-6 py-4 text-foreground text-sm font-bold focus:outline-none focus:border-primary/40 placeholder:opacity-30"
-                  />
+            <div className="mb-5 flex items-center gap-3">
+               <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                  <ArrowUpDown className="h-4 w-4" />
                </div>
-               <div className="flex gap-4 w-full xl:w-auto">
-                  <select value={filterTopic} onChange={(e) => setFilterTopic(e.target.value)}
-                    className="bg-card/60 border border-border/10 rounded-[18px] px-6 py-4 text-muted-foreground text-[11px] font-black uppercase tracking-[0.2em] focus:outline-none focus:border-primary/40 appearance-none flex-1 min-w-[160px] cursor-pointer">
-                    <option value="All">Sector: Global</option>
-                    {uniqueTopics.map((t) => <option key={t}>{t}</option>)}
-                  </select>
-                  <select value={filterDiff} onChange={(e) => setFilterDiff(e.target.value as Difficulty | 'All')}
-                    className="bg-card/60 border border-border/10 rounded-[18px] px-6 py-4 text-muted-foreground text-[11px] font-black uppercase tracking-[0.2em] focus:outline-none focus:border-primary/40 appearance-none flex-1 min-w-[160px] cursor-pointer"
-                  >
-                    <option value="All">Tier: Dynamic</option>
-                    {['Easy', 'Medium', 'Hard'].map((d) => <option key={d}>{d} Alert</option>)}
-                  </select>
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/60">List Controls</p>
+                  <p className="text-sm font-black text-foreground">Search, filter, and sort your sheet</p>
                </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(150px,1fr))_auto]">
+               <label className="block">
+                  <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">
+                    Search
+                  </span>
+                  <div className="relative">
+                     <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/40" />
+                     <input
+                       value={search}
+                       onChange={(e) => setSearch(e.target.value)}
+                       placeholder="Search problems, topics, subtopics..."
+                       className="w-full rounded-[18px] border border-border/10 bg-card/70 py-3 pl-12 pr-4 text-sm font-bold text-foreground outline-none transition-all focus:border-primary/40 focus:bg-card placeholder:opacity-30"
+                     />
+                  </div>
+               </label>
+               <SelectField value={filterTopic} onChange={(e) => setFilterTopic(e.target.value)} label="Topic">
+                  <option value="All">All Topics</option>
+                  {uniqueTopics.map((t) => <option key={t}>{t}</option>)}
+               </SelectField>
+               <SelectField value={filterDiff} onChange={(e) => setFilterDiff(e.target.value as Difficulty | 'All')} label="Difficulty">
+                  <option value="All">All Levels</option>
+                  {['Easy', 'Medium', 'Hard'].map((d) => <option key={d}>{d}</option>)}
+               </SelectField>
+               <SelectField value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as ProblemStatus | 'All')} label="Status">
+                  <option value="All">All Status</option>
+                  {(['Todo', 'Done', 'Revisit'] as ProblemStatus[]).map((status) => <option key={status}>{status}</option>)}
+               </SelectField>
+               <SelectField value={sortKey} onChange={(e) => setSortKey(e.target.value as typeof sortKey)} label="Sort">
+                  <option value="addedAt">Date Added</option>
+                  <option value="name">Name</option>
+                  <option value="difficulty">Difficulty</option>
+                  <option value="status">Status</option>
+               </SelectField>
+               <button
+                 onClick={() => setSortAsc((current) => !current)}
+                 className="mt-[22px] inline-flex items-center justify-center gap-2 rounded-[18px] border border-border/10 bg-card/70 px-4 py-3 text-xs font-black uppercase tracking-[0.18em] text-muted-foreground transition-all hover:border-primary/30 hover:text-foreground"
+               >
+                 <ArrowUpDown className="h-4 w-4 text-primary" />
+                 {sortAsc ? 'Ascending' : 'Descending'}
+               </button>
             </div>
          </motion.div>
 
@@ -652,7 +720,7 @@ export default function DSATrackerView() {
                      <p className="text-muted-foreground text-[13px] font-black uppercase tracking-[0.4em]">No problems found in this category</p>
                   </motion.div>
                ) : (
-                  <div className="h-[600px] w-full border border-border/10 rounded-[32px] overflow-hidden bg-muted/5 relative">
+                  <div className="h-[640px] w-full rounded-[32px] border border-border/10 bg-muted/5 p-2 relative">
                     {(() => {
                       const Row = ({ index, style }: { index: number, style: React.CSSProperties }) => {
                         const item = flatList[index];
@@ -685,11 +753,11 @@ export default function DSATrackerView() {
                           rowHeight={(index: number) => {
                             const item = flatList[index];
                             if (item.type === 'header') {
-                              return item.variant === 'topic' ? 66 : 52;
+                              return item.variant === 'topic' ? 62 : 48;
                             }
-                            return item.problem.category === 'Aptitude' ? 215 : 165;
+                            return item.problem.category === 'Aptitude' ? 252 : 182;
                           }}
-                          style={{ height: 600, width: '100%' }}
+                          style={{ height: 624, width: '100%' }}
                           className="scrollbar-hide"
                           rowComponent={Row as any}
                           rowProps={{} as any}
