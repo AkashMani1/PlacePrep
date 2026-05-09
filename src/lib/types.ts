@@ -11,12 +11,14 @@ export interface Problem {
   category: 'Aptitude' | 'DSA';
   isPriority?: boolean;
   topic: string;
+  subtopic?: string;
   difficulty: Difficulty;
   platform: Platform;
   status: ProblemStatus;
   notes: string;
   addedAt: string;
   videoUrl?: string;
+  readingUrl?: string;
 }
 
 export interface DSASheetItem {

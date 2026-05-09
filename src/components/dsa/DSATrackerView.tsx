@@ -69,10 +69,12 @@ const ProblemItem = memo(({
   setNoteDraft: (v: string) => void
 }) => {
   const isDone = problem.status === 'Done';
-  
-  const refUrl = problem.videoUrl || getReferenceUrl(problem.name, problem.category, problem.topic);
-  const platformLabel = problem.videoUrl ? 'YouTube' : refUrl ? getPlatformLabel(refUrl) : null;
   const isAptitude = problem.category === 'Aptitude';
+  const fallbackUrl = getReferenceUrl(problem.name, problem.category, problem.topic);
+  const videoUrl = isAptitude ? problem.videoUrl : undefined;
+  const readingUrl = isAptitude ? (problem.readingUrl || fallbackUrl) : undefined;
+  const practiceUrl = isAptitude ? undefined : (problem.videoUrl || fallbackUrl);
+  const practiceLabel = practiceUrl ? getPlatformLabel(practiceUrl) : null;
 
   return (
     <motion.div 
@@ -91,32 +93,62 @@ const ProblemItem = memo(({
          </div>
          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-4 mb-2 flex-wrap">
-               <h4 className={`text-xl font-black tracking-tight truncate ${isDone ? 'text-muted-foreground/50' : 'text-foreground'}`}>{problem.name}</h4>
+               <h4 className={`text-lg font-black tracking-tight leading-tight ${isDone ? 'text-muted-foreground/50' : 'text-foreground'}`}>{problem.name}</h4>
                {problem.isPriority && (
                   <span className="bg-rose-500/10 text-rose-500 border border-rose-500/30 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">High Priority</span>
                )}
             </div>
+            {problem.subtopic && (
+              <div className="mb-3">
+                <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary">
+                  {problem.subtopic}
+                </span>
+              </div>
+            )}
             {/* Reference Link Row */}
             <div className="flex items-center gap-3 flex-wrap mb-1">
-              {refUrl ? (
+              {isAptitude ? (
+                <>
+                  {readingUrl && (
+                    <a
+                      href={readingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all hover:scale-105 active:scale-95 bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20 hover:border-amber-500/50"
+                    >
+                      <BookOpen className="w-3 h-3" />
+                      Read Material
+                    </a>
+                  )}
+                  {videoUrl && (
+                    <a
+                      href={videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all hover:scale-105 active:scale-95 bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20 hover:border-rose-500/50"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Video Solution
+                    </a>
+                  )}
+                </>
+              ) : practiceUrl ? (
                 <a
-                  href={refUrl}
+                  href={practiceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all hover:scale-105 active:scale-95 ${
-                    isAptitude
-                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20 hover:border-amber-500/50'
-                      : 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 hover:border-primary/50'
-                  }`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all hover:scale-105 active:scale-95 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 hover:border-primary/50"
                 >
-                  {isAptitude ? <BookOpen className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
-                  {problem.videoUrl ? `Watch — ${platformLabel}` : isAptitude ? `Read — ${platformLabel}` : `Solve — ${platformLabel}`}
+                  <ExternalLink className="w-3 h-3" />
+                  {problem.videoUrl ? 'Watch — YouTube' : `Solve — ${practiceLabel}`}
                 </a>
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-border/10 text-muted-foreground/30 bg-muted/10">
                   {isAptitude ? <BookOpen className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
-                  {isAptitude ? 'Reading Material' : 'Practice Link'}
+                  {isAptitude ? 'Links Pending' : 'Practice Link'}
                 </span>
               )}
             </div>
@@ -128,7 +160,7 @@ const ProblemItem = memo(({
                  className="w-full bg-muted/50 border border-primary/30 rounded-xl px-4 py-2.5 text-sm font-bold text-foreground focus:outline-none"
                />
             ) : (
-               <p onClick={() => { setEditingNote(problem.id); setNoteDraft(problem.notes); }} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer truncate max-w-xl italic opacity-60 hover:opacity-100">
+               <p onClick={() => { setEditingNote(problem.id); setNoteDraft(problem.notes); }} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer max-w-3xl italic opacity-60 hover:opacity-100 whitespace-pre-wrap">
                   {problem.notes || '+ Add Topic Note'}
                </p>
             )}
@@ -164,15 +196,17 @@ const ProblemItem = memo(({
 
 ProblemItem.displayName = 'ProblemItem';
 
-const TopicHeader = memo(({ topic, count }: { topic: string, count: number }) => (
+const TopicHeader = memo(({ topic, count, variant = 'topic' }: { topic: string, count: number, variant?: 'topic' | 'subtopic' }) => (
   <motion.div 
     layout
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
-    className="flex items-center gap-4 px-4 py-2 mt-8 mb-4 sticky top-0 bg-background/80 backdrop-blur-md z-20"
+    className={`flex items-center gap-4 px-4 py-2 ${variant === 'topic' ? 'mt-8 mb-4 sticky top-0 bg-background/80 backdrop-blur-md z-20' : 'mt-4 mb-3 ml-4'}`}
   >
-     <div className="w-2.5 h-8 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]" />
-     <span className="text-sm font-black text-foreground uppercase tracking-[0.3em]">{topic} <span className="opacity-30 ml-2 font-bold">[{count} PROBLEMS]</span></span>
+     <div className={`${variant === 'topic' ? 'w-2.5 h-8 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]' : 'w-2 h-6 bg-amber-500/70'} rounded-full`} />
+     <span className={`${variant === 'topic' ? 'text-sm tracking-[0.3em]' : 'text-xs tracking-[0.2em]'} font-black text-foreground uppercase`}>
+       {topic} <span className="opacity-30 ml-2 font-bold">[{count} PROBLEMS]</span>
+     </span>
   </motion.div>
 ));
 
@@ -428,12 +462,12 @@ export default function DSATrackerView() {
   const uniqueTopics = useMemo(() => Array.from(new Set(tabProblems.map(p => p.topic))).sort(), [tabProblems]);
 
   type FlatListItem =
-    | { type: 'header'; topic: string; count: number }
+    | { type: 'header'; topic: string; count: number; variant: 'topic' | 'subtopic' }
     | { type: 'problem'; problem: Problem };
 
   const problems = useMemo(() => {
     let list = tabProblems;
-    if (search) list = list.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.topic.toLowerCase().includes(search.toLowerCase()));
+    if (search) list = list.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.topic.toLowerCase().includes(search.toLowerCase()) || p.subtopic?.toLowerCase().includes(search.toLowerCase()));
     if (filterTopic !== 'All') list = list.filter((p) => p.topic === filterTopic);
     if (filterDiff !== 'All') list = list.filter((p) => p.difficulty === filterDiff);
     if (filterStatus !== 'All') list = list.filter((p) => p.status === filterStatus);
@@ -450,24 +484,49 @@ export default function DSATrackerView() {
   }, [tabProblems, search, filterTopic, filterDiff, filterStatus, sortKey, sortAsc]);
 
   const groupedProblems = useMemo(() => {
-    const map = new Map<string, typeof problems>();
-    problems.forEach(p => {
-      if (!map.has(p.topic)) map.set(p.topic, []);
-      map.get(p.topic)!.push(p);
+    if (activeTab === 'Aptitude') {
+      const topicMap = new Map<string, Map<string, Problem[]>>();
+      problems.forEach((problem) => {
+        const subtopic = problem.subtopic || 'General';
+        if (!topicMap.has(problem.topic)) topicMap.set(problem.topic, new Map<string, Problem[]>());
+        const subtopicMap = topicMap.get(problem.topic)!;
+        if (!subtopicMap.has(subtopic)) subtopicMap.set(subtopic, []);
+        subtopicMap.get(subtopic)!.push(problem);
+      });
+
+      return Array.from(topicMap.entries()).map(([topic, subtopics]) => ({
+        topic,
+        subtopics: Array.from(subtopics.entries()),
+      }));
+    }
+
+    const map = new Map<string, Problem[]>();
+    problems.forEach((problem) => {
+      if (!map.has(problem.topic)) map.set(problem.topic, []);
+      map.get(problem.topic)!.push(problem);
     });
-    return Array.from(map.entries());
-  }, [problems]);
+    return Array.from(map.entries()).map(([topic, topicProblems]) => ({
+      topic,
+      subtopics: [[topic, topicProblems]] as [string, Problem[]][],
+    }));
+  }, [activeTab, problems]);
 
   const flatList = useMemo<FlatListItem[]>(() => {
     const items: FlatListItem[] = [];
-    groupedProblems.forEach(([topic, groupProps]) => {
-      items.push({ type: 'header', topic, count: groupProps.length });
-      groupProps.forEach((problem) => {
-        items.push({ type: 'problem', problem });
+    groupedProblems.forEach(({ topic, subtopics }) => {
+      const topicCount = subtopics.reduce((total, [, topicProblems]) => total + topicProblems.length, 0);
+      items.push({ type: 'header', topic, count: topicCount, variant: 'topic' });
+      subtopics.forEach(([subtopic, topicProblems]) => {
+        if (activeTab === 'Aptitude') {
+          items.push({ type: 'header', topic: subtopic, count: topicProblems.length, variant: 'subtopic' });
+        }
+        topicProblems.forEach((problem) => {
+          items.push({ type: 'problem', problem });
+        });
       });
     });
     return items;
-  }, [groupedProblems]);
+  }, [activeTab, groupedProblems]);
 
   const stats = {
     total: tabProblems.length,
@@ -604,7 +663,7 @@ export default function DSATrackerView() {
                         if (item.type === 'header') {
                           return (
                             <div style={style}>
-                              <TopicHeader topic={item.topic} count={item.count} />
+                              <TopicHeader topic={item.topic} count={item.count} variant={item.variant} />
                             </div>
                           );
                         }
@@ -627,7 +686,13 @@ export default function DSATrackerView() {
                       return (
                         <List
                           rowCount={flatList.length}
-                          rowHeight={(index: number) => flatList[index].type === 'header' ? 72 : 152}
+                          rowHeight={(index: number) => {
+                            const item = flatList[index];
+                            if (item.type === 'header') {
+                              return item.variant === 'topic' ? 72 : 60;
+                            }
+                            return item.problem.category === 'Aptitude' ? 230 : 170;
+                          }}
                           style={{ height: 600, width: '100%' }}
                           className="scrollbar-hide"
                           rowComponent={Row as any}
