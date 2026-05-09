@@ -16,6 +16,7 @@ export interface Problem {
   status: ProblemStatus;
   notes: string;
   addedAt: string;
+  videoUrl?: string;
 }
 
 export interface DSASheetItem {

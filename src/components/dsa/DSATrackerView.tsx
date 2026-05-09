@@ -70,8 +70,8 @@ const ProblemItem = memo(({
 }) => {
   const isDone = problem.status === 'Done';
   
-  const refUrl = getReferenceUrl(problem.name, problem.category, problem.topic);
-  const platformLabel = refUrl ? getPlatformLabel(refUrl) : null;
+  const refUrl = problem.videoUrl || getReferenceUrl(problem.name, problem.category, problem.topic);
+  const platformLabel = problem.videoUrl ? 'YouTube' : refUrl ? getPlatformLabel(refUrl) : null;
   const isAptitude = problem.category === 'Aptitude';
 
   return (
@@ -111,7 +111,7 @@ const ProblemItem = memo(({
                   }`}
                 >
                   {isAptitude ? <BookOpen className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
-                  {isAptitude ? `Read — ${platformLabel}` : `Solve — ${platformLabel}`}
+                  {problem.videoUrl ? `Watch — ${platformLabel}` : isAptitude ? `Read — ${platformLabel}` : `Solve — ${platformLabel}`}
                 </a>
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-border/10 text-muted-foreground/30 bg-muted/10">

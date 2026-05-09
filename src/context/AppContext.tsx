@@ -214,6 +214,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [initialized, setState]);
 
+  // Aptitude refresh: replace any stale must-do list data with the new PDF-derived seed.
+  useEffect(() => {
+    if (!initialized) return;
+    setState((prev) => {
+      const sameSeed =
+        prev.problems.length === KILL_LIST_PROBLEMS.length &&
+        prev.problems.every((problem, idx) => problem.id === KILL_LIST_PROBLEMS[idx].id);
+
+      if (sameSeed) return prev;
+      return { ...prev, problems: KILL_LIST_PROBLEMS };
+    });
+  }, [initialized, setState]);
+
   // 2. Debounced Cloud Backup on State Changes
   useEffect(() => {
     if (!user || isInitialLoad.current) return;
