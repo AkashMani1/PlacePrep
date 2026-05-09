@@ -427,6 +427,10 @@ export default function DSATrackerView() {
   const tabProblems = state.problems.filter(p => p.category === activeTab);
   const uniqueTopics = useMemo(() => Array.from(new Set(tabProblems.map(p => p.topic))).sort(), [tabProblems]);
 
+  type FlatListItem =
+    | { type: 'header'; topic: string; count: number }
+    | { type: 'problem'; problem: Problem };
+
   const problems = useMemo(() => {
     let list = tabProblems;
     if (search) list = list.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.topic.toLowerCase().includes(search.toLowerCase()));
@@ -453,6 +457,17 @@ export default function DSATrackerView() {
     });
     return Array.from(map.entries());
   }, [problems]);
+
+  const flatList = useMemo<FlatListItem[]>(() => {
+    const items: FlatListItem[] = [];
+    groupedProblems.forEach(([topic, groupProps]) => {
+      items.push({ type: 'header', topic, count: groupProps.length });
+      groupProps.forEach((problem) => {
+        items.push({ type: 'problem', problem });
+      });
+    });
+    return items;
+  }, [groupedProblems]);
 
   const stats = {
     total: tabProblems.length,
@@ -583,15 +598,7 @@ export default function DSATrackerView() {
                   </motion.div>
                ) : (
                   <div className="h-[600px] w-full border border-border/10 rounded-[32px] overflow-hidden bg-muted/5 relative">
-                    {useMemo(() => {
-                      const flatList: any[] = [];
-                      groupedProblems.forEach(([topic, groupProps]) => {
-                        flatList.push({ type: 'header', topic, count: groupProps.length });
-                        groupProps.forEach((p) => {
-                          flatList.push({ type: 'problem', problem: p });
-                        });
-                      });
-
+                    {(() => {
                       const Row = ({ index, style }: { index: number, style: React.CSSProperties }) => {
                         const item = flatList[index];
                         if (item.type === 'header') {
@@ -603,9 +610,9 @@ export default function DSATrackerView() {
                         }
                         return (
                           <div style={style} className="px-2 pt-1 pb-3">
-                            <ProblemItem 
-                              problem={item.problem} 
-                              onUpdate={updateProblem} 
+                            <ProblemItem
+                              problem={item.problem}
+                              onUpdate={updateProblem}
                               onDelete={deleteProblem}
                               onEdit={setEditingProblem}
                               editingNote={editingNote}
@@ -627,7 +634,7 @@ export default function DSATrackerView() {
                           rowProps={{} as any}
                         />
                       );
-                    }, [groupedProblems, updateProblem, deleteProblem, editingNote, noteDraft])}
+                    })()}
                   </div>
                )}
             </AnimatePresence>
