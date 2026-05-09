@@ -92,11 +92,8 @@ const ProblemItem = memo(({
             {isDone ? <ShieldCheck className="w-7 h-7" /> : isAptitude ? <BookMarked className="w-7 h-7" /> : <ExternalLink className="w-7 h-7" />}
          </div>
          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-4 mb-2 flex-wrap">
-               <h4 className={`text-lg font-black tracking-tight leading-tight ${isDone ? 'text-muted-foreground/50' : 'text-foreground'}`}>{problem.name}</h4>
-               {problem.isPriority && (
-                  <span className="bg-rose-500/10 text-rose-500 border border-rose-500/30 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">High Priority</span>
-               )}
+            <div className="flex items-start gap-3 mb-3 flex-wrap">
+               <h4 className={`text-[17px] font-black tracking-tight leading-[1.18] max-w-4xl ${isDone ? 'text-muted-foreground/50' : 'text-foreground'}`}>{problem.name}</h4>
             </div>
             {problem.subtopic && (
               <div className="mb-3">
@@ -106,7 +103,7 @@ const ProblemItem = memo(({
               </div>
             )}
             {/* Reference Link Row */}
-            <div className="flex items-center gap-3 flex-wrap mb-1">
+            <div className="flex items-center gap-3 flex-wrap mb-3">
               {isAptitude ? (
                 <>
                   {readingUrl && (
@@ -160,7 +157,7 @@ const ProblemItem = memo(({
                  className="w-full bg-muted/50 border border-primary/30 rounded-xl px-4 py-2.5 text-sm font-bold text-foreground focus:outline-none"
                />
             ) : (
-               <p onClick={() => { setEditingNote(problem.id); setNoteDraft(problem.notes); }} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer max-w-3xl italic opacity-60 hover:opacity-100 whitespace-pre-wrap">
+               <p onClick={() => { setEditingNote(problem.id); setNoteDraft(problem.notes); }} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer max-w-4xl italic opacity-60 hover:opacity-100 whitespace-pre-wrap leading-relaxed">
                   {problem.notes || '+ Add Topic Note'}
                </p>
             )}
@@ -291,8 +288,8 @@ function AddProblemModal({ onClose, activeCategory }: { onClose: () => void, act
           </div>
           <div className="flex items-center justify-between px-4 py-3 bg-rose-500/5 border border-rose-500/20 rounded-[16px]">
             <div>
-              <p className="text-sm font-black text-foreground">High Priority</p>
-              <p className="text-[10px] text-muted-foreground opacity-60 font-bold uppercase tracking-wider">Flag as must-do before placement</p>
+              <p className="text-sm font-black text-foreground">Focus Flag</p>
+              <p className="text-[10px] text-muted-foreground opacity-60 font-bold uppercase tracking-wider">Highlight items you want to revisit often</p>
             </div>
             <button onClick={() => set('isPriority', !form.isPriority)} className={`w-11 h-6 rounded-full transition-all duration-300 relative ${form.isPriority ? 'bg-rose-500' : 'bg-muted/60'}`}>
               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${form.isPriority ? 'left-6' : 'left-1'}`} />
@@ -401,8 +398,8 @@ function EditProblemModal({ problem, onClose }: { problem: Problem, onClose: () 
           {/* Priority toggle */}
           <div className="flex items-center justify-between px-5 py-4 bg-rose-500/5 border border-rose-500/20 rounded-[20px]">
             <div>
-              <p className="text-sm font-black text-foreground">High Priority</p>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider opacity-60">Mark as must-do before placement</p>
+              <p className="text-sm font-black text-foreground">Focus Flag</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider opacity-60">Highlight items you want to revisit often</p>
             </div>
             <button
               onClick={() => set('isPriority', !form.isPriority)}
@@ -531,7 +528,6 @@ export default function DSATrackerView() {
   const stats = {
     total: tabProblems.length,
     done: tabProblems.filter((p) => p.status === 'Done').length,
-    prio: tabProblems.filter((p) => p.isPriority && p.status !== 'Done').length,
   };
 
   return (
@@ -565,8 +561,8 @@ export default function DSATrackerView() {
                  <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground underline underline-offset-[14px] decoration-primary/30 decoration-4">Completed</p>
               </div>
               <div className="text-center group">
-                 <p className="text-6xl font-black text-foreground mb-4 group-hover:text-amber-500 transition-all tabular-nums tracking-tighter">{stats.prio}</p>
-                 <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground underline underline-offset-[14px] decoration-amber-500/30 decoration-4">High Risk</p>
+                 <p className="text-6xl font-black text-foreground mb-4 group-hover:text-foreground transition-all tabular-nums tracking-tighter">{stats.total - stats.done}</p>
+                 <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground underline underline-offset-[14px] decoration-foreground/20 decoration-4">Pending</p>
               </div>
            </div>
         </div>
@@ -668,7 +664,7 @@ export default function DSATrackerView() {
                           );
                         }
                         return (
-                          <div style={style} className="px-2 pt-1 pb-3">
+                          <div style={style} className="px-2 pt-1 pb-4">
                             <ProblemItem
                               problem={item.problem}
                               onUpdate={updateProblem}
@@ -689,9 +685,9 @@ export default function DSATrackerView() {
                           rowHeight={(index: number) => {
                             const item = flatList[index];
                             if (item.type === 'header') {
-                              return item.variant === 'topic' ? 72 : 60;
+                              return item.variant === 'topic' ? 66 : 52;
                             }
-                            return item.problem.category === 'Aptitude' ? 230 : 170;
+                            return item.problem.category === 'Aptitude' ? 215 : 165;
                           }}
                           style={{ height: 600, width: '100%' }}
                           className="scrollbar-hide"
@@ -712,7 +708,6 @@ export default function DSATrackerView() {
             <div className="space-y-5 py-2">
                {[
                  { label: 'Completed', count: stats.done, color: 'text-emerald-500', total: stats.total },
-                 { label: 'High Priority', count: stats.prio, color: 'text-primary', total: stats.total },
                  { label: 'Pending Problems', count: stats.total - stats.done, color: 'text-muted-foreground', total: stats.total },
                ].map((item) => {
                  const percentage = item.total ? Math.round((item.count / item.total) * 100) : 0;
@@ -735,7 +730,7 @@ export default function DSATrackerView() {
             </div>
          </BentoCard>
 
-         {/* Elite Mastery — High Priority Topics */}
+         {/* Topic Overview */}
          <div className="bento-card !p-6 relative overflow-hidden group w-full">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
 
@@ -745,8 +740,8 @@ export default function DSATrackerView() {
                   <Star className="w-5 h-5 text-primary" />
                </div>
                <div className="min-w-0">
-                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground opacity-60 leading-none mb-1">Elite Mastery</p>
-                  <p className="text-[13px] font-black text-foreground leading-none">High Priority Topics</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground opacity-60 leading-none mb-1">Topic Overview</p>
+                  <p className="text-[13px] font-black text-foreground leading-none">Top sections in view</p>
                </div>
             </div>
 
