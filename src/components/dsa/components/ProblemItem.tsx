@@ -1,18 +1,18 @@
 'use client';
 
 import { memo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { ShieldCheck, BookMarked, ExternalLink, BookOpen, Pencil, Trash2, ChevronDown } from 'lucide-react';
 import { Problem, Difficulty, ProblemStatus } from '@/lib/types';
 import { getReferenceUrl, getPlatformLabel } from '@/lib/referenceLinks';
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { 
     opacity: 1, 
     transition: { 
       duration: 0.4, 
-      ease: 'easeOut'
+      ease: 'easeOut' as const
     }
   }
 };

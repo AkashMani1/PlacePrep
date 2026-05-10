@@ -35,7 +35,7 @@ const itemVariants: Variants = {
     opacity: 1, 
     transition: { 
       duration: 0.4, 
-      ease: 'easeOut'
+      ease: 'easeOut' as const
     }
   }
 };
@@ -383,20 +383,19 @@ export default function DSATrackerView() {
 
                       return (
                         <List
-                          height={624}
-                          itemCount={flatList.length}
-                          itemSize={(index: number) => {
+                          style={{ height: 624, width: '100%' }}
+                          rowCount={flatList.length}
+                          rowHeight={(index: number) => {
                             const item = flatList[index];
                             if (item.type === 'header') {
                               return item.variant === 'topic' ? 62 : 74;
                             }
                             return item.problem.category === 'Aptitude' ? 252 : 182;
                           }}
-                          width="100%"
                           className="scrollbar-hide"
-                        >
-                          {Row}
-                        </List>
+                          rowComponent={Row as any}
+                          rowProps={{} as any}
+                        />
                       );
                     })()}
                   </div>
