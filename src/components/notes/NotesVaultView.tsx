@@ -1,4 +1,3 @@
-/* Developed by Akash Mani - This site is developed by Akash Mani. Original watermark of Akash Mani. */
 'use client';
 
 import { useState } from 'react';
@@ -15,6 +14,9 @@ import { BentoCard, ActivityRing } from '@/components/ui/Bento';
 
 // ── Animation Variants ────────────────────────────────────────────────────────
 
+const magneticSpring = { type: 'spring', stiffness: 150, damping: 15, mass: 0.1 } as any;
+const smoothSpring = { type: 'spring', stiffness: 100, damping: 20 } as any;
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -27,14 +29,18 @@ const containerVariants: Variants = {
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, y: 30, filter: 'blur(8px)' },
   visible: { 
     opacity: 1, 
-    transition: { 
-      duration: 0.6, 
-      ease: 'easeOut'
-    }
+    y: 0,
+    filter: 'blur(0px)',
+    transition: smoothSpring
   }
+};
+
+const textReveal = {
+  hidden: { opacity: 0, y: "100%" },
+  visible: { opacity: 1, y: 0, transition: { ...smoothSpring, duration: 0.8 } }
 };
 
 // ── STAR Story Form ────────────────────────────────────────────────────────────
@@ -64,23 +70,24 @@ function StarForm({
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card border border-border/20 rounded-[40px] p-10 space-y-10 relative overflow-hidden group hover:border-primary/30 transition-all shadow-2xl"
+      transition={smoothSpring}
+      className="bg-card/80 backdrop-blur-2xl border border-white/10 rounded-[40px] p-10 space-y-10 relative overflow-hidden group hover:border-primary/40 transition-all shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
     >
-      <div className="absolute -top-10 -right-10 p-12 opacity-5 group-hover:opacity-10 transition-opacity">
+      <div className="absolute -top-10 -right-10 p-12 opacity-5 group-hover:opacity-20 transition-opacity duration-700">
          <Star className="w-24 h-24 text-primary" />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
         <div>
            <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.3em] mb-3 block ml-1">Core Scenario</label>
            <select value={form.tag} onChange={(e) => set('tag', e.target.value)}
-            className="w-full bg-muted/40 border border-border/10 rounded-[24px] px-6 py-4 text-foreground text-md font-bold focus:outline-none focus:border-primary/40 appearance-none transition-all cursor-pointer">
+            className="w-full bg-background border border-border/10 rounded-[24px] px-6 py-4 text-foreground text-md font-bold focus:outline-none focus:border-primary/40 appearance-none transition-all cursor-pointer shadow-inner">
             {TAGS.map((t) => <option key={t} className="bg-card text-foreground">{t} Dynamic</option>)}
            </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 relative z-10">
         {[
           { k: 'situation' as const, label: 'SITUATION', icon: Database, color: 'text-secondary', placeholder: 'Standardized context/background reporting...' },
           { k: 'task' as const, label: 'TASK', icon: Target, color: 'text-primary', placeholder: 'Specific project goals and requirements...' },
@@ -89,7 +96,7 @@ function StarForm({
         ].map(({ k, label, icon: Icon, color, placeholder }) => (
           <div key={k} className="space-y-4">
             <div className="flex items-center gap-3 mb-1 px-1">
-               <div className={`p-2 rounded-lg bg-muted/40 border border-border/5 ${color}`}>
+               <div className={`p-2 rounded-lg bg-black/5 dark:bg-white/5 border border-border/50 ${color} shadow-sm`}>
                   <Icon className="w-4 h-4" />
                </div>
                <label className="text-muted-foreground text-[11px] font-black uppercase tracking-[0.3em]">{label} CORE</label>
@@ -99,18 +106,18 @@ function StarForm({
               onChange={(e) => set(k, e.target.value)}
               placeholder={placeholder}
               rows={4}
-              className="w-full bg-muted/40 border border-border/10 rounded-[28px] px-6 py-5 text-foreground text-sm focus:outline-none focus:border-primary/40 resize-none transition-all placeholder:opacity-30 font-medium leading-relaxed"
+              className="w-full bg-background border border-border/10 rounded-[28px] px-6 py-5 text-foreground text-sm focus:outline-none focus:border-primary/40 resize-none transition-all placeholder:opacity-30 font-medium leading-relaxed shadow-inner"
             />
           </div>
         ))}
       </div>
 
-      <div className="flex gap-6 pt-6">
-        <button onClick={onCancel} className="flex-1 py-5 rounded-[24px] border border-border/10 text-muted-foreground hover:text-foreground hover:bg-muted/40 text-[11px] font-black uppercase tracking-[0.3em] transition-all">Cancel</button>
-        <button onClick={() => valid && onSave(form)} disabled={!valid}
-          className="flex-[2] py-5 rounded-[24px] bg-primary text-foreground disabled:opacity-30 text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-[0_10px_30px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3">
+      <div className="flex gap-6 pt-6 relative z-10">
+        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onCancel} className="flex-1 py-5 rounded-[24px] border border-white/10 text-muted-foreground hover:text-foreground hover:bg-black/10 dark:hover:bg-white/10 text-[11px] font-black uppercase tracking-[0.3em] transition-all">Cancel</motion.button>
+        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => valid && onSave(form)} disabled={!valid}
+          className="flex-[2] py-5 rounded-[24px] bg-primary text-white disabled:opacity-30 text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-[0_10px_30px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3">
           <Save className="w-5 h-5" /> Commit to Vault
-        </button>
+        </motion.button>
       </div>
     </motion.div>
   );
@@ -166,55 +173,76 @@ export default function NotesVaultView() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="grid grid-cols-12 gap-10"
+      className="grid grid-cols-12 gap-8 relative pb-24"
     >
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/10 blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
+
+      {/* ── Massive Typography Header ── */}
+      <div className="col-span-12 mb-4">
+        <div className="overflow-hidden mb-4 flex items-center gap-4">
+            <motion.div 
+               initial={{ rotate: -90, scale: 0 }} 
+               animate={{ rotate: 0, scale: 1 }} 
+               transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+               className="w-14 h-14 rounded-3xl bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center shadow-[0_0_40px_rgba(var(--primary-rgb),0.4)]"
+            >
+               <Library className="w-7 h-7 text-white" />
+            </motion.div>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/40 leading-[1.1]">
+               <motion.span variants={textReveal} className="inline-block">Notes</motion.span>{' '}
+               <motion.span variants={textReveal} className="inline-block">Vault.</motion.span>
+            </h1>
+        </div>
+        <motion.p variants={itemVariants} className="text-muted-foreground text-lg md:text-xl font-medium max-w-2xl tracking-tight pl-18">
+          The ultimate intelligence repository. Secure your behavioral stories and deep CS concepts in one unshakeable framework.
+        </motion.p>
+      </div>
       
       {/* Row 1: Hero & Density */}
-      <BentoCard className="col-span-12 lg:col-span-8 overflow-hidden relative">
-         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-primary/5 to-transparent pointer-events_none" />
+      <BentoCard className="col-span-12 lg:col-span-8 overflow-hidden backdrop-blur-2xl bg-card/60 shadow-2xl border-white/10 relative">
+         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-10 py-4">
             <div className="max-w-md">
-               <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-8 border border-primary/30 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)]">
-                  <Library className="w-7 h-7 text-primary" />
-               </div>
-               <h2 className="text-4xl font-black text-foreground mb-4 leading-none tracking-tight uppercase">KNOWLEDGE BASE</h2>
-               <p className="text-muted-foreground text-md font-medium leading-relaxed">
+               <h2 className="text-4xl font-black text-foreground mb-4 leading-none tracking-tighter uppercase">KNOWLEDGE BASE</h2>
+               <p className="text-muted-foreground text-base font-semibold leading-relaxed">
                   Central repository for all placement preparation. Currently documenting <span className="text-primary font-black">{STORIES_COUNT} preparation stories</span> and 
-                  <span className="text-primary font-black">{KB_COUNT} key study topics</span>.
+                  <span className="text-secondary font-black"> {KB_COUNT} key study topics</span>.
                </p>
             </div>
             
-            <div className="flex gap-14 items-center">
+            <div className="flex gap-14 items-center bg-black/5 dark:bg-white/5 p-8 rounded-3xl border border-white/5 shadow-inner">
                <div className="text-center group">
-                  <p className="text-6xl font-black text-foreground mb-4 group-hover:text-primary transition-all tabular-nums tracking-tighter">{STORIES_COUNT}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground underline underline-offset-[14px] decoration-primary/30 decoration-4">Action Plan</p>
+                  <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-2 transition-all tabular-nums tracking-tighter group-hover:from-primary group-hover:to-indigo-500">{STORIES_COUNT}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Action Plan</p>
                </div>
+               <div className="w-px h-16 bg-border/50" />
                <div className="text-center group">
-                  <p className="text-6xl font-black text-foreground mb-4 group-hover:text-secondary transition-all tabular-nums tracking-tighter">{KB_COUNT}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground underline underline-offset-[14px] decoration-secondary/30 decoration-4">Topics</p>
+                  <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-2 transition-all tabular-nums tracking-tighter group-hover:from-secondary group-hover:to-purple-500">{KB_COUNT}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Topics</p>
                </div>
             </div>
          </div>
       </BentoCard>
 
-      <BentoCard className="col-span-12 lg:col-span-4" title="Retention Analytics">
-         <div className="flex items-center justify-center h-full py-4">
+      <BentoCard className="col-span-12 lg:col-span-4 backdrop-blur-2xl bg-card/60 shadow-2xl border-white/10" title="Retention Analytics">
+         <div className="flex items-center justify-center h-full py-6">
             <ActivityRing value={Math.min(100, STORIES_COUNT * 10 + KB_COUNT * 2)} max={100} color="var(--primary)" label="Overall Revision" />
          </div>
       </BentoCard>
 
       {/* Row 2: Navigation Segmented Control - Notion Style */}
-      <div className="col-span-12 flex flex-col gap-4 pb-6">
+      <div className="col-span-12 flex flex-col gap-6 pb-6 mt-4">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-         <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/20 border border-border/5">
+         <div className="flex items-center gap-2 p-2 rounded-2xl bg-card/60 backdrop-blur-xl border border-white/10 shadow-xl">
             {TABS.map(({ id, label, icon: Icon }) => (
                <button
                   key={id}
                   onClick={() => { setTab(id); setAddingKb(false); setEditKbId(null); setSelectedSubcat('All'); }}
-                  className={`relative px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2.5 ${
+                  className={`relative px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-3 z-10 ${
                     tab === id 
-                      ? 'text-primary' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/10'
+                      ? 'text-white shadow-[0_5px_15px_rgba(var(--primary-rgb),0.3)]' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                   }`}
                >
                   <Icon className="w-4 h-4" /> 
@@ -222,8 +250,8 @@ export default function NotesVaultView() {
                   {tab === id && (
                     <motion.div 
                       layoutId="vaultTabIndicator"
-                      className="absolute inset-0 bg-primary/10 border-b-2 border-primary rounded-lg -z-0"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      className="absolute inset-0 bg-primary border border-primary/50 rounded-xl -z-10"
+                      transition={smoothSpring}
                     />
                   )}
                </button>
@@ -235,11 +263,14 @@ export default function NotesVaultView() {
              !showStarForm && (
                <motion.button
                   key="add-star"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={magneticSpring}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   onClick={() => { setShowStarForm(true); setEditStarId(null); }}
-                  className="w-full lg:w-auto flex items-center justify-center gap-4 px-10 py-5 bg-primary text-foreground rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all group shadow-[0_10px_30px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.03] active:scale-95"
+                  className="w-full lg:w-auto flex items-center justify-center gap-4 px-10 py-5 bg-primary text-white rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all group shadow-[0_10px_30px_rgba(var(--primary-rgb),0.4)]"
                >
                   <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" /> 
                   ADD INTERVIEW STORY
@@ -249,11 +280,14 @@ export default function NotesVaultView() {
              !addingKb && (
                <motion.button
                   key="add-kb"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={magneticSpring}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   onClick={() => setAddingKb(true)}
-                  className="w-full lg:w-auto flex items-center justify-center gap-4 px-10 py-5 bg-card border border-border/10 text-foreground rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all group shadow-xl hover:border-secondary/40"
+                  className="w-full lg:w-auto flex items-center justify-center gap-4 px-10 py-5 bg-card/80 backdrop-blur-xl border border-white/10 text-foreground rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all group shadow-xl hover:border-secondary/50"
                >
                   <Plus className="w-5 h-5 text-secondary group-hover:rotate-90 transition-transform duration-500" /> 
                   ADD TOPIC ENTRY
@@ -267,32 +301,35 @@ export default function NotesVaultView() {
         <AnimatePresence>
           {tab === 'core' && (
             <motion.div
-              initial={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="flex flex-wrap gap-2"
+              exit={{ opacity: 0, y: -10 }}
+              transition={smoothSpring}
+              className="flex flex-wrap gap-3"
             >
               {CS_SUBCATS.map((sub) => (
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   key={sub}
                   onClick={() => setSelectedSubcat(sub)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] border transition-all duration-200 ${
+                  className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] border transition-all duration-300 ${
                     selectedSubcat === sub
-                      ? 'bg-secondary text-foreground border-secondary shadow-[0_4px_15px_rgba(var(--secondary-rgb),0.3)]'
-                      : 'bg-muted/20 text-muted-foreground border-border/10 hover:border-secondary/30 hover:text-foreground'
+                      ? 'bg-secondary text-white border-secondary shadow-[0_10px_20px_rgba(var(--secondary-rgb),0.4)]'
+                      : 'bg-card/60 backdrop-blur-xl text-muted-foreground border-white/5 hover:border-secondary/50 hover:text-foreground shadow-lg'
                   }`}
                 >
-                  <span>{SUBCAT_ICONS[sub]}</span>
+                  <span className="text-base">{SUBCAT_ICONS[sub]}</span>
                   <span>{sub}</span>
-                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${
-                    selectedSubcat === sub ? 'bg-white/20' : 'bg-muted/40'
+                  <span className={`ml-2 px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                    selectedSubcat === sub ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/10 text-muted-foreground'
                   }`}>
                     {sub === 'All'
                       ? (state.knowledgeBase || []).filter(k => k.category === 'Core CS').length
                       : (state.knowledgeBase || []).filter(k => k.category === 'Core CS' && k.subcategory === sub).length
                     }
                   </span>
-                </button>
+                </motion.button>
               ))}
             </motion.div>
           )}
@@ -315,7 +352,7 @@ export default function NotesVaultView() {
               {state.stars.map((story) => {
                 const isOpen = expandedStar === story.id;
                 return (
-                  <motion.div key={story.id} variants={itemVariants} className="group min-w-0">
+                  <motion.div key={story.id} variants={itemVariants} className="group min-w-0" whileHover={!isOpen ? { scale: 1.02, y: -5 } : {}} transition={magneticSpring}>
                     {editStarId === story.id ? (
                       <StarForm
                         initial={story}
@@ -325,19 +362,23 @@ export default function NotesVaultView() {
                     ) : (
                       <motion.div 
                         layout 
-                        className={`bg-card border border-border/10 rounded-[40px] overflow-hidden hover:border-primary/30 transition-all shadow-xl shadow-black/5 ${isOpen ? 'ring-2 ring-primary/10' : ''}`}
+                        className={`bg-card/60 backdrop-blur-2xl border border-white/5 rounded-[40px] overflow-hidden hover:border-primary/40 transition-all shadow-xl ${isOpen ? 'ring-2 ring-primary/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)]' : ''}`}
                       >
                         <button onClick={() => setExpandedStar(isOpen ? null : story.id)} className="w-full flex items-center gap-8 px-10 py-10 text-left group/btn">
-                           <div className={`w-16 h-16 rounded-[24px] flex items-center justify-center border border-primary/30 bg-primary/10 text-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.1)] group-hover/btn:scale-110 transition-all duration-500`}>
+                           <div className={`w-16 h-16 rounded-[24px] flex items-center justify-center border border-primary/30 bg-primary/10 text-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] group-hover/btn:scale-110 group-hover/btn:rotate-6 transition-all duration-500`}>
                               <Star className="w-8 h-8" />
                            </div>
                            <div className="flex-1 min-w-0">
-                              <span className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-60 block mb-2">{story.tag} Interview Story</span>
-                              <h4 className="text-foreground text-2xl font-black tracking-tight line-clamp-1 uppercase group-hover/btn:text-primary transition-colors">{story.situation}</h4>
+                              <span className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-80 block mb-2">{story.tag} Interview Story</span>
+                              <h4 className="text-foreground text-2xl font-black tracking-tighter line-clamp-1 uppercase group-hover/btn:text-primary transition-colors">{story.situation}</h4>
                            </div>
-                           <div className={`p-4 rounded-2xl bg-muted/30 text-muted-foreground transition-all duration-500 ${isOpen ? 'rotate-180 text-primary bg-primary/10' : ''}`}>
+                           <motion.div 
+                             animate={{ rotate: isOpen ? 180 : 0 }}
+                             transition={smoothSpring}
+                             className={`p-4 rounded-2xl transition-all duration-500 ${isOpen ? 'text-primary bg-primary/20 shadow-inner' : 'bg-black/5 dark:bg-white/5 text-muted-foreground'}`}
+                           >
                               <ChevronDown className="w-6 h-6" />
-                           </div>
+                           </motion.div>
                         </button>
 
                         <AnimatePresence>
@@ -347,10 +388,10 @@ export default function NotesVaultView() {
                               initial={{ opacity: 0, height: 0 }} 
                               animate={{ opacity: 1, height: 'auto' }} 
                               exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                              transition={smoothSpring}
                             >
-                               <div className="px-10 pb-12 pt-4 space-y-10">
-                                  <div className="h-px bg-border/10 w-full" />
+                               <div className="px-10 pb-12 pt-4 space-y-10 bg-black/5 dark:bg-white/[0.02]">
+                                  <div className="h-px bg-border/50 w-full" />
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                      {[
                                        { label: 'SITUATION REPORT', val: story.situation, color: 'text-secondary' },
@@ -359,16 +400,16 @@ export default function NotesVaultView() {
                                        { label: 'VERIFIED RESULT', val: story.result, color: 'text-emerald-500' },
                                      ].map(({ label, val, color }) => (
                                        <div key={label} className="space-y-4">
-                                          <p className={`text-[10px] font-black uppercase tracking-[0.3em] opacity-60 ${color}`}>{label}</p>
-                                          <p className="text-foreground text-sm leading-relaxed font-bold bg-muted/10 p-6 rounded-[28px] border border-border/5 shadow-inner min-h-[120px]">
+                                          <p className={`text-[10px] font-black uppercase tracking-[0.3em] opacity-80 ${color}`}>{label}</p>
+                                          <p className="text-foreground text-sm leading-relaxed font-bold bg-background p-6 rounded-[28px] border border-border/50 shadow-inner min-h-[120px]">
                                              {val}
                                           </p>
                                        </div>
                                      ))}
                                   </div>
                                   <div className="flex gap-6 pt-6 px-1">
-                                     <button onClick={() => setEditStarId(story.id)} className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-muted/40 border border-border/10 text-muted-foreground hover:text-foreground transition-all text-[11px] font-black uppercase tracking-[0.3em]"><Edit3 className="w-5 h-5" /> MODIFY RECORD</button>
-                                     <button onClick={() => deleteStar(story.id)} className="flex items-center gap-3 px-8 py-4 rounded-2xl border border-rose-500/20 text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 transition-all text-[11px] font-black uppercase tracking-[0.3em]"><Trash2 className="w-5 h-5" /> PURGE</button>
+                                     <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setEditStarId(story.id)} className="flex items-center gap-3 px-8 py-5 rounded-2xl bg-card border border-white/10 text-muted-foreground hover:text-white hover:bg-white/10 transition-all text-[11px] font-black uppercase tracking-[0.3em] shadow-lg"><Edit3 className="w-5 h-5" /> MODIFY RECORD</motion.button>
+                                     <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => deleteStar(story.id)} className="flex items-center gap-3 px-8 py-5 rounded-2xl border border-rose-500/20 text-rose-500 hover:text-white hover:bg-rose-500 transition-all text-[11px] font-black uppercase tracking-[0.3em] shadow-lg"><Trash2 className="w-5 h-5" /> PURGE</motion.button>
                                   </div>
                                </div>
                             </motion.div>
@@ -389,13 +430,14 @@ export default function NotesVaultView() {
             <AnimatePresence>
               {addingKb && (
                 <motion.div 
-                  initial={{ opacity: 0, y: -20 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  exit={{ opacity: 0, y: -20 }}
-                  className="bg-muted/40 border border-secondary/30 rounded-[40px] p-10 space-y-8 backdrop-blur-md"
+                  initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }} 
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} 
+                  exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+                  transition={smoothSpring}
+                  className="bg-card/80 border border-secondary/30 rounded-[40px] p-10 space-y-8 backdrop-blur-2xl shadow-[0_20px_60px_rgba(var(--secondary-rgb),0.2)]"
                 >
                   <div className="flex items-center gap-4 text-secondary mb-2">
-                     <div className="p-3 bg-secondary/10 rounded-xl border border-secondary/20 shadow-[0_0_15px_rgba(var(--secondary-rgb),0.2)]">
+                     <div className="p-3 bg-secondary/10 rounded-2xl border border-secondary/20 shadow-[0_0_20px_rgba(var(--secondary-rgb),0.3)]">
                         <Terminal className="w-6 h-6" />
                      </div>
                      <span className="text-[11px] font-black uppercase tracking-[0.4em]">Topic Entry Setup</span>
@@ -405,68 +447,68 @@ export default function NotesVaultView() {
                     value={newKbQ}
                     onChange={(e) => setNewKbQ(e.target.value)}
                     placeholder="Identify specific topic category (e.g. Memory Management, API Design)..."
-                    className="w-full bg-card/60 border border-border/20 rounded-[28px] px-8 py-5 text-foreground text-xl font-black focus:outline-none focus:border-secondary transition-all placeholder:opacity-20 shadow-inner"
+                    className="w-full bg-background border border-border/20 rounded-[28px] px-8 py-6 text-foreground text-xl font-black focus:outline-none focus:border-secondary transition-all placeholder:opacity-30 shadow-inner"
                   />
                   <div className="flex gap-6">
-                    <button onClick={() => { if (newKbQ.trim() && currentTabConfig.filter) { addKnowledgeItem(newKbQ.trim(), currentTabConfig.filter, tab === 'core' && selectedSubcat !== 'All' ? selectedSubcat as CSSubcategory : undefined); setNewKbQ(''); setAddingKb(false); } }}
-                      className="px-10 py-5 bg-secondary text-foreground rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] shadow-[0_10px_30px_rgba(var(--secondary-rgb),0.2)] transition-all hover:scale-[1.03] active:scale-95">Save Topic</button>
-                    <button onClick={() => { setAddingKb(false); setNewKbQ(''); }}
-                      className="px-10 py-5 border border-border/10 text-muted-foreground hover:text-foreground rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all">Cancel setup</button>
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { if (newKbQ.trim() && currentTabConfig.filter) { addKnowledgeItem(newKbQ.trim(), currentTabConfig.filter, tab === 'core' && selectedSubcat !== 'All' ? selectedSubcat as CSSubcategory : undefined); setNewKbQ(''); setAddingKb(false); } }}
+                      className="px-10 py-5 bg-secondary text-white rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] shadow-[0_10px_30px_rgba(var(--secondary-rgb),0.4)] transition-all">Save Topic</motion.button>
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { setAddingKb(false); setNewKbQ(''); }}
+                      className="px-10 py-5 border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all">Cancel setup</motion.button>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
               {filteredKnowledge.map((qa) => (
-                <motion.div key={qa.id} variants={itemVariants} className="bg-card border border-border/10 rounded-[40px] p-10 space-y-8 group/kb hover:border-secondary/40 transition-all shadow-xl shadow-black/5 relative overflow-hidden">
-                  <div className={`absolute top-0 right-0 w-32 h-32 bg-secondary/5 blur-[80px] opacity-0 group-hover/kb:opacity-100 transition-opacity duration-1000`} />
+                <motion.div key={qa.id} variants={itemVariants} whileHover={editKbId !== qa.id ? { scale: 1.02, y: -5 } : {}} transition={magneticSpring} className="bg-card/60 backdrop-blur-2xl border border-white/5 rounded-[40px] p-10 space-y-8 group/kb hover:border-secondary/40 transition-all shadow-xl shadow-black/5 relative overflow-hidden">
+                  <div className={`absolute top-0 right-0 w-48 h-48 bg-secondary/10 blur-[100px] opacity-0 group-hover/kb:opacity-100 transition-opacity duration-1000`} />
                   <div className="flex items-start justify-between gap-6 relative z-10">
                     <div className="flex items-start gap-5 flex-1 min-w-0">
-                      <div className="w-12 h-12 bg-secondary/10 rounded-2xl flex items-center justify-center border border-secondary/20 shadow-[0_0_10px_rgba(var(--secondary-rgb),0.1)] group-hover/kb:scale-110 transition-all duration-500 shrink-0">
-                        <Terminal className="w-6 h-6 text-secondary" />
+                      <div className="w-14 h-14 bg-secondary/10 rounded-2xl flex items-center justify-center border border-secondary/30 shadow-[0_0_20px_rgba(var(--secondary-rgb),0.2)] group-hover/kb:scale-110 group-hover/kb:rotate-6 transition-all duration-500 shrink-0">
+                        <Terminal className="w-7 h-7 text-secondary" />
                       </div>
                       <div className="min-w-0">
                         {qa.subcategory && (
-                          <span className="inline-flex items-center gap-1 mb-2 px-2.5 py-1 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-[9px] font-black uppercase tracking-[0.25em]">
-                            {SUBCAT_ICONS[qa.subcategory]} {qa.subcategory}
+                          <span className="inline-flex items-center gap-1.5 mb-3 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/30 text-secondary text-[10px] font-black uppercase tracking-[0.3em] shadow-sm">
+                            <span className="text-sm">{SUBCAT_ICONS[qa.subcategory]}</span> {qa.subcategory}
                           </span>
                         )}
-                        <h4 className="text-foreground text-lg font-black tracking-tight leading-snug uppercase">{qa.question}</h4>
+                        <h4 className="text-foreground text-2xl font-black tracking-tighter leading-snug uppercase">{qa.question}</h4>
                       </div>
                     </div>
-                    <button onClick={() => deleteKnowledgeItem(qa.id)} className="p-3 text-muted-foreground hover:text-rose-500 bg-muted/40 hover:bg-rose-500/10 rounded-[14px] transition-all shrink-0"><Trash2 className="w-5 h-5" /></button>
+                    <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => deleteKnowledgeItem(qa.id)} className="p-4 text-muted-foreground hover:text-rose-500 bg-black/5 dark:bg-white/5 hover:bg-rose-500/20 rounded-2xl transition-all shrink-0"><Trash2 className="w-5 h-5" /></motion.button>
                   </div>
 
                   {editKbId === qa.id ? (
-                    <div className="space-y-6 relative z-10 transition-all">
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-6 relative z-10 transition-all">
                       <textarea
                         autoFocus
                         value={kbDraft}
                         onChange={(e) => setKbDraft(e.target.value)}
                         rows={8}
-                        className="w-full bg-muted/60 border border-secondary/30 rounded-[28px] px-6 py-5 text-foreground text-[15px] focus:outline-none resize-none font-mono leading-relaxed shadow-inner"
+                        className="w-full bg-background border border-secondary/40 rounded-[28px] px-6 py-6 text-foreground text-[15px] focus:outline-none resize-none font-mono leading-relaxed shadow-inner"
                       />
                       <div className="flex gap-4">
-                        <button onClick={() => { updateKnowledgeItem(qa.id, kbDraft); setEditKbId(null); }}
-                          className="px-8 py-3 bg-secondary text-foreground rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-secondary/20 transition-all hover:scale-105 active:scale-95">Save Topic</button>
-                        <button onClick={() => setEditKbId(null)} className="px-8 py-3 border border-border/10 text-muted-foreground rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:text-foreground transition-all">Discard</button>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { updateKnowledgeItem(qa.id, kbDraft); setEditKbId(null); }}
+                          className="px-8 py-4 bg-secondary text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] shadow-[0_10px_20px_rgba(var(--secondary-rgb),0.3)] transition-all">Save Topic</motion.button>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setEditKbId(null)} className="px-8 py-4 border border-white/10 text-muted-foreground rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] hover:text-foreground hover:bg-white/10 transition-all shadow-lg">Discard</motion.button>
                       </div>
-                    </div>
+                    </motion.div>
                   ) : (
                     <div className="space-y-8 relative z-10">
-                      <div className="bg-muted/20 rounded-[32px] p-8 border border-border/5 relative shadow-inner">
-                        <p className="text-foreground text-[14px] leading-relaxed whitespace-pre-wrap font-bold opacity-80">
+                      <div className="bg-background rounded-[32px] p-8 border border-border/50 relative shadow-inner">
+                        <p className="text-foreground text-[15px] leading-relaxed whitespace-pre-wrap font-bold opacity-90">
                           {qa.answer || 'EMPTY: No details provided for this topic. Update with notes immediately.'}
                         </p>
                       </div>
-                      <button onClick={() => { setEditKbId(qa.id); setKbDraft(qa.answer); }}
-                        className="flex items-center gap-3 text-muted-foreground hover:text-secondary transition-all text-[11px] font-black uppercase tracking-[0.3em] w-fit group/edit">
-                        <div className="p-2 rounded-lg bg-muted/40 group-hover/edit:bg-secondary/10 border border-border/5 group-hover/edit:border-secondary/20 transition-all">
-                           <Edit3 className="w-4 h-4" />
+                      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { setEditKbId(qa.id); setKbDraft(qa.answer); }}
+                        className="flex items-center gap-4 text-muted-foreground hover:text-secondary transition-all text-[11px] font-black uppercase tracking-[0.3em] w-fit group/edit">
+                        <div className="p-3 rounded-xl bg-black/5 dark:bg-white/5 group-hover/edit:bg-secondary/20 border border-border/50 group-hover/edit:border-secondary/30 transition-all shadow-sm">
+                           <Edit3 className="w-5 h-5" />
                         </div>
                         Update Topic Entry
-                      </button>
+                      </motion.button>
                     </div>
                   )}
                 </motion.div>
@@ -474,8 +516,8 @@ export default function NotesVaultView() {
             </div>
 
             {filteredKnowledge.length === 0 && !addingKb && (
-               <motion.div variants={itemVariants} className="text-center py-32 border-2 border-dashed border-border/10 rounded-[48px] bg-muted/5">
-                  <Cpu className="w-16 h-16 text-muted-foreground mx-auto mb-8 opacity-10" />
+               <motion.div variants={itemVariants} className="text-center py-40 border-2 border-dashed border-white/10 rounded-[48px] bg-card/20 backdrop-blur-sm">
+                  <Cpu className="w-20 h-20 text-muted-foreground mx-auto mb-8 opacity-20" />
                   <p className="text-muted-foreground text-[13px] font-black uppercase tracking-[0.4em]">No topic entries found in this category</p>
                </motion.div>
             )}
