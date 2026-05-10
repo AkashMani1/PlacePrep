@@ -210,9 +210,19 @@ const ProblemItem = memo(({
            </div>
         </div>
         <div className="flex flex-col gap-3 xl:w-[230px] xl:flex-shrink-0">
-           <span className={`text-[10px] font-black uppercase tracking-[0.18em] px-4 py-2 rounded-xl border ${DIFF_COLORS[problem.difficulty]}`}>
-              {problem.difficulty} TIER
-           </span>
+           <div className="flex items-center justify-between">
+             <span className={`text-[10px] font-black uppercase tracking-[0.18em] px-4 py-2 rounded-xl border ${DIFF_COLORS[problem.difficulty]}`}>
+                {problem.difficulty} TIER
+             </span>
+             <div className="flex items-center gap-2 opacity-100 xl:opacity-0 xl:group-hover/card:opacity-100 transition-all duration-300">
+                <button onClick={() => onEdit(problem)} className="p-2 bg-primary/10 text-primary/60 hover:text-primary hover:bg-primary/20 rounded-xl transition-all border border-transparent hover:border-primary/30" title="Edit problem">
+                   <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => onDelete(problem.id)} className="p-2 bg-rose-500/10 text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/20 rounded-xl transition-all border border-transparent hover:border-rose-500/30" title="Delete problem">
+                   <Trash2 className="w-3.5 h-3.5" />
+                </button>
+             </div>
+           </div>
            <SelectField
              aria-label="Update problem status"
              value={problem.status}
@@ -226,14 +236,6 @@ const ProblemItem = memo(({
                </option>
              ))}
            </SelectField>
-           <div className="flex items-center gap-3 xl:justify-end opacity-100 xl:opacity-0 xl:group-hover/card:opacity-100 transition-all duration-300">
-              <button onClick={() => onEdit(problem)} className="p-3 bg-primary/10 text-primary/60 hover:text-primary hover:bg-primary/20 rounded-xl transition-all border border-transparent hover:border-primary/30" title="Edit problem">
-                 <Pencil className="w-4 h-4" />
-              </button>
-              <button onClick={() => onDelete(problem.id)} className="p-3 bg-rose-500/10 text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/20 rounded-xl transition-all border border-transparent hover:border-rose-500/30" title="Delete problem">
-                 <Trash2 className="w-4 h-4" />
-              </button>
-           </div>
         </div>
       </div>
     </motion.div>
