@@ -121,7 +121,7 @@ function WeekCard({ week, isExpanded, onToggle }: {
                <motion.div 
                  initial={{ width: 0 }}
                  animate={{ width: `${pct}%` }}
-                 transition={{ duration: 1, ease: smoothSpring }}
+                 transition={{ duration: 1, ease: [0.32, 0.72, 0, 1] }}
                  className={`h-full ${phase.bar} rounded-full`} 
                />
             </div>
@@ -337,7 +337,7 @@ export default function RoadmapView() {
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${p}%` }}
-                        transition={{ duration: 1, ease: smoothSpring }}
+                        transition={{ duration: 1, ease: [0.32, 0.72, 0, 1] }}
                         className={`h-full ${config.bar} rounded-full`} 
                       />
                     </div>
