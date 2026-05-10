@@ -103,31 +103,7 @@ export default function AppShell() {
       >
         <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 py-8 md:py-12 flex-1">
           
-          {/* Header Section */}
-          <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-            <div>
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 mb-2"
-              >
-                <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground/80">
-                  <Icon className="w-4 h-4" />
-                  <span>{label}</span>
-                </div>
-              </motion.div>
-              
-              {activeTab === 'dashboard' && (
-                <motion.h1 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-3xl font-semibold tracking-tight text-foreground"
-                >
-                  <span className="text-muted-foreground font-normal">Welcome back,</span> {state.userName}
-                </motion.h1>
-              )}
-            </div>
-          </header>
+          {/* Header Section Removed as per new Awwwards-style UI */}
 
           {/* Dynamic Tab Content with Smooth Crossfade */}
           <AnimatePresence mode="wait">
