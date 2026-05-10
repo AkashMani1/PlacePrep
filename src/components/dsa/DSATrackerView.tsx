@@ -156,7 +156,14 @@ export default function DSATrackerView() {
     groupedProblems.forEach(({ topic, subtopics }) => {
       const topicCount = subtopics.reduce((total, [, topicProblems]) => total + topicProblems.length, 0);
       const topicSolved = subtopics.reduce((total, [, topicProblems]) => total + topicProblems.filter((problem) => problem.status === 'Done').length, 0);
-      items.push({ type: 'header', topic, count: topicCount, solved: topicSolved, variant: 'topic' });
+      
+      const topicGroupKey = `${activeTab}:${topic}`;
+      const topicCollapsed = Boolean(collapsedSubtopics[topicGroupKey]);
+      
+      items.push({ type: 'header', topic, count: topicCount, solved: topicSolved, variant: 'topic', groupKey: topicGroupKey, collapsed: topicCollapsed });
+      
+      if (topicCollapsed) return;
+
       subtopics.forEach(([subtopic, topicProblems]) => {
         const groupKey = `${activeTab}:${topic}:${subtopic}`;
         const collapsed = Boolean(collapsedSubtopics[groupKey]);

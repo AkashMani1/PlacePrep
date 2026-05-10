@@ -42,8 +42,8 @@ const TopicHeader = memo(({
           </div>
         )}
       </div>
-      {isSubtopic && (
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/10 bg-card/70 text-muted-foreground">
+      {onToggle && (
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/10 bg-card/70 text-muted-foreground transition-all hover:bg-muted/50">
           {collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
         </div>
       )}
@@ -57,16 +57,16 @@ const TopicHeader = memo(({
       animate={{ opacity: 1, x: 0 }}
       className={`${isSubtopic ? 'mt-4 mb-2 ml-0 md:ml-4 rounded-2xl border border-border/10 bg-card/55 shadow-sm' : 'mt-6 mb-3 sticky top-0 z-20 rounded-2xl bg-background/90 backdrop-blur-xl'} overflow-hidden`}
     >
-      {isSubtopic ? (
+      {onToggle ? (
         <button
           onClick={onToggle}
-          className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-muted/20"
+          className={`flex w-full items-center gap-4 px-4 ${isSubtopic ? 'py-3' : 'py-4'} text-left transition-colors hover:bg-muted/20`}
           type="button"
         >
           {content}
         </button>
       ) : (
-        <div className="flex items-center gap-4 px-4 py-2">
+        <div className="flex items-center gap-4 px-4 py-4">
           {content}
         </div>
       )}
