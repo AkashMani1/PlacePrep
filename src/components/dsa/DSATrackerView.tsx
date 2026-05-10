@@ -338,7 +338,7 @@ export default function DSATrackerView() {
                    rowProps={itemData}
                    rowHeight={(index: number) => {
                      const item = flatList[index];
-                     if (item.type === 'header') return item.variant === 'topic' ? 62 : 74;
+                     if (item.type === 'header') return item.variant === 'topic' ? 92 : 84;
                      return item.problem.category === 'Aptitude' ? 252 : 182;
                    }}
                    className="scrollbar-hide"
