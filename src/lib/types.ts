@@ -19,6 +19,11 @@ export interface Problem {
   addedAt: string;
   videoUrl?: string;
   readingUrl?: string;
+  // ── SRS Fields (Spaced Repetition System) ──────────────────────────────
+  srsNextReview?: string;    // ISO date: when to surface for review
+  srsInterval?: number;      // current interval in days: 3, 7, or 21
+  srsReviewCount?: number;   // total number of SRS review cycles completed
+  srsLastReviewed?: string;  // ISO date of the last SRS review session
 }
 
 export interface DSASheetItem {
@@ -50,6 +55,48 @@ export interface MockInterview {
   maxScore: number;
   date: string;
   feedback: string;
+  // ── Advanced Analytics (Elite Feedback) ──────────────────────────────
+  metrics?: {
+    communication: number; // 0-100
+    technical: number;     // 0-100
+    behavioral: number;    // 0-100
+    pressure: number;      // 0-100 (handling)
+    confidence: number;    // 0-100
+    clarity: number;       // 0-100
+  };
+  durationMinutes?: number;
+  interviewerName?: string;
+  rejectionTriggers?: string[]; // Likely causes for rejection
+  strengths?: string[];
+  weakZones?: string[];
+}
+
+export interface AssessmentRecord {
+  id: string;
+  title: string; // e.g. "Amazon OA Simulator", "TCS NQT Full Mock"
+  category: 'Aptitude' | 'Technical' | 'Full';
+  score: number;
+  maxScore: number;
+  percentile?: number;
+  date: string;
+  accuracy: number;
+  avgTimePerQuestion: number;
+  sections: {
+    name: string;
+    score: number;
+    maxScore: number;
+    timeSpent: number;
+  }[];
+}
+
+export interface PeerSession {
+  id: string;
+  partnerName: string;
+  role: 'Interviewer' | 'Interviewee';
+  type: string;
+  date: string;
+  status: 'Scheduled' | 'Completed' | 'Cancelled';
+  roomUrl?: string;
 }
 
 export interface WeekTask {
@@ -146,4 +193,20 @@ export interface AppState {
   sidebarCollapsed?: boolean;
   projects?: ProjectRecord[];
   theme?: 'light' | 'dark';
+  seenBadgeIds?: string[];   // IDs of badges whose unlock toast has already been shown
+  assessments?: AssessmentRecord[];
+  peerSessions?: PeerSession[];
+}
+
+// ── Badge System ──────────────────────────────────────────────────────────────
+export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;                            // Lucide icon name
+  color: string;                           // Tailwind gradient class
+  tier: BadgeTier;
+  check: (state: AppState) => boolean;     // Pure unlock condition
 }

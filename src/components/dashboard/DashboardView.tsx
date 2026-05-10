@@ -10,6 +10,8 @@ import { StreakPill } from './components/StreakWidgets';
 import { DeploymentLogPanel } from './components/DeploymentLogPanel';
 import { DSASheetProgressCard } from './components/DSASheetProgressCard';
 import { DailyTaskChecklist } from './components/DailyTaskChecklist';
+import { SRSReviewQueue } from './components/SRSReviewQueue';
+import { BadgeVault } from './components/BadgeVault';
 
 // Premium spring physics for tactile interaction
 const magneticSpring = { type: 'spring', stiffness: 150, damping: 15, mass: 0.1 } as any;
@@ -140,6 +142,11 @@ export default function DashboardView() {
           </motion.div>
         </motion.div>
 
+        {/* ── SRS Review Queue ─────────────────────────────────────────── */}
+        <motion.div variants={itemVariants} className="col-span-12">
+          <SRSReviewQueue />
+        </motion.div>
+
         {/* ── Deployment Log ────────────────────────────────────────────── */}
         <motion.div variants={itemVariants} className="col-span-12">
            <DeploymentLogPanel />
@@ -153,6 +160,11 @@ export default function DashboardView() {
               <DailyTaskChecklist />
             </BentoCard>
           </motion.div>
+        </motion.div>
+
+        {/* ── Achievement Vault ─────────────────────────────────────────── */}
+        <motion.div variants={itemVariants} className="col-span-12">
+          <BadgeVault />
         </motion.div>
 
       </motion.div>

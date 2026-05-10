@@ -2,13 +2,14 @@
 'use client';
 
 import { useState, useMemo, memo } from 'react';
-import { Target, Search, Zap, Activity, BookOpen, Star, AlertTriangle, ArrowUpDown, ChevronDown, Plus, LayoutGrid, List as ListIcon, Filter } from 'lucide-react';
+import { Target, Search, Zap, Activity, BookOpen, Star, AlertTriangle, ArrowUpDown, ChevronDown, Plus, LayoutGrid, List as ListIcon, Filter, RotateCcw } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Problem, Difficulty, ProblemStatus } from '@/lib/types';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { BentoCard, ActivityRing } from '@/components/ui/Bento';
 import { List } from 'react-window';
 import React from 'react';
+import { getDueForReview } from '@/lib/srsUtils';
 
 // Modular Component Imports
 import ProblemItem from './components/ProblemItem';
@@ -104,14 +105,28 @@ export default function DSATrackerView() {
   
   // UI State
   const [showFilters, setShowFilters] = useState(false);
+  const [srsFilter, setSrsFilter] = useState(false);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
   const [collapsedSubtopics, setCollapsedSubtopics] = useState<Record<string, boolean>>({});
+
+  const srsQueue = useMemo(() => getDueForReview(state.problems), [state.problems]);
+  const srsCount = srsQueue.length;
 
   const tabProblems = state.problems.filter(p => p.category === activeTab);
   const uniqueTopics = useMemo(() => Array.from(new Set(tabProblems.map(p => p.topic))).sort(), [tabProblems]);
 
   const problems = useMemo(() => {
+    // If SRS filter is on, bypass category/search filters and show the full queue
+    // Sort by most overdue first so urgent items surface to the top
+    if (srsFilter) {
+      return [...srsQueue].sort((a, b) => {
+        const aDate = a.srsNextReview ?? '';
+        const bDate = b.srsNextReview ?? '';
+        return aDate.localeCompare(bDate); // oldest due date first
+      });
+    }
+
     let list = tabProblems;
     if (search) list = list.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.topic.toLowerCase().includes(search.toLowerCase()) || p.subtopic?.toLowerCase().includes(search.toLowerCase()));
     if (filterTopic !== 'All') list = list.filter((p) => p.topic === filterTopic);
@@ -127,7 +142,7 @@ export default function DSATrackerView() {
       return sortAsc ? cmp : -cmp;
     });
     return list;
-  }, [tabProblems, search, filterTopic, filterDiff, filterStatus, sortKey, sortAsc]);
+  }, [tabProblems, srsFilter, srsQueue, search, filterTopic, filterDiff, filterStatus, sortKey, sortAsc]);
 
   const groupedProblems = useMemo(() => {
     if (activeTab === 'Aptitude') {
@@ -249,12 +264,12 @@ export default function DSATrackerView() {
          <div className="p-2 bg-card/60 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center gap-2 shadow-xl">
             {['DSA', 'Aptitude'].map((tab) => (
               <button
-                key={tab} onClick={() => setActiveTab(tab as any)}
+                key={tab} onClick={() => { setActiveTab(tab as any); setSrsFilter(false); }}
                 className={`relative px-10 py-3.5 text-sm font-bold tracking-widest uppercase transition-all duration-300 flex items-center gap-3 rounded-xl z-10 ${
-                  activeTab === tab ? 'text-white shadow-[0_5px_15px_rgba(0,0,0,0.3)]' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                  activeTab === tab && !srsFilter ? 'text-white shadow-[0_5px_15px_rgba(0,0,0,0.3)]' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                 }`}
               >
-                {activeTab === tab && (
+                {activeTab === tab && !srsFilter && (
                   <motion.div layoutId="activeCategoryBg" className={`absolute inset-0 ${tab === 'DSA' ? 'bg-primary border-primary/50' : 'bg-amber-500 border-amber-500/50'} border rounded-xl -z-10`} transition={smoothSpring} />
                 )}
                 <span className="relative z-10 flex items-center gap-2.5">
@@ -263,6 +278,25 @@ export default function DSATrackerView() {
                 </span>
               </button>
             ))}
+            {/* SRS Filter Chip */}
+            {srsCount > 0 && (
+              <button
+                onClick={() => setSrsFilter(!srsFilter)}
+                className={`relative px-6 py-3.5 text-sm font-bold tracking-widest uppercase transition-all duration-300 flex items-center gap-2.5 rounded-xl z-10 border ${
+                  srsFilter
+                    ? 'bg-amber-500 border-amber-500/50 text-white shadow-[0_5px_20px_rgba(245,158,11,0.4)]'
+                    : 'border-amber-500/30 text-amber-500 hover:bg-amber-500/10'
+                }`}
+              >
+                <RotateCcw className={`w-4 h-4 ${srsFilter ? '' : 'animate-pulse'}`} />
+                SRS
+                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${
+                  srsFilter ? 'bg-white/20 text-white' : 'bg-amber-500/15 text-amber-500 border border-amber-500/30'
+                }`}>
+                  {srsCount}
+                </span>
+              </button>
+            )}
          </div>
 
          <motion.button 

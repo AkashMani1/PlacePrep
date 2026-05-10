@@ -7,6 +7,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuth } from './AuthContext';
 import { syncService } from '@/lib/syncService';
 import { toast } from 'sonner';
+import { scheduleForReview, clearSrsSchedule } from '@/lib/srsUtils';
 import {
   DEFAULT_WEEKS,
   DEFAULT_MOCKS,
@@ -128,6 +129,9 @@ interface AppContextType {
   // UI State (Transient)
   isSidebarHovered: boolean;
   setSidebarHovered: (val: boolean) => void;
+
+  // Badge System
+  markBadgesSeen: (ids: string[]) => void;
 
   // Utility
   touchToday: () => void;
@@ -384,7 +388,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [mutate]);
 
   const updateProblem = useCallback((id: string, updates: Partial<Problem>) => {
-    mutate((s) => ({ ...s, problems: s.problems.map((p) => (p.id === id ? { ...p, ...updates } : p)) }));
+    mutate((s) => ({
+      ...s,
+      problems: s.problems.map((p) => {
+        if (p.id !== id) return p;
+        const merged = { ...p, ...updates };
+        // ── SRS Auto-Scheduling ────────────────────────────────────────────────
+        // Auto-schedule review when status is 'Revisit' or difficulty set to 'Hard'
+        if (updates.status === 'Revisit' || updates.difficulty === 'Hard') {
+          return { ...merged, ...scheduleForReview(merged) };
+        }
+        // Clear SRS schedule when a problem in the queue is finally mastered
+        if (updates.status === 'Done' && p.srsNextReview) {
+          return { ...merged, ...clearSrsSchedule() };
+        }
+        return merged;
+      }),
+    }));
   }, [mutate]);
 
   const deleteProblem = useCallback((id: string) => {
@@ -530,6 +550,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [mutate]);
 
+  // ── Badge System ──────────────────────────────────────────────────────────────
+  const markBadgesSeen = useCallback((ids: string[]) => {
+    mutate((s) => ({
+      ...s,
+      seenBadgeIds: Array.from(new Set([...(s.seenBadgeIds ?? []), ...ids])),
+    }));
+  }, [mutate]);
+
   const value: AppContextType = {
     state,
     initialized,
@@ -569,6 +597,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     deleteHabitItem,
     updateHabitGroupTitle,
     toggleTheme,
+    markBadgesSeen,
     isSidebarHovered,
     setSidebarHovered,
     touchToday,
