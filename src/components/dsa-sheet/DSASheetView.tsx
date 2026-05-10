@@ -29,6 +29,15 @@ import { useApp } from '@/context/AppContext';
 import { DSASheetItem, Difficulty } from '@/lib/types';
 import { today, addDays, formatDisplayDate } from '@/lib/utils';
 
+// Premium Kinetic Physics
+const magneticSpring = { type: 'spring', stiffness: 150, damping: 15, mass: 0.1 } as any;
+const smoothSpring = { type: 'spring', stiffness: 100, damping: 20 } as any;
+
+const textReveal = {
+  hidden: { opacity: 0, y: "100%" },
+  visible: { opacity: 1, y: 0, transition: { ...smoothSpring, duration: 0.8 } }
+};
+
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1T5-nGsJ9WNwna44e9WWRD0jlZIT5KxVOGvylcvvVrY8/edit?gid=0#gid=0';
 
 const DIFFICULTY_STYLE: Record<Difficulty, string> = {
@@ -592,7 +601,12 @@ export default function DSASheetView() {
         />
       )}
 
-      <section className="rounded-[38px] border border-border/20 bg-card/40 backdrop-blur-3xl overflow-hidden relative shadow-2xl group">
+      <motion.section 
+        initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={smoothSpring}
+        className="rounded-[38px] border border-border/20 bg-card/60 backdrop-blur-2xl overflow-hidden relative shadow-2xl group"
+      >
         {/* Animated Accent Background */}
         <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
           <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/20 blur-[120px] rounded-full animate-pulse" />
@@ -606,32 +620,41 @@ export default function DSASheetView() {
             
             {/* Left: Branding & Performance */}
             <div className="flex-1 space-y-7">
-               <h2 className="text-[24px] md:text-[32px] leading-[1.1] font-black tracking-tight text-foreground flex items-center flex-wrap gap-3">
-                 <span className="bg-gradient-to-r from-[#ff7a59] to-[#ff4d24] bg-clip-text text-transparent">DSA Sheet</span>
-                 <span className="w-2 h-2 rounded-full bg-border/40" />
-                 <span className="opacity-40 font-medium text-[20px] md:text-[24px]">Most Important Interview Questions</span>
-               </h2>
+               <div className="flex items-center flex-wrap gap-4">
+                 <motion.div 
+                    initial={{ rotate: -90, scale: 0 }} 
+                    animate={{ rotate: 0, scale: 1 }} 
+                    transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                    className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#ff7a59] to-[#ff4d24] flex items-center justify-center shadow-[0_0_30px_rgba(255,122,89,0.4)]"
+                 >
+                    <BookMarked className="w-6 h-6 text-white" />
+                 </motion.div>
+                 <h2 className="text-4xl md:text-5xl leading-[1.1] font-black tracking-tighter text-foreground flex items-center flex-wrap gap-3">
+                   <motion.span variants={textReveal} initial="hidden" animate="visible" className="bg-gradient-to-r from-[#ff7a59] to-[#ff4d24] bg-clip-text text-transparent inline-block">DSA Sheet</motion.span>
+                   <span className="opacity-40 font-medium text-[24px] md:text-[32px] tracking-tight">Most Important Interview Questions</span>
+                 </h2>
+               </div>
 
                <div className="flex flex-wrap items-end gap-x-14 gap-y-8">
                   {/* Progress Block */}
                   <div className="space-y-4">
                      <div className="flex items-center gap-3">
-                        <div className="px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 flex items-center gap-2">
-                           <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Solved Progress</span>
+                        <div className="px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-2">
+                           <span className="text-[11px] font-black text-primary uppercase tracking-[0.2em]">Solved Progress</span>
                         </div>
-                        <span className="text-[13px] font-bold text-foreground tabular-nums opacity-80">{stats.completed}/{stats.total} <span className="text-muted-foreground font-medium opacity-60">Total Questions</span></span>
+                        <span className="text-lg font-black text-foreground tabular-nums tracking-tighter">{stats.completed}/{stats.total} <span className="text-muted-foreground font-semibold opacity-60 text-sm ml-1">Total Questions</span></span>
                      </div>
                      <DifficultyTracker stats={stats} />
                   </div>
 
                   {/* Community Stats */}
-                  <div className="flex flex-col gap-3 py-1 px-4 border-l border-border/10">
-                    <div className="flex -space-x-2.5">
+                  <div className="flex flex-col gap-3 py-1 px-5 border-l border-border/10">
+                    <div className="flex -space-x-3">
                       {HERO_USERS.map((label, index) => (
                         <div
                           key={label}
                           title={label}
-                          className={`w-8 h-8 rounded-full border-2 border-background flex items-center justify-center font-black text-[10px] shadow-lg ${
+                          className={`w-10 h-10 rounded-full border-4 border-background flex items-center justify-center font-black text-xs shadow-lg transition-transform hover:-translate-y-1 ${
                             index === 0 ? 'bg-[#c084fc] text-white' : index === 1 ? 'bg-[#f9a8d4] text-[#111319]' : index === 2 ? 'bg-[#86efac] text-[#111319]' : 'bg-[#fbbf24] text-[#111319]'
                           }`}
                         >
@@ -639,8 +662,8 @@ export default function DSASheetView() {
                         </div>
                       ))}
                     </div>
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 mt-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
                       <span className="text-foreground">{Math.max(372, stats.total + 121)}+</span> solving now
                     </p>
                   </div>
@@ -648,30 +671,31 @@ export default function DSASheetView() {
             </div>
 
             {/* Right: Actions */}
-            <div className="flex flex-wrap lg:flex-nowrap gap-3 shrink-0 lg:self-start">
-               <button onClick={openCreate} className="group flex items-center gap-2.5 rounded-[22px] bg-primary px-6 py-4.5 text-[13px] font-black text-white shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                  <Plus className="w-4 h-4" />
+            <div className="flex flex-wrap lg:flex-nowrap gap-4 shrink-0 lg:self-start mt-2 lg:mt-0">
+               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={openCreate} className="group flex items-center gap-2.5 rounded-[24px] bg-primary px-7 py-5 text-sm font-black text-white shadow-[0_10px_20px_rgba(var(--primary-rgb),0.2)] transition-all">
+                  <Plus className="w-5 h-5" />
                   <span>Add Question</span>
-               </button>
-               <a href={SHEET_URL} target="_blank" rel="noreferrer" className="flex items-center gap-2.5 rounded-[22px] bg-muted/20 border border-border/30 px-6 py-4.5 text-[13px] font-bold text-foreground hover:bg-muted/40 transition-all">
-                  <Link2 className="w-4 h-4 text-muted-foreground" />
+               </motion.button>
+               <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href={SHEET_URL} target="_blank" rel="noreferrer" className="flex items-center gap-2.5 rounded-[24px] bg-card border border-border/30 px-7 py-5 text-sm font-black text-foreground shadow-lg hover:border-primary/30 transition-all">
+                  <Link2 className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                   <span>Source Sheet</span>
-               </a>
-               <button 
+               </motion.a>
+               <motion.button 
+                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => setSavedOnly((prev) => !prev)} 
-                  className={`flex items-center gap-2.5 rounded-[22px] border px-6 py-4.5 text-[13px] font-bold transition-all ${
+                  className={`flex items-center gap-2.5 rounded-[24px] border px-7 py-5 text-sm font-black shadow-lg transition-all ${
                     savedOnly 
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' 
-                      : 'bg-muted/20 border-border/30 text-foreground hover:bg-muted/40'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.15)]' 
+                      : 'bg-card border-border/30 text-foreground hover:border-[#ff7a59]/30'
                   }`}
                >
-                  <BookmarkCheck className={`w-4 h-4 ${savedOnly ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                  <BookmarkCheck className={`w-5 h-5 ${savedOnly ? 'text-emerald-500' : 'text-muted-foreground'}`} />
                   <span>Saved</span>
-               </button>
+               </motion.button>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
 
       <div className="rounded-[30px] border border-border/30 bg-card p-5 md:p-6 shadow-md">
