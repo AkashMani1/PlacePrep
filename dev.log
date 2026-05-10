@@ -42,3 +42,16 @@
    Reload env: .env.local
    Reload env: .env.local
    Reload env: .env.local
+ ○ Compiling /src/middleware ...
+ ✓ Compiled /src/middleware in 1471ms (64 modules)
+ ○ Compiling /[[...tab]] ...
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from /Users/akashmani/Placement/study-os/.next/cache/webpack/client-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+ ✓ Compiled /[[...tab]] in 27.2s (1659 modules)
+ ✓ Compiled in 1812ms (794 modules)
+ ✓ Compiled in 355ms (780 modules)
+[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL — running in offline/localStorage mode. Cloud sync disabled.
+ ✓ Compiled in 1835ms (1650 modules)
+ ✓ Compiled in 926ms (1650 modules)
+[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL — running in offline/localStorage mode. Cloud sync disabled.
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/akashmani/Placement/study-os/.next/cache/webpack/client-development/1.pack.gz_' -> '/Users/akashmani/Placement/study-os/.next/cache/webpack/client-development/1.pack.gz'
+[?25h

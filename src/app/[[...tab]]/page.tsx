@@ -20,7 +20,7 @@ import { useApp } from '@/context/AppContext';
 const TAB_LABELS: Record<TabId, { label: string; icon: React.ElementType }> = {
   dashboard: { label: 'Dashboard', icon: LayoutDashboard },
   roadmap: { label: '3-Month Roadmap', icon: GitMerge },
-  dsa: { label: 'DSA Sheet', icon: Target },
+  dsa: { label: 'Must Do List', icon: Target },
   dsaSheet: { label: 'DSA Sheet', icon: Code2 },
   mocks: { label: 'Mock Hub', icon: Video },
   notes: { label: 'Knowledge Base', icon: BookOpen },
