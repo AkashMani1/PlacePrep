@@ -12,12 +12,20 @@ import { useApp } from '@/context/AppContext';
 import { MockInterview } from '@/lib/types';
 import { BentoCard } from '@/components/ui/Bento';
 
-// New Modular Components
+import dynamic from 'next/dynamic';
 import { MockHero } from './components/MockHero';
 import { MockArena } from './components/MockArena';
 import { AssessmentEngine } from './components/AssessmentEngine';
+import { MockSocial } from './components/MockSocial';
+import { MockRecommendations } from './components/MockRecommendations';
+import { AssessmentResults } from './components/AssessmentResults';
+import { MockNotifications } from './components/MockNotifications';
+import { useMockStore } from '@/store/useMockStore';
 
-// ── Animation Variants ────────────────────────────────────────────────────────
+const AssessmentPortal = dynamic(() => import('./components/AssessmentPortal').then(mod => mod.AssessmentPortal), { ssr: false });
+const InterviewRoom = dynamic(() => import('./components/InterviewRoom').then(mod => mod.InterviewRoom), { ssr: false });
+
+//  Animation Variants 
 
 const smoothSpring = { type: 'spring', stiffness: 100, damping: 20 } as any;
 
@@ -39,7 +47,7 @@ const itemVariants: Variants = {
   }
 };
 
-// ── Redesigned Modal ──────────────────────────────────────────────────────────
+//  Redesigned Modal 
 
 function AddMockModal({ onClose }: { onClose: () => void }) {
   const { addMock } = useApp();
@@ -126,27 +134,40 @@ function AddMockModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ── Main Dashboard ────────────────────────────────────────────────────────────
+//  Main Dashboard 
 
 export default function MockHubView() {
   const { state, deleteMock } = useApp();
+  const { isAssessmentActive, activeRoom, lastSubmission } = useMockStore();
   const [showModal, setShowModal] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const mocks = [...state.mocks].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
-    <motion.div 
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="max-w-[1600px] mx-auto px-4 pb-40"
-    >
+    <>
+      <AnimatePresence>
+        {isAssessmentActive && <AssessmentPortal />}
+        {activeRoom && <InterviewRoom />}
+        {lastSubmission && (
+          <AssessmentResults 
+            submission={lastSubmission} 
+            onClose={() => useMockStore.setState({ lastSubmission: null })} 
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showModal && <AddMockModal onClose={() => setShowModal(false)} />}
       </AnimatePresence>
 
-      <MockHero />
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-[1600px] mx-auto px-4 pb-40"
+      >
+        <MockHero />
       
       <div className="col-span-12 flex flex-col md:flex-row items-center justify-between gap-8 py-10 mt-12 border-y border-white/5">
          <div className="flex items-center gap-6">
@@ -183,8 +204,12 @@ export default function MockHubView() {
       <MockArena />
       
       <AssessmentEngine />
+      
+      <MockSocial />
+      
+      <MockRecommendations />
 
-      {/* ── Historical Execution Logs ────────────────────────────────── */}
+      {/*  Historical Execution Logs  */}
       <div className="mt-32 space-y-12">
         <div className="px-2">
           <h2 className="text-2xl font-black uppercase tracking-tight text-foreground flex items-center gap-4">
@@ -215,7 +240,10 @@ export default function MockHubView() {
            )}
         </div>
       </div>
+
+      <MockNotifications />
     </motion.div>
+    </>
   );
 }
 
@@ -240,7 +268,7 @@ function ExecutionLogCard({ mock, index, total, isExpanded, onToggle, onDelete }
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-2">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Log #{total - index}</span>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">•</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40"></span>
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">{mock.date}</span>
           </div>
           <h3 className="text-xl font-black tracking-tight text-foreground uppercase group-hover:text-primary transition-colors">{mock.type}</h3>

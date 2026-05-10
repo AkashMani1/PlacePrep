@@ -1,3 +1,10 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 /* Developed by Akash Mani - This site is developed by Akash Mani. Original watermark of Akash Mani. */
 export function toDateStr(date: Date): string {
   const year = date.getFullYear();

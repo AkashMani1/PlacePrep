@@ -1,9 +1,9 @@
-'use client';
-
 import { motion } from 'framer-motion';
-import { Target, Brain, Code2, ShieldCheck, ChevronRight, AlertCircle, BarChart, Zap } from 'lucide-react';
+import { Target, Brain, Code2, ShieldCheck, ChevronRight, AlertCircle, BarChart, Zap, Plus } from 'lucide-react';
 import { BentoCard } from '@/components/ui/Bento';
 import { useApp } from '@/context/AppContext';
+import { useEffect } from 'react';
+import { useMockStore } from '@/store/useMockStore';
 
 const ASSESSMENTS = [
   { id: 'tcs', title: 'TCS NQT Simulator', category: 'Campus Drive', questions: 80, time: '180m', difficulty: 'Medium', color: 'from-blue-500 to-indigo-600' },
@@ -13,7 +13,14 @@ const ASSESSMENTS = [
 
 export function AssessmentEngine() {
   const { state } = useApp();
-  const assessments = state.assessments || [];
+  const { assessments, startAssessment, fetchAssessments } = useMockStore();
+
+  useEffect(() => {
+    fetchAssessments();
+  }, [fetchAssessments]);
+
+  // Use store assessments if available, else fallback to defaults
+  const displayAssessments = assessments.length > 0 ? assessments : ASSESSMENTS;
 
   return (
     <div className="mt-20 space-y-8">
@@ -41,7 +48,7 @@ export function AssessmentEngine() {
       <div className="grid grid-cols-12 gap-8">
         {/* ── Active Simulators ────────────────────────────────────────── */}
         <div className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          {ASSESSMENTS.map((exam, i) => (
+          {displayAssessments.map((exam, i) => (
             <motion.div
               key={exam.id}
               initial={{ opacity: 0, y: 20 }}
@@ -50,27 +57,40 @@ export function AssessmentEngine() {
               whileHover={{ y: -8 }}
               className="group relative rounded-[40px] border border-white/5 bg-card/40 backdrop-blur-3xl p-8 overflow-hidden shadow-2xl transition-all hover:border-primary/40"
             >
-              <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${exam.color} opacity-10 blur-[60px] group-hover:opacity-20 transition-opacity`} />
+              <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${exam.color || 'from-primary to-indigo-600'} opacity-10 blur-[50px] group-hover:opacity-20 transition-opacity`} />
               
-              <div className="flex flex-col h-full gap-8 relative z-10">
+              <div className="flex flex-col h-full gap-6 relative z-10">
                 <div className="flex items-start justify-between">
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${exam.color} flex items-center justify-center shadow-lg`}>
-                    {exam.id === 'amazon' ? <Code2 className="w-7 h-7 text-white" /> : <Brain className="w-7 h-7 text-white" />}
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${exam.color || 'from-primary to-indigo-600'} flex items-center justify-center shadow-lg`}>
+                    {exam.title.toLowerCase().includes('coding') || exam.title.toLowerCase().includes('amazon') ? <Code2 className="w-6 h-6 text-white" /> : <Brain className="w-6 h-6 text-white" />}
                   </div>
                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/10">
                     {exam.category}
                   </span>
                 </div>
 
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-black tracking-tight text-foreground">{exam.title}</h3>
+                <div className="space-y-1.5">
+                  <h3 className="text-xl font-black tracking-tight text-foreground">{exam.title}</h3>
                   <div className="flex items-center gap-4 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                    <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-yellow-500" /> {exam.questions} Qs</span>
-                    <span className="flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5 text-primary" /> {exam.time}</span>
+                    <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-yellow-500" /> {exam.totalQuestions || (exam as any).questions} Qs</span>
+                    <span className="flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5 text-primary" /> {exam.durationMinutes || (exam as any).time}</span>
                   </div>
                 </div>
 
-                <button className="mt-auto w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-[11px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white hover:border-primary transition-all shadow-xl group/btn flex items-center justify-center gap-3">
+                <button 
+                  onClick={() => {
+                    if (typeof exam.id === 'string' && exam.id.length > 10) {
+                      startAssessment(exam.id);
+                    } else {
+                      // Fallback for demo assessments
+                      startAssessment('demo-id');
+                    }
+                    if (!document.fullscreenElement) {
+                      document.documentElement.requestFullscreen();
+                    }
+                  }}
+                  className="mt-auto w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-[11px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white hover:border-primary transition-all shadow-xl group/btn flex items-center justify-center gap-3"
+                >
                   Enter Simulation
                   <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                 </button>
@@ -142,11 +162,4 @@ export function AssessmentEngine() {
   );
 }
 
-function Plus({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-  );
-}
+

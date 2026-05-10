@@ -97,6 +97,71 @@ export interface PeerSession {
   date: string;
   status: 'Scheduled' | 'Completed' | 'Cancelled';
   roomUrl?: string;
+  roomId?: string;
+}
+
+export interface MockRoom {
+  id: string;
+  createdBy: string;
+  title: string;
+  type: string;
+  company?: string;
+  difficulty: Difficulty;
+  maxParticipants: number;
+  status: 'open' | 'ongoing' | 'completed';
+  isPrivate: boolean;
+  roomCode?: string;
+  participants: {
+    userId: string;
+    fullName: string;
+    role: 'interviewer' | 'interviewee';
+  }[];
+  createdAt: string;
+}
+
+export interface Question {
+  id: string;
+  title: string;
+  content: string;
+  type: 'mcq' | 'coding' | 'aptitude';
+  difficulty: Difficulty;
+  tags: string[];
+  solutionExplanation?: string;
+  testCases?: any;
+}
+
+export interface Assessment {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  durationMinutes: number;
+  totalQuestions: number;
+  difficulty: Difficulty;
+  companyTags: string[];
+  questions?: Question[];
+}
+
+export interface Submission {
+  id: string;
+  userId: string;
+  assessmentId: string;
+  score: number;
+  maxScore: number;
+  accuracy: number;
+  timeSpentSeconds: number;
+  telemetry: {
+    hesitationPoints: number;
+    speed: number; // Qs per minute
+    antiCheatWarnings: number;
+  };
+  aiFeedback?: {
+    summary: string;
+    strengths: string[];
+    weaknesses: string[];
+    communicationScore: number;
+  };
+  completedAt: string;
 }
 
 export interface WeekTask {

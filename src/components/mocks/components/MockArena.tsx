@@ -1,9 +1,9 @@
-'use client';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Calendar, Plus, ChevronRight, Play, Clock, Star, Globe, Lock } from 'lucide-react';
 import { BentoCard } from '@/components/ui/Bento';
 import { useApp } from '@/context/AppContext';
+import { useEffect } from 'react';
+import { useMockStore } from '@/store/useMockStore';
 
 const magneticSpring = { type: 'spring', stiffness: 150, damping: 15, mass: 0.1 } as any;
 
@@ -15,7 +15,14 @@ const LIVE_ROOMS = [
 
 export function MockArena() {
   const { state } = useApp();
+  const { availableRooms, fetchRooms, joinRoom, createRoom } = useMockStore();
   const peerSessions = state.peerSessions || [];
+
+  useEffect(() => {
+    fetchRooms();
+  }, [fetchRooms]);
+
+  const displayRooms = availableRooms.length > 0 ? availableRooms : LIVE_ROOMS;
 
   return (
     <div className="grid grid-cols-12 gap-8 mt-12">
@@ -27,35 +34,36 @@ export function MockArena() {
             <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Live Mock Arena</h2>
           </div>
           <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary uppercase tracking-widest">
-            {LIVE_ROOMS.length} Active Rooms
+            {displayRooms.length} Active Rooms
           </span>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
           <AnimatePresence>
-            {LIVE_ROOMS.map((room) => (
+            {displayRooms.map((room) => (
               <motion.div
                 key={room.id}
                 whileHover={{ x: 8, backgroundColor: 'rgba(255, 255, 255, 0.04)' }}
-                className="group relative flex items-center justify-between p-6 rounded-[32px] bg-card/40 border border-white/5 backdrop-blur-xl transition-all cursor-pointer overflow-hidden shadow-xl"
+                onClick={() => joinRoom(room.id)}
+                className="group relative flex items-center justify-between p-5 rounded-[28px] bg-card/40 border border-white/5 backdrop-blur-xl transition-all cursor-pointer overflow-hidden shadow-xl"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 
                 <div className="flex items-center gap-6 relative z-10">
-                  <div className="w-16 h-16 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <Play className="w-6 h-6 text-primary fill-primary" />
+                  <div className="w-14 h-14 rounded-[20px] bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                    <Play className="w-5 h-5 text-primary fill-primary" />
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="text-lg font-black tracking-tight text-foreground">{room.type}</h3>
                       <span className="px-2 py-0.5 rounded-md bg-black/40 text-[9px] font-black text-muted-foreground uppercase tracking-widest border border-white/5">
-                        {room.company}
+                        {room.company || 'Universal'}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
-                      <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {room.duration}</span>
-                      <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {room.participants} Joined</span>
-                      <span className="flex items-center gap-1.5 text-yellow-500/80"><Star className="w-3.5 h-3.5 fill-yellow-500/20" /> {room.rating}</span>
+                      <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {room.duration || '45m'}</span>
+                      <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {room.participants?.length || (room as any).participants} Joined</span>
+                      <span className="flex items-center gap-1.5 text-yellow-500/80"><Star className="w-3.5 h-3.5 fill-yellow-500/20" /> {room.rating || 4.8}</span>
                     </div>
                   </div>
                 </div>
@@ -66,7 +74,7 @@ export function MockArena() {
                     room.difficulty === 'Medium' ? 'bg-primary/10 text-primary border-primary/20' : 
                     'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                   }`}>
-                    {room.difficulty} TIER
+                    {room.difficulty || 'Easy'} TIER
                   </span>
                   <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-300">
                     <ChevronRight className="w-5 h-5 text-white" />
@@ -88,6 +96,7 @@ export function MockArena() {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => createRoom({ title: 'New Peer Session', type: 'Technical (DSA)', difficulty: 'Medium' })}
             className="p-2 rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/10"
           >
             <Plus className="w-5 h-5" />
@@ -96,15 +105,15 @@ export function MockArena() {
 
         <BentoCard className="bg-card/40 backdrop-blur-3xl border-white/5 shadow-2xl !p-0 overflow-hidden">
           <div className="p-8 space-y-6">
-            <div className="bg-primary/10 p-6 rounded-[32px] border border-primary/20 relative overflow-hidden group">
+            <div className="bg-primary/10 p-5 rounded-[28px] border border-primary/20 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform">
-                <Users className="w-20 h-20 text-primary" />
+                <Users className="w-16 h-16 text-primary" />
               </div>
-              <h3 className="text-lg font-black text-primary tracking-tight mb-2 uppercase">Match with Peer</h3>
-              <p className="text-xs font-semibold text-primary/70 mb-6 leading-relaxed">
+              <h3 className="text-base font-black text-primary tracking-tight mb-2 uppercase">Match with Peer</h3>
+              <p className="text-[10px] font-semibold text-primary/70 mb-5 leading-relaxed">
                 Automatically find a partner for a bidirectional technical mock interview.
               </p>
-              <button className="w-full py-4 rounded-2xl bg-primary text-white text-[11px] font-black uppercase tracking-[0.3em] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <button className="w-full py-3.5 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-[0.3em] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
                 Find Match Now
               </button>
             </div>

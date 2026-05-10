@@ -31,12 +31,12 @@ export function MockHero() {
            >
              <Video className="w-7 h-7 text-white" />
            </motion.div>
-           <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/40 leading-[1.1]">
+           <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/40 leading-[1.1]">
               <motion.span initial="hidden" animate="visible" variants={textReveal} className="inline-block">Interview</motion.span>{' '}
               <motion.span initial="hidden" animate="visible" variants={textReveal} className="inline-block">Command.</motion.span>
            </h1>
         </div>
-        <p className="text-muted-foreground text-lg md:text-xl font-medium max-w-2xl tracking-tight pl-2">
+        <p className="text-muted-foreground text-sm md:text-base font-medium max-w-xl tracking-tight pl-2">
           Experience the pressure of real hiring cycles. Simulate, Analyze, and Master the final round.
         </p>
       </div>
@@ -53,8 +53,8 @@ export function MockHero() {
               <div>
                 <h2 className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-3">Readiness Status</h2>
                 <div className="flex items-end gap-3">
-                  <span className="text-6xl font-black tracking-tighter text-foreground">{readiness}%</span>
-                  <span className="text-emerald-500 font-bold mb-2 flex items-center gap-1">
+                  <span className="text-5xl font-black tracking-tighter text-foreground">{readiness}%</span>
+                  <span className="text-emerald-500 font-bold mb-2 flex items-center gap-1 text-xs">
                     <TrendingUp className="w-4 h-4" /> +12.4%
                   </span>
                 </div>
