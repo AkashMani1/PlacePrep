@@ -51,7 +51,7 @@ export default function DashboardView() {
   return (
     <div className="relative min-h-[calc(100vh-8rem)] w-full overflow-hidden pt-4 pb-24">
       {/* Subtle Grid Background for Texture */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(128,128,128,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(128,128,128,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
       <motion.div
         variants={containerVariants}
@@ -70,14 +70,14 @@ export default function DashboardView() {
              >
                 <Sparkles className="w-7 h-7 text-white" />
              </motion.div>
-             <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/40 leading-[1.1]">
+             <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/50 leading-[1.1]">
                 <motion.span variants={textReveal} className="inline-block">Welcome</motion.span>{' '}
                 <motion.span variants={textReveal} className="inline-block">back,</motion.span>{' '}
                 <motion.span variants={textReveal} className="inline-block text-primary">{firstName}.</motion.span>
              </h1>
           </div>
           <motion.p variants={itemVariants} className="text-muted-foreground text-xl md:text-2xl font-medium max-w-3xl tracking-tight pl-20">
-            Your high-performance placement OS is synced. You are currently in <strong className="text-white">Week {currentWeek}</strong> of your sprint. Let's execute.
+            Your high-performance placement OS is synced. You are currently in <strong className="text-foreground">Week {currentWeek}</strong> of your sprint. Let's execute.
           </motion.p>
         </motion.div>
 
@@ -86,17 +86,17 @@ export default function DashboardView() {
            <motion.div 
              whileHover={{ y: -5 }} 
              transition={magneticSpring}
-             className="h-full relative overflow-hidden rounded-[40px] bg-[#050505] border border-white/[0.08] shadow-2xl p-1"
+             className="h-full relative overflow-hidden rounded-[40px] bg-card border border-border/50 shadow-2xl p-1"
            >
               {/* Refined subtle top glow instead of muddy blur */}
-              <div className="absolute top-0 left-[20%] w-[60%] h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+              <div className="absolute top-0 left-[20%] w-[60%] h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/5 dark:from-white/[0.02] to-transparent pointer-events-none" />
               
               <div className="relative z-10 h-full p-8 md:p-10 flex flex-col justify-between gap-12">
                 <div className="flex items-center justify-between">
-                  <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
-                    <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
-                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Live Telemetry</span>
+                  <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/10 dark:border-white/10 backdrop-blur-md shadow-inner">
+                    <Activity className="w-4 h-4 text-emerald-500 animate-pulse" />
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground">Live Telemetry</span>
                   </div>
                   <StreakPill />
                 </div>
@@ -105,18 +105,18 @@ export default function DashboardView() {
                   {/* Stat Block 1 */}
                   <motion.div whileHover={{ scale: 1.05 }} transition={magneticSpring} className="group cursor-default flex flex-col">
                     <p className="text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 mb-3 group-hover:text-primary transition-colors">Current Streak</p>
-                    <p className="text-6xl font-black text-white tracking-tighter group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-b group-hover:from-white group-hover:to-white/50 transition-all">{streak}</p>
+                    <p className="text-6xl font-black text-foreground tracking-tighter group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-b group-hover:from-foreground group-hover:to-foreground/50 transition-all">{streak}</p>
                   </motion.div>
                   {/* Stat Block 2 */}
                   <motion.div whileHover={{ scale: 1.05 }} transition={magneticSpring} className="group cursor-default flex flex-col">
                     <p className="text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 mb-3 group-hover:text-primary transition-colors">Solved</p>
-                    <p className="text-6xl font-black text-white tracking-tighter">{totalDone}</p>
+                    <p className="text-6xl font-black text-foreground tracking-tighter">{totalDone}</p>
                   </motion.div>
                   {/* Stat Block 3 */}
                   <motion.div whileHover={{ scale: 1.05 }} transition={magneticSpring} className="group cursor-default flex flex-col">
                     <p className="text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 mb-3 group-hover:text-primary transition-colors">Hours Today</p>
                     <div className="flex items-baseline gap-1">
-                      <p className="text-6xl font-black text-white tracking-tighter">{dailyHours}</p>
+                      <p className="text-6xl font-black text-foreground tracking-tighter">{dailyHours}</p>
                       <span className="text-xl font-bold text-muted-foreground/40">h</span>
                     </div>
                   </motion.div>
@@ -124,7 +124,7 @@ export default function DashboardView() {
                   <motion.div whileHover={{ scale: 1.05 }} transition={magneticSpring} className="group cursor-default flex flex-col">
                     <p className="text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 mb-3 group-hover:text-primary transition-colors">Completion</p>
                     <div className="flex items-baseline gap-1">
-                      <p className="text-6xl font-black text-white tracking-tighter">{progressPct}</p>
+                      <p className="text-6xl font-black text-foreground tracking-tighter">{progressPct}</p>
                       <span className="text-xl font-bold text-muted-foreground/40">%</span>
                     </div>
                   </motion.div>

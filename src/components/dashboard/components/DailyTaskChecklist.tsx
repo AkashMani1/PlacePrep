@@ -96,7 +96,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
                       </div>
                     ) : (
                       <button onClick={() => toggleHabit(item.id)} className={`w-full flex items-start gap-3 p-3 rounded-xl border transition-all text-left ${isChecked ? 'bg-primary/10 border-primary/20 text-foreground' : 'bg-black/5 dark:bg-white/[0.02] border-border/50 dark:border-white/[0.04] hover:bg-black/5 dark:bg-white/[0.04] text-muted-foreground'}`}>
-                        <div className={`mt-0.5 w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all ${isChecked ? 'bg-primary border-primary text-white' : 'border-white/20'}`}>
+                        <div className={`mt-0.5 w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all ${isChecked ? 'bg-primary border-primary text-white' : 'border-black/20 dark:border-white/20'}`}>
                           {isChecked && <CheckCheck className="w-3 h-3" />}
                         </div>
                         <div>
