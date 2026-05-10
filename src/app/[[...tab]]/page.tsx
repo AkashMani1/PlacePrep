@@ -1,40 +1,57 @@
-/* Developed by Akash Mani - This site is developed by Akash Mani. Original watermark of Akash Mani. */
+/* Developed by Akash Mani - Refactored for Premium Performance */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { LayoutDashboard, GitMerge, Code2, Video, BookOpen, Target, Layers, Loader2 } from 'lucide-react';
 import Sidebar, { TabId } from '@/components/layout/Sidebar';
 import SettingsModal from '@/components/layout/SettingsModal';
-import DashboardView from '@/components/dashboard/DashboardView';
-import RoadmapView from '@/components/roadmap/RoadmapView';
-import DSATrackerView from '@/components/dsa/DSATrackerView';
-import DSASheetView from '@/components/dsa-sheet/DSASheetView';
-import MockHubView from '@/components/mocks/MockHubView';
-import NotesVaultView from '@/components/notes/NotesVaultView';
-import ProjectLabView from '@/components/projects/ProjectLabView';
-import { LayoutDashboard, GitMerge, Code2, Video, BookOpen, Target, Layers } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
+// 🚀 PERFORMANCE OPTIMIZATION: Lazy Load all heavy views
+// This prevents downloading the entire app bundle on initial load.
+const DashboardView = dynamic(() => import('@/components/dashboard/DashboardView'), { 
+  loading: () => <PageLoader /> 
+});
+const RoadmapView = dynamic(() => import('@/components/roadmap/RoadmapView'), { loading: () => <PageLoader /> });
+const DSATrackerView = dynamic(() => import('@/components/dsa/DSATrackerView'), { loading: () => <PageLoader /> });
+const DSASheetView = dynamic(() => import('@/components/dsa-sheet/DSASheetView'), { loading: () => <PageLoader /> });
+const MockHubView = dynamic(() => import('@/components/mocks/MockHubView'), { loading: () => <PageLoader /> });
+const NotesVaultView = dynamic(() => import('@/components/notes/NotesVaultView'), { loading: () => <PageLoader /> });
+const ProjectLabView = dynamic(() => import('@/components/projects/ProjectLabView'), { loading: () => <PageLoader /> });
+
 const TAB_LABELS: Record<TabId, { label: string; icon: React.ElementType }> = {
-  dashboard: { label: 'Dashboard', icon: LayoutDashboard },
-  roadmap: { label: '3-Month Roadmap', icon: GitMerge },
+  dashboard: { label: 'Overview', icon: LayoutDashboard },
+  roadmap: { label: 'Roadmap', icon: GitMerge },
   dsa: { label: 'Must Do List', icon: Target },
   dsaSheet: { label: 'DSA Sheet', icon: Code2 },
   mocks: { label: 'Mock Hub', icon: Video },
-  notes: { label: 'Knowledge Base', icon: BookOpen },
-  projects: { label: 'Project Lab', icon: Layers },
+  notes: { label: 'Knowledge', icon: BookOpen },
+  projects: { label: 'Projects', icon: Layers },
 };
 
-export default function Home() {
+// Custom Premium Easing (Linear/Vercel style)
+const premiumEasing = [0.32, 0.72, 0, 1] as any;
+
+function PageLoader() {
+  return (
+    <div className="flex h-[60vh] w-full items-center justify-center">
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground/40" />
+    </div>
+  );
+}
+
+export default function AppShell() {
   const { state, isSidebarHovered } = useApp();
   const router = useRouter();
   const pathname = usePathname();
   
-  // Derive active tab from pathname, default to 'dashboard'
   const currentTab = (pathname.split('/').filter(Boolean)[0] || 'dashboard') as TabId;
   const resolvedTab = TAB_LABELS[currentTab] ? currentTab : 'dashboard';
+  
   const [activeTab, setActiveTab] = useState<TabId>(resolvedTab);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -46,18 +63,14 @@ export default function Home() {
       router.replace('/');
       return;
     }
-
     if (currentTab !== activeTab) {
       setActiveTab(currentTab);
     }
   }, [currentTab, activeTab, router]);
 
   useEffect(() => {
-    const syncViewport = () => {
-      setIsMobileViewport(window.innerWidth < 768);
-    };
-
-    syncViewport();
+    const syncViewport = () => setIsMobileViewport(window.innerWidth < 768);
+    syncViewport(); // Initial check
     window.addEventListener('resize', syncViewport);
     return () => window.removeEventListener('resize', syncViewport);
   }, []);
@@ -72,51 +85,58 @@ export default function Home() {
   const mainPaddingLeft = isMobileViewport ? '0px' : (isSidebarHovered ? '240px' : (collapsed ? '80px' : '240px'));
 
   return (
-    <div className="flex min-h-screen bg-obsidian selection:bg-neon-indigo/30 selection:text-white">
-      {/* Sidebar */}
+    <div className="flex min-h-screen bg-[#0A0A0B] text-[#EDEDED] selection:bg-primary/30 selection:text-white">
+      
+      {/* 🎨 UI/UX UPGRADE: Premium Soothing Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 flex items-center justify-center">
+         <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.03)_0%,transparent_70%)] blur-3xl" />
+         <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-[radial-gradient(circle,rgba(129,140,248,0.03)_0%,transparent_70%)] blur-3xl" />
+      </div>
+
       <Sidebar activeTab={activeTab} onTabChange={handleTabChange} onSettingsOpen={() => setSettingsOpen(true)} />
 
-      {/* Main content */}
       <motion.main 
         initial={false}
         animate={{ paddingLeft: mainPaddingLeft }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-        className="flex-1 min-w-0 min-h-screen relative pb-24 md:pb-0 transition-all duration-300"
+        transition={{ duration: 0.4, ease: premiumEasing }}
+        className="flex-1 min-w-0 min-h-screen relative pb-24 md:pb-0 transition-all z-10 flex flex-col"
       >
-        {/* Decorative Background Elements */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-neon-indigo/5 blur-[120px] rounded-full" />
-           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neon-cyan/5 blur-[120px] rounded-full" />
-        </div>
-
-        <div className="relative z-10 w-full max-w-[1600px] px-4 md:px-12 py-6 md:py-10">
-          {/* Header / Breadcrumb Section - Only visible on Dashboard now */}
-          {activeTab === 'dashboard' && (
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-8 md:mb-12">
-              <div>
-                <div className="flex items-center gap-2 mb-3 text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em]">
-                  <Link href="/" className="hover:text-primary transition-colors cursor-pointer">PlacePrep</Link>
-                  <span className="text-border">/</span>
-                  <div className="flex items-center gap-1.5 text-primary font-black">
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{label}</span>
-                  </div>
+        <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 py-8 md:py-12 flex-1">
+          
+          {/* Header Section */}
+          <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+            <div>
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 mb-2"
+              >
+                <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground/80">
+                  <Icon className="w-4 h-4" />
+                  <span>{label}</span>
                 </div>
-                <h1 className="text-3xl font-black text-foreground tracking-tight">
-                  <span className="opacity-90">Morning,</span> <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{state.userName}</span>
-                </h1>
-              </div>
-            </header>
-          )}
+              </motion.div>
+              
+              {activeTab === 'dashboard' && (
+                <motion.h1 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-3xl font-semibold tracking-tight text-foreground"
+                >
+                  <span className="text-muted-foreground font-normal">Welcome back,</span> {state.userName}
+                </motion.h1>
+              )}
+            </div>
+          </header>
 
-          {/* Tab content */}
-          <AnimatePresence mode="wait" initial={false}>
+          {/* Dynamic Tab Content with Smooth Crossfade */}
+          <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+              transition={{ duration: 0.3, ease: premiumEasing }}
             >
               {activeTab === 'dashboard' && <DashboardView />}
               {activeTab === 'roadmap' && <RoadmapView />}
@@ -129,32 +149,35 @@ export default function Home() {
           </AnimatePresence>
         </div>
 
-        {/* Footer */}
-        <footer className="relative z-10 border-t border-border/20 mt-20 px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-muted-foreground text-[11px] font-bold uppercase tracking-widest flex items-center gap-2">
-            Career Accelerator © 2026 
-            <span className="w-1 h-1 rounded-full bg-border" />
-            <span className="text-primary/60">Designed by Akash Mani</span>
+        {/* Minimalist Footer */}
+        <footer className="w-full border-t border-white/[0.04] px-8 py-6 mt-auto flex flex-col md:flex-row items-center justify-between gap-4 bg-[#0A0A0B]/80 backdrop-blur-md">
+          <p className="text-muted-foreground text-xs font-medium flex items-center gap-2">
+            Antigravity OS © {new Date().getFullYear()}
           </p>
-          <div className="flex items-center gap-6">
-             <span className="text-muted-foreground/60 text-[10px] font-bold uppercase tracking-widest">Encrypted Local Storage</span>
-             <span className="text-muted-foreground/60 text-[10px] font-bold uppercase tracking-widest">v5.4.0-obsidian</span>
+          <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground/60">
+             <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /> Local Sync Active</span>
+             <span>v5.4.0</span>
           </div>
         </footer>
       </motion.main>
 
-      {/* Mobile bottom nav - hidden by CSS but here for structure */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/20 flex md:hidden z-50">
-        {(Object.entries(TAB_LABELS) as [TabId, { label: string; icon: React.ElementType }][]).map(([id, { label, icon: Icon }]) => (
-          <button
-            key={id}
-            onClick={() => handleTabChange(id)}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wider transition-all ${activeTab === id ? 'text-primary' : 'text-muted-foreground'}`}
-          >
-            <Icon className="w-5 h-5 mb-0.5" />
-            {label.split(' ')[0]}
-          </button>
-        ))}
+      {/* Mobile Nav */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#0A0A0B]/90 backdrop-blur-xl border-t border-white/[0.06] flex md:hidden z-50 px-2 pb-safe">
+        {(Object.entries(TAB_LABELS) as [TabId, { label: string; icon: React.ElementType }][]).map(([id, { label, icon: Icon }]) => {
+          const isActive = activeTab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => handleTabChange(id)}
+              className={`flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-all ${
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : 'opacity-70'}`} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="tracking-wide">{label.split(' ')[0]}</span>
+            </button>
+          );
+        })}
       </nav>
 
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
