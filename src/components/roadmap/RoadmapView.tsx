@@ -9,7 +9,7 @@ import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { BentoCard, ActivityRing } from '@/components/ui/Bento';
 
 // Premium Linear Easing
-const premiumEasing = [0.32, 0.72, 0, 1];
+const premiumEasing = [0.32, 0.72, 0, 1] as any;
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },

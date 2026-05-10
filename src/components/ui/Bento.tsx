@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { ReactNode } from 'react';
 
 // Premium Linear Easing
-const premiumEasing = [0.32, 0.72, 0, 1];
+const premiumEasing = [0.32, 0.72, 0, 1] as any;
 
 interface BentoCardProps {
   children: ReactNode;
