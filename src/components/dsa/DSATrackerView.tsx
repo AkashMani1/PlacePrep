@@ -45,7 +45,7 @@ const SelectField = memo(function SelectField({
       <div className="relative group">
         <select
           {...props}
-          className={`w-full appearance-none rounded-xl border border-white/[0.05] bg-white/[0.02] px-4 py-2.5 pr-10 text-sm font-medium text-foreground outline-none transition-all focus:border-primary/40 focus:bg-white/[0.04] hover:bg-white/[0.04] ${selectClassName}`}
+          className={`w-full appearance-none rounded-xl border border-border/50 dark:border-white/[0.05] bg-black/5 dark:bg-white/[0.02] px-4 py-2.5 pr-10 text-sm font-medium text-foreground outline-none transition-all focus:border-primary/40 focus:bg-black/5 dark:bg-white/[0.04] hover:bg-black/5 dark:bg-white/[0.04] ${selectClassName}`}
         >
           {children}
         </select>
@@ -208,7 +208,7 @@ export default function DSATrackerView() {
 
       {/* Segmented Control & Actions */}
       <div className="col-span-12 flex flex-col md:flex-row items-center justify-between gap-6 pb-2 pt-2">
-         <div className="p-1 bg-[#1A1A1C] border border-white/[0.04] rounded-2xl flex items-center gap-1">
+         <div className="p-1 bg-[#1A1A1C] border border-border/50 dark:border-white/[0.04] rounded-2xl flex items-center gap-1">
             {['DSA', 'Aptitude'].map((tab) => (
               <button
                 key={tab} onClick={() => setActiveTab(tab as any)}
@@ -217,7 +217,7 @@ export default function DSATrackerView() {
                 }`}
               >
                 {activeTab === tab && (
-                  <motion.div layoutId="activeCategoryBg" className="absolute inset-0 bg-white/[0.04] border border-white/[0.08] rounded-xl shadow-sm" transition={{ duration: 0.4, ease: premiumEasing }} />
+                  <motion.div layoutId="activeCategoryBg" className="absolute inset-0 bg-black/5 dark:bg-white/[0.04] border border-white/[0.08] rounded-xl shadow-sm" transition={{ duration: 0.4, ease: premiumEasing }} />
                 )}
                 <span className="relative z-10 flex items-center gap-2.5">
                   {tab === 'DSA' ? <Zap className="w-4 h-4" /> : <Activity className="w-4 h-4" />}
@@ -242,10 +242,10 @@ export default function DSATrackerView() {
                  <input
                    value={search} onChange={(e) => setSearch(e.target.value)}
                    placeholder="Search problems, topics..."
-                   className="w-full bg-[#121214] border border-white/[0.04] rounded-xl py-2.5 pl-11 pr-4 text-sm font-medium text-foreground focus:outline-none focus:border-primary/40 focus:bg-white/[0.02] transition-colors"
+                   className="w-full bg-card border border-border/50 dark:border-white/[0.04] rounded-xl py-2.5 pl-11 pr-4 text-sm font-medium text-foreground focus:outline-none focus:border-primary/40 focus:bg-black/5 dark:bg-white/[0.02] transition-colors"
                  />
               </div>
-              <button onClick={() => setShowFilters(!showFilters)} className={`ml-4 flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[11px] font-semibold tracking-wide uppercase transition-colors ${showFilters ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-white/[0.02] border-white/[0.04] text-muted-foreground hover:bg-white/[0.04]'}`}>
+              <button onClick={() => setShowFilters(!showFilters)} className={`ml-4 flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[11px] font-semibold tracking-wide uppercase transition-colors ${showFilters ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-black/5 dark:bg-white/[0.02] border-border/50 dark:border-white/[0.04] text-muted-foreground hover:bg-black/5 dark:bg-white/[0.04]'}`}>
                 <Filter className="w-3.5 h-3.5" /> Filters
               </button>
             </div>
@@ -253,7 +253,7 @@ export default function DSATrackerView() {
             <AnimatePresence>
               {showFilters && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: premiumEasing }} className="overflow-hidden">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-5 rounded-2xl bg-[#121214] border border-white/[0.04]">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-5 rounded-2xl bg-card border border-border/50 dark:border-white/[0.04]">
                      <SelectField value={filterTopic} onChange={(e) => setFilterTopic(e.target.value)} label="Topic">
                         <option value="All">All Topics</option>
                         {uniqueTopics.map((t) => <option key={t}>{t}</option>)}
@@ -285,7 +285,7 @@ export default function DSATrackerView() {
                   <p className="text-muted-foreground/60 text-xs font-semibold uppercase tracking-widest">No entries found</p>
                </motion.div>
             ) : (
-               <div className="h-[650px] w-full rounded-[24px] border border-white/[0.04] bg-[#121214] p-3 relative shadow-inner">
+               <div className="h-[650px] w-full rounded-[24px] border border-border/50 dark:border-white/[0.04] bg-card p-3 relative shadow-inner">
                  <List
                    style={{ height: 626, width: '100%' }}
                    rowCount={flatList.length}
@@ -319,7 +319,7 @@ export default function DSATrackerView() {
                          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 leading-none">{item.label}</span>
                          <span className={`text-sm font-bold ${item.color} tabular-nums leading-none`}>{item.count}</span>
                       </div>
-                      <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-black/5 dark:bg-white/[0.05] rounded-full overflow-hidden">
                          <motion.div initial={{ width: 0 }} animate={{ width: `${percentage}%` }} transition={{ duration: 1, ease: premiumEasing }} className={`h-full ${item.bg} rounded-full`} />
                       </div>
                    </div>
@@ -336,7 +336,7 @@ export default function DSATrackerView() {
                  uniqueTopics.slice(0, 6).map((t, i) => (
                     <motion.div 
                       key={t} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05, ease: premiumEasing }}
-                      className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all cursor-default group`}
+                      className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-black/5 dark:bg-white/[0.02] border border-border/50 dark:border-white/[0.04] hover:bg-black/5 dark:bg-white/[0.04] transition-all cursor-default group`}
                     >
                        <span className="text-xs font-medium text-muted-foreground/80 truncate group-hover:text-foreground transition-colors">{t}</span>
                        <Activity className={`w-3.5 h-3.5 ${activeTab === 'DSA' ? 'text-primary/40' : 'text-amber-500/40'} shrink-0 group-hover:text-opacity-100 transition-opacity`} />

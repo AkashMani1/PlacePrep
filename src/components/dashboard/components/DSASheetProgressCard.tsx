@@ -63,7 +63,7 @@ export function DSASheetProgressCard() {
                   <span className="text-muted-foreground">{row.label}</span>
                   <span className="text-foreground/80">{row.solved} / {row.total}</span>
                 </div>
-                <div className="h-1.5 w-full rounded-full overflow-hidden bg-white/[0.05]">
+                <div className="h-1.5 w-full rounded-full overflow-hidden bg-black/5 dark:bg-white/[0.05]">
                   <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${row.total > 0 ? (row.solved / row.total) * 100 : 0}%`, backgroundColor: row.color }} />
                 </div>
               </div>

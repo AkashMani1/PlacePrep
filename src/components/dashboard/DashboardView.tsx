@@ -55,11 +55,11 @@ export default function DashboardView() {
                </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] rounded-lg border border-white/[0.05]">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-black/5 dark:bg-white/[0.03] rounded-lg border border-border/50 dark:border-white/[0.05]">
                   <p className="text-primary text-[11px] font-semibold tracking-wider">Week {currentWeek} <span className="opacity-50">/ {(state.goalDurationMonths || 3) * 4}</span></p>
                 </div>
                 <div className="w-[1px] h-4 bg-white/[0.08] mx-1" />
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] rounded-lg border border-white/[0.05]">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-black/5 dark:bg-white/[0.03] rounded-lg border border-border/50 dark:border-white/[0.05]">
                   <History className="w-3.5 h-3.5 text-indigo-400 opacity-80" />
                   <p className="text-foreground text-[11px] font-semibold tabular-nums">{totalHours.toFixed(0)}<span className="text-muted-foreground/60 text-[9px] ml-1.5">Hrs Logged</span></p>
                 </div>

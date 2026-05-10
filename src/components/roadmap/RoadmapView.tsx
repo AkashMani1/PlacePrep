@@ -68,20 +68,20 @@ function WeekCard({ week, isExpanded, onToggle }: {
   return (
     <motion.div 
       variants={itemVariants}
-      className={`relative overflow-hidden rounded-[24px] bg-[#121214] border transition-all duration-500 ${
+      className={`relative overflow-hidden rounded-[24px] bg-card border transition-all duration-500 ${
         isActive 
           ? 'border-primary/40 bg-primary/[0.03] shadow-[0_8px_30px_rgba(var(--primary-rgb),0.1)]' 
-          : 'border-white/[0.04]'
+          : 'border-border/50 dark:border-white/[0.04]'
       } ${isPast && pct === 100 ? 'opacity-80' : ''}`}
     >
       <button
         onClick={onToggle}
-        className={`w-full flex items-center gap-6 px-8 py-6 text-left transition-all ${isExpanded ? 'bg-white/[0.02]' : 'hover:bg-white/[0.02]'}`}
+        className={`w-full flex items-center gap-6 px-8 py-6 text-left transition-all ${isExpanded ? 'bg-black/5 dark:bg-white/[0.02]' : 'hover:bg-black/5 dark:bg-white/[0.02]'}`}
       >
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 border transition-all ${
           isActive 
             ? 'bg-primary/20 border-primary/40 text-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]' 
-            : isPast ? 'bg-white/5 border-white/10 text-muted-foreground' : 'bg-white/[0.02] border-white/[0.05] text-muted-foreground/60'
+            : isPast ? 'bg-white/5 border-white/10 text-muted-foreground' : 'bg-black/5 dark:bg-white/[0.02] border-border/50 dark:border-white/[0.05] text-muted-foreground/60'
         }`}>
           W{week.week}
         </div>
@@ -109,7 +109,7 @@ function WeekCard({ week, isExpanded, onToggle }: {
         <div className="flex items-center gap-8 flex-shrink-0">
           <div className="hidden sm:flex flex-col items-end gap-1.5 min-w-[80px]">
             <span className={`text-[10px] font-semibold tracking-wider ${pct === 100 ? 'text-emerald-500' : 'text-muted-foreground/60'}`}>{pct}% COMPLETED</span>
-            <div className="w-24 h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+            <div className="w-24 h-1.5 bg-black/5 dark:bg-white/[0.05] rounded-full overflow-hidden">
                <motion.div 
                  initial={{ width: 0 }}
                  animate={{ width: `${pct}%` }}
@@ -131,7 +131,7 @@ function WeekCard({ week, isExpanded, onToggle }: {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: premiumEasing }}
-            className="border-t border-white/[0.04] overflow-hidden"
+            className="border-t border-border/50 dark:border-white/[0.04] overflow-hidden"
           >
             <div className="px-8 py-8 space-y-8 bg-white/[0.01]">
               <div className="space-y-3">
@@ -148,7 +148,7 @@ function WeekCard({ week, isExpanded, onToggle }: {
                 ) : (
                   <button
                     onClick={() => { setFocusDraft(week.focus); setEditFocus(true); }}
-                    className="group bg-white/[0.02] hover:bg-white/[0.04] transition-all p-5 rounded-2xl border border-white/[0.04] flex items-center justify-between text-left w-full"
+                    className="group bg-black/5 dark:bg-white/[0.02] hover:bg-black/5 dark:bg-white/[0.04] transition-all p-5 rounded-2xl border border-border/50 dark:border-white/[0.04] flex items-center justify-between text-left w-full"
                   >
                     <span className="text-sm font-medium text-foreground/90 leading-relaxed">{week.focus}</span>
                     <Edit3 className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-all" />
@@ -166,7 +166,7 @@ function WeekCard({ week, isExpanded, onToggle }: {
                       className={`group flex items-center gap-4 p-4 rounded-xl border transition-all ${
                         task.done 
                           ? 'bg-emerald-500/[0.03] border-emerald-500/10 opacity-80' 
-                          : 'bg-white/[0.02] border-white/[0.04] hover:border-primary/20'
+                          : 'bg-black/5 dark:bg-white/[0.02] border-border/50 dark:border-white/[0.04] hover:border-primary/20'
                       }`}
                     >
                       <button
@@ -199,7 +199,7 @@ function WeekCard({ week, isExpanded, onToggle }: {
                         placeholder="Add new objective..."
                         onChange={(e) => setNewTask(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddTask(); if (e.key === 'Escape') setAdding(false); }}
-                        className="flex-1 bg-white/[0.02] border border-white/[0.1] border-dashed rounded-xl px-5 py-3 text-sm text-foreground focus:outline-none"
+                        className="flex-1 bg-black/5 dark:bg-white/[0.02] border border-white/[0.1] border-dashed rounded-xl px-5 py-3 text-sm text-foreground focus:outline-none"
                       />
                       <button onClick={handleAddTask} className="px-5 py-3 bg-primary text-primary-foreground rounded-xl text-[10px] font-bold uppercase tracking-wider">Add</button>
                       <button onClick={() => setAdding(false)} className="px-5 py-3 text-muted-foreground/60 hover:text-foreground transition-colors text-[10px] font-bold uppercase tracking-wider">Cancel</button>
@@ -289,7 +289,7 @@ export default function RoadmapView() {
                     </span>
                     <span className={`text-3xl font-bold ${config.tint} tabular-nums tracking-tighter`}>{p}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-black/5 dark:bg-white/[0.05] rounded-full overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${p}%` }}
@@ -331,7 +331,7 @@ export default function RoadmapView() {
                  { label: 'Resource Node', icon: BookOpen, color: 'text-indigo-400' },
                ].map((item) => (
                  <div key={item.label} className="flex items-center gap-4 group/item">
-                   <div className="w-10 h-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] group-hover/item:border-primary/20 transition-all">
+                   <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/[0.03] flex items-center justify-center border border-border/50 dark:border-white/[0.05] group-hover/item:border-primary/20 transition-all">
                       <item.icon className={`w-4 h-4 ${item.color}`} />
                    </div>
                    <span className="text-[13px] font-medium text-muted-foreground/80 group-hover/item:text-foreground transition-all">{item.label}</span>

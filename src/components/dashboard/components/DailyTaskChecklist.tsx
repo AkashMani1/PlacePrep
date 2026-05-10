@@ -39,22 +39,22 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-center justify-between gap-6 py-4 border-b border-white/[0.05] px-2">
+      <div className="flex flex-wrap items-center justify-between gap-6 py-4 border-b border-border/50 dark:border-white/[0.05] px-2">
         <div className="flex items-center gap-8">
           <div className="flex flex-col">
             <span className="text-[10px] font-semibold tracking-wider text-muted-foreground opacity-60">Date</span>
             <span className="text-xs font-bold text-foreground">{todayStr}</span>
           </div>
-          <div className="w-[1px] h-6 bg-white/[0.05]" />
+          <div className="w-[1px] h-6 bg-black/5 dark:bg-white/[0.05]" />
           <div className="flex flex-col">
             <span className="text-[10px] font-semibold tracking-wider text-muted-foreground opacity-60">Phase</span>
             <span className="text-xs font-bold text-primary">Week {currentWeek} / {(state.goalDurationMonths || 3) * 4}</span>
           </div>
-          <div className="w-[1px] h-6 bg-white/[0.05] hidden sm:block" />
+          <div className="w-[1px] h-6 bg-black/5 dark:bg-white/[0.05] hidden sm:block" />
           <div className="hidden sm:flex flex-col">
             <span className="text-[10px] font-semibold tracking-wider text-muted-foreground opacity-60">Efficiency</span>
             <div className="flex items-center gap-3">
-              <div className="h-1.5 w-24 bg-white/[0.05] rounded-full overflow-hidden">
+              <div className="h-1.5 w-24 bg-black/5 dark:bg-white/[0.05] rounded-full overflow-hidden">
                 <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
               </div>
               <span className="text-[11px] font-bold text-primary tabular-nums">{pct}%</span>
@@ -62,7 +62,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
           </div>
         </div>
 
-        <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-semibold tracking-wider transition-all ${isEditing ? 'bg-primary text-white' : 'bg-white/[0.03] text-muted-foreground hover:bg-white/[0.08]'}`}>
+        <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-semibold tracking-wider transition-all ${isEditing ? 'bg-primary text-white' : 'bg-black/5 dark:bg-white/[0.03] text-muted-foreground hover:bg-white/[0.08]'}`}>
           {isEditing ? <CheckSquare className="w-3.5 h-3.5" /> : <Settings className="w-3.5 h-3.5" />}
           {isEditing ? 'Save Template' : 'Edit Plan'}
         </button>
@@ -71,9 +71,9 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 px-2 items-start">
         {habitGroups.map((group) => (
           <div key={group.id} className="space-y-4">
-            <div className="flex items-center justify-between border-b border-white/[0.05] pb-2">
+            <div className="flex items-center justify-between border-b border-border/50 dark:border-white/[0.05] pb-2">
               {isEditing ? (
-                <input type="text" value={group.title} onChange={(e) => updateHabitGroupTitle(group.id, e.target.value)} className="bg-white/[0.02] border border-white/[0.05] rounded-lg px-2 py-1.5 text-[11px] font-semibold tracking-wide text-primary focus:outline-none w-full mr-2" />
+                <input type="text" value={group.title} onChange={(e) => updateHabitGroupTitle(group.id, e.target.value)} className="bg-black/5 dark:bg-white/[0.02] border border-border/50 dark:border-white/[0.05] rounded-lg px-2 py-1.5 text-[11px] font-semibold tracking-wide text-primary focus:outline-none w-full mr-2" />
               ) : (
                 <h4 className="text-[11px] font-semibold tracking-wider text-primary flex items-center gap-2">
                   <div className="w-1 h-1 rounded-full bg-primary" /> {group.title}
@@ -87,7 +87,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
                 return (
                   <div key={item.id} className="group relative">
                     {isEditing ? (
-                      <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                      <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-black/5 dark:bg-white/[0.02] border border-border/50 dark:border-white/[0.04]">
                         <div className="flex items-center justify-between">
                           <input type="text" value={item.label} onChange={(e) => updateHabitItem(group.id, item.id, { label: e.target.value })} className="bg-transparent text-[11px] font-medium tracking-tight w-full focus:outline-none text-foreground" />
                           <button onClick={() => deleteHabitItem(group.id, item.id)} className="text-rose-500/50 hover:text-rose-500 transition-colors"><Minus className="w-3 h-3" /></button>
@@ -95,7 +95,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
                         <input type="text" value={item.detail} onChange={(e) => updateHabitItem(group.id, item.id, { detail: e.target.value })} className="bg-transparent text-[10px] font-medium text-muted-foreground/60 w-full focus:outline-none" placeholder="Details..." />
                       </div>
                     ) : (
-                      <button onClick={() => toggleHabit(item.id)} className={`w-full flex items-start gap-3 p-3 rounded-xl border transition-all text-left ${isChecked ? 'bg-primary/10 border-primary/20 text-foreground' : 'bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.04] text-muted-foreground'}`}>
+                      <button onClick={() => toggleHabit(item.id)} className={`w-full flex items-start gap-3 p-3 rounded-xl border transition-all text-left ${isChecked ? 'bg-primary/10 border-primary/20 text-foreground' : 'bg-black/5 dark:bg-white/[0.02] border-border/50 dark:border-white/[0.04] hover:bg-black/5 dark:bg-white/[0.04] text-muted-foreground'}`}>
                         <div className={`mt-0.5 w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all ${isChecked ? 'bg-primary border-primary text-white' : 'border-white/20'}`}>
                           {isChecked && <CheckCheck className="w-3 h-3" />}
                         </div>
@@ -118,7 +118,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
         ))}
       </div>
 
-      <div className="space-y-10 pt-8 border-t border-white/[0.05] px-2 max-w-4xl">
+      <div className="space-y-10 pt-8 border-t border-border/50 dark:border-white/[0.05] px-2 max-w-4xl">
         <div className="space-y-5">
           <div className="flex items-center gap-3">
             <Target className="w-4 h-4 text-primary" />
@@ -129,7 +129,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
               <div key={diff} className="flex flex-col gap-2.5">
                 <span className="text-[10px] font-medium tracking-wider text-muted-foreground/60 capitalize">{diff} Problems</span>
                 <div className="flex items-center gap-4">
-                  <button onClick={() => updateProbs(diff, -1)} className="w-7 h-7 rounded bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-muted-foreground transition-colors"><Minus className="w-3 h-3" /></button>
+                  <button onClick={() => updateProbs(diff, -1)} className="w-7 h-7 rounded bg-black/5 dark:bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-muted-foreground transition-colors"><Minus className="w-3 h-3" /></button>
                   <span className="text-base font-bold text-foreground tabular-nums w-6 text-center">{(log.problemsSolved ?? { easy: 0, medium: 0, hard: 0 })[diff]}</span>
                   <button onClick={() => updateProbs(diff, 1)} className="w-7 h-7 rounded bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary transition-colors"><Plus className="w-3 h-3" /></button>
                 </div>
@@ -144,7 +144,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
               <PenTool className="w-4 h-4 text-indigo-400" />
               <h4 className="text-[11px] font-semibold tracking-widest uppercase text-foreground/80">Notes & Learnings</h4>
             </div>
-            <textarea value={(log.conceptsLearned ?? [])[0] || ''} onChange={(e) => updateConcepts(0, e.target.value)} className="w-full bg-transparent border border-white/[0.05] rounded-xl p-3 text-[12px] font-medium text-foreground/90 focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[120px] shadow-inner" placeholder="Log your insights here..." />
+            <textarea value={(log.conceptsLearned ?? [])[0] || ''} onChange={(e) => updateConcepts(0, e.target.value)} className="w-full bg-transparent border border-border/50 dark:border-white/[0.05] rounded-xl p-3 text-[12px] font-medium text-foreground/90 focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[120px] shadow-inner" placeholder="Log your insights here..." />
           </div>
 
           <div className="space-y-4">
@@ -155,11 +155,11 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
             <div className="space-y-3">
               <div className="flex flex-col gap-1.5">
                 <span className="text-[10px] font-medium tracking-wider text-muted-foreground/80">Morning</span>
-                <textarea value={(log.tomorrowPlan ?? { morning: '', afternoon: '' }).morning} onChange={(e) => updatePlan('morning', e.target.value)} className="w-full bg-transparent border border-white/[0.05] rounded-xl p-2.5 text-[12px] font-medium focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[60px]" placeholder="Objectives..." />
+                <textarea value={(log.tomorrowPlan ?? { morning: '', afternoon: '' }).morning} onChange={(e) => updatePlan('morning', e.target.value)} className="w-full bg-transparent border border-border/50 dark:border-white/[0.05] rounded-xl p-2.5 text-[12px] font-medium focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[60px]" placeholder="Objectives..." />
               </div>
               <div className="flex flex-col gap-1.5">
                 <span className="text-[10px] font-medium tracking-wider text-muted-foreground/80">Afternoon/Evening</span>
-                <textarea value={(log.tomorrowPlan ?? { morning: '', afternoon: '' }).afternoon} onChange={(e) => updatePlan('afternoon', e.target.value)} className="w-full bg-transparent border border-white/[0.05] rounded-xl p-2.5 text-[12px] font-medium focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[60px]" placeholder="Objectives..." />
+                <textarea value={(log.tomorrowPlan ?? { morning: '', afternoon: '' }).afternoon} onChange={(e) => updatePlan('afternoon', e.target.value)} className="w-full bg-transparent border border-border/50 dark:border-white/[0.05] rounded-xl p-2.5 text-[12px] font-medium focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[60px]" placeholder="Objectives..." />
               </div>
             </div>
           </div>

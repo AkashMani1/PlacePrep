@@ -63,7 +63,7 @@ export function BentoCard({ children, className = '', title = '', icon: Icon, ba
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -2, transition: { duration: 0.3 } }}
-      className={`relative overflow-hidden rounded-[24px] bg-[#121214] border border-white/[0.04] p-6 flex flex-col group shadow-[0_8px_30px_rgb(0,0,0,0.12)] ${className}`}
+      className={`relative overflow-hidden rounded-[24px] bg-card border border-border/50 dark:border-white/[0.04] p-6 flex flex-col group shadow-[0_8px_30px_rgb(0,0,0,0.12)] ${className}`}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
       <div className="relative z-10 flex flex-col h-full">
@@ -71,7 +71,7 @@ export function BentoCard({ children, className = '', title = '', icon: Icon, ba
           <div className={`flex items-center justify-between ${badge ? 'mb-8' : 'mb-6'}`}>
             <div className="flex items-center gap-4">
               {Icon && (
-                <div className="w-10 h-10 bg-white/[0.03] rounded-xl flex items-center justify-center border border-white/[0.04] transition-all group-hover:bg-white/[0.05]">
+                <div className="w-10 h-10 bg-black/5 dark:bg-white/[0.03] rounded-xl flex items-center justify-center border border-border/50 dark:border-white/[0.04] transition-all group-hover:bg-black/5 dark:bg-white/[0.05]">
                   <Icon className="w-5 h-5 text-primary/80 group-hover:text-primary transition-colors" />
                 </div>
               )}

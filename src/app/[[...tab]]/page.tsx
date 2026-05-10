@@ -85,7 +85,7 @@ export default function AppShell() {
   const mainPaddingLeft = isMobileViewport ? '0px' : (isSidebarHovered ? '240px' : (collapsed ? '80px' : '240px'));
 
   return (
-    <div className="flex min-h-screen bg-[#0A0A0B] text-[#EDEDED] selection:bg-primary/30 selection:text-white">
+    <div className="flex min-h-screen bg-background text-[#EDEDED] selection:bg-primary/30 selection:text-white">
       
       {/* 🎨 UI/UX UPGRADE: Premium Soothing Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 flex items-center justify-center">
@@ -150,9 +150,9 @@ export default function AppShell() {
         </div>
 
         {/* Minimalist Footer */}
-        <footer className="w-full border-t border-white/[0.04] px-8 py-6 mt-auto flex flex-col md:flex-row items-center justify-between gap-4 bg-[#0A0A0B]/80 backdrop-blur-md">
+        <footer className="w-full border-t border-border/50 dark:border-white/[0.04] px-8 py-6 mt-auto flex flex-col md:flex-row items-center justify-between gap-4 bg-background/80 backdrop-blur-md">
           <p className="text-muted-foreground text-xs font-medium flex items-center gap-2">
-            Antigravity OS © {new Date().getFullYear()}
+            PlacePrep © {new Date().getFullYear()} • Designed by Akash Mani
           </p>
           <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground/60">
              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /> Local Sync Active</span>
@@ -162,7 +162,7 @@ export default function AppShell() {
       </motion.main>
 
       {/* Mobile Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#0A0A0B]/90 backdrop-blur-xl border-t border-white/[0.06] flex md:hidden z-50 px-2 pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-t border-border/50 dark:border-white/[0.06] flex md:hidden z-50 px-2 pb-safe">
         {(Object.entries(TAB_LABELS) as [TabId, { label: string; icon: React.ElementType }][]).map(([id, { label, icon: Icon }]) => {
           const isActive = activeTab === id;
           return (
