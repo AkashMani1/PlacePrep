@@ -142,22 +142,51 @@ const ProblemItem = memo(({
                       </a>
                     )}
                   </>
-                ) : practiceUrl ? (
-                  <a
-                    href={practiceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-primary/25 bg-primary/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.13em] text-primary transition-all hover:bg-primary/20 hover:border-primary/50"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    {problem.videoUrl ? 'Watch — YouTube' : `Solve — ${practiceLabel}`}
-                  </a>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-border/10 text-muted-foreground/30 bg-muted/10">
-                    {isAptitude ? <BookOpen className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
-                    {isAptitude ? 'Links Pending' : 'Practice Link'}
-                  </span>
+                  <>
+                    {/* LeetCode Practice Button */}
+                    {problem.readingUrl ? (
+                      <a
+                        href={problem.readingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-2 rounded-xl border border-[#FFA116]/25 bg-[#FFA116]/10 px-3 py-1.5 transition-all hover:bg-[#FFA116]/20 hover:border-[#FFA116]/50 group/lc"
+                      >
+                        {/* LeetCode SVG Logo */}
+                        <svg className="w-3.5 h-3.5 text-[#FFA116]" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M16.102 17.93l-2.697 2.607c-.466.467-1.111.662-1.823.662s-1.357-.195-1.824-.662l-4.332-4.363c-.467-.467-.702-1.15-.702-1.863s.235-1.357.702-1.824l4.319-4.38c.467-.467 1.125-.645 1.837-.645s1.357.195 1.823.662l2.697 2.606c.514.515 1.365.497 1.9-.038.535-.536.553-1.387.038-1.901l-2.609-2.519c-.756-.721-1.787-1.141-2.849-1.141-1.063 0-2.093.42-2.849 1.141l-4.344 4.363c-.756.72-1.176 1.751-1.176 2.815s.42 2.094 1.176 2.814l4.344 4.363c.756.72 1.787 1.14 2.849 1.14 1.062 0 2.093-.42 2.849-1.14l2.609-2.519c.515-.515.497-1.366-.038-1.901-.535-.536-1.386-.553-1.9-.038z"/>
+                          <path d="M20.178 8.563c.535.536.553 1.387.038 1.901l-6.137 5.942c-.466.451-1.111.677-1.823.677s-1.357-.225-1.824-.677l-1.137-1.101c-.515-.514-.497-1.365.038-1.9.535-.536 1.387-.553 1.901-.039l1.022.99 6.022-5.831c.515-.515 1.366-.497 1.9.038z"/>
+                        </svg>
+                        <span className="text-[10px] font-black uppercase tracking-[0.13em] text-[#FFA116]">LeetCode</span>
+                      </a>
+                    ) : null}
+
+                    {/* YouTube Video Button */}
+                    {problem.videoUrl ? (
+                      <a
+                        href={problem.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-2 rounded-xl border border-[#FF0000]/25 bg-[#FF0000]/10 px-3 py-1.5 transition-all hover:bg-[#FF0000]/20 hover:border-[#FF0000]/50 group/yt"
+                      >
+                        {/* YouTube SVG Logo */}
+                        <svg className="w-3.5 h-3.5 text-[#FF0000]" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        <span className="text-[10px] font-black uppercase tracking-[0.13em] text-[#FF0000]">YouTube</span>
+                      </a>
+                    ) : null}
+
+                    {/* Fallback if no links */}
+                    {!problem.readingUrl && !problem.videoUrl && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-border/10 text-muted-foreground/30 bg-muted/10">
+                        <ExternalLink className="w-3 h-3" />
+                        Links Pending
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
               {editingNote === problem.id ? (

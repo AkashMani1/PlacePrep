@@ -1,5 +1,6 @@
 /* Developed by Akash Mani - This site is developed by Akash Mani. Original watermark of Akash Mani. */
 import { Problem } from './types';
+import { DSA_KILL_LIST } from './dsaKillListSeed';
 
 const aptitudeProblem = (problem: Problem): Problem => problem;
 
@@ -5118,5 +5119,6 @@ export const KILL_LIST_PROBLEMS: Problem[] = [
     "isPriority": true,
     "videoUrl": "https://www.youtube.com/results?search_query=Verbal%20Ability%20Synonyms%20%26%20Antonyms%20(Incl.%20Idioms%20and%20One-Word%20Substitutions)%20One%20word%3A%20A%20man%20who%20always%20thinks%20of%20himself%20solution",
     "readingUrl": "https://www.indiabix.com/verbal-ability/synonyms-and-antonyms/"
-  })
+  }),
+  ...DSA_KILL_LIST,
 ];
