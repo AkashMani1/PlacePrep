@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Pencil, Target, Search, X, ShieldCheck, Zap, Activity, BookOpen, Star, AlertTriangle, ExternalLink, LayoutGrid, BookMarked, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Plus, Trash2, Pencil, Target, Search, X, ShieldCheck, Zap, Activity, BookOpen, Star, AlertTriangle, ExternalLink, LayoutGrid, BookMarked, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Problem, Difficulty, ProblemStatus, Platform } from '@/lib/types';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
@@ -130,11 +130,6 @@ const ProblemItem = memo(({
                <h4 className={`text-[17px] font-black tracking-tight leading-[1.24] max-w-4xl text-balance ${isDone ? 'text-muted-foreground/50' : 'text-foreground'}`}>{problem.name}</h4>
             </div>
             <div className="flex flex-wrap items-center gap-3 mb-3">
-              {problem.subtopic && (
-                <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary">
-                  {problem.subtopic}
-                </span>
-              )}
               {isAptitude ? (
                 <>
                   {readingUrl && (
@@ -234,19 +229,72 @@ const ProblemItem = memo(({
 
 ProblemItem.displayName = 'ProblemItem';
 
-const TopicHeader = memo(({ topic, count, variant = 'topic' }: { topic: string, count: number, variant?: 'topic' | 'subtopic' }) => (
-  <motion.div 
+const TopicHeader = memo(({
+  topic,
+  count,
+  solved = 0,
+  variant = 'topic',
+  collapsed = false,
+  onToggle,
+}: {
+  topic: string;
+  count: number;
+  solved?: number;
+  variant?: 'topic' | 'subtopic';
+  collapsed?: boolean;
+  onToggle?: () => void;
+}) => {
+  const isSubtopic = variant === 'subtopic';
+  const progress = count ? Math.round((solved / count) * 100) : 0;
+  const content = (
+    <>
+      <div className={`${isSubtopic ? 'w-2 h-7 bg-amber-500/80' : 'w-2.5 h-8 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]'} rounded-full shrink-0`} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className={`${isSubtopic ? 'text-xs tracking-[0.18em]' : 'text-sm tracking-[0.3em]'} font-black text-foreground uppercase`}>
+            {topic}
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/45">
+            {solved}/{count} Done
+          </span>
+        </div>
+        {isSubtopic && (
+          <div className="mt-2 h-1.5 w-full max-w-sm overflow-hidden rounded-full bg-muted/40">
+            <div className="h-full rounded-full bg-amber-500/80 transition-all" style={{ width: `${progress}%` }} />
+          </div>
+        )}
+      </div>
+      {isSubtopic && (
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/10 bg-card/70 text-muted-foreground">
+          {collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <motion.div
     layout
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
-    className={`flex items-center gap-4 px-4 py-2 ${variant === 'topic' ? 'mt-6 mb-3 sticky top-0 z-20 rounded-2xl bg-background/90 backdrop-blur-xl' : 'mt-4 mb-2 ml-4'}`}
+    className={`${isSubtopic ? 'mt-4 mb-2 ml-0 md:ml-4 rounded-2xl border border-border/10 bg-card/55 shadow-sm' : 'mt-6 mb-3 sticky top-0 z-20 rounded-2xl bg-background/90 backdrop-blur-xl'} overflow-hidden`}
   >
-     <div className={`${variant === 'topic' ? 'w-2.5 h-8 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]' : 'w-2 h-6 bg-amber-500/70'} rounded-full`} />
-     <span className={`${variant === 'topic' ? 'text-sm tracking-[0.3em]' : 'text-xs tracking-[0.2em]'} font-black text-foreground uppercase`}>
-       {topic} <span className="opacity-30 ml-2 font-bold">[{count} PROBLEMS]</span>
-     </span>
-  </motion.div>
-));
+      {isSubtopic ? (
+        <button
+          onClick={onToggle}
+          className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-muted/20"
+          type="button"
+        >
+          {content}
+        </button>
+      ) : (
+        <div className="flex items-center gap-4 px-4 py-2">
+          {content}
+        </div>
+      )}
+    </motion.div>
+  );
+});
 
 TopicHeader.displayName = 'TopicHeader';
 
@@ -262,7 +310,12 @@ function AddProblemModal({ onClose, activeCategory }: { onClose: () => void, act
 
   const submit = () => {
     if (!form.name.trim() || !form.topic.trim()) return;
-    addProblem(form);
+    addProblem({
+      ...form,
+      name: form.name.trim(),
+      topic: form.topic.trim(),
+      subtopic: form.subtopic?.trim() || undefined,
+    });
     onClose();
   };
 
@@ -318,6 +371,18 @@ function AddProblemModal({ onClose, activeCategory }: { onClose: () => void, act
                className="w-full bg-muted/40 border border-border/10 rounded-[20px] px-6 py-4 text-foreground text-sm font-bold focus:outline-none focus:border-primary transition-all" />
           </div>
 
+          {activeCategory === 'Aptitude' && (
+            <div>
+              <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">Subtopic Group</label>
+              <input
+                value={form.subtopic || ''}
+                onChange={(e) => set('subtopic', e.target.value)}
+                placeholder="e.g. Linear and Parallel Arrangements + New Types"
+                className="w-full bg-muted/40 border border-border/10 rounded-[20px] px-6 py-4 text-foreground text-sm font-bold focus:outline-none focus:border-primary transition-all"
+              />
+            </div>
+          )}
+
           <div>
             <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">Notes & Solution Logic</label>
             <textarea
@@ -360,18 +425,26 @@ function EditProblemModal({ problem, onClose }: { problem: Problem, onClose: () 
     name: problem.name,
     category: problem.category,
     topic: problem.topic,
+    subtopic: problem.subtopic,
     difficulty: problem.difficulty,
     platform: problem.platform,
     status: problem.status,
     notes: problem.notes,
     isPriority: problem.isPriority ?? false,
+    videoUrl: problem.videoUrl,
+    readingUrl: problem.readingUrl,
   });
 
   const set = (k: keyof typeof form, v: string | boolean) => setForm((p) => ({ ...p, [k]: v }));
 
   const submit = () => {
     if (!form.name.trim() || !form.topic.trim()) return;
-    updateProblem(problem.id, form);
+    updateProblem(problem.id, {
+      ...form,
+      name: form.name.trim(),
+      topic: form.topic.trim(),
+      subtopic: form.subtopic?.trim() || undefined,
+    });
     onClose();
   };
 
@@ -417,6 +490,18 @@ function EditProblemModal({ problem, onClose }: { problem: Problem, onClose: () 
               placeholder={isAptitude ? 'e.g. Quant: Percentages' : 'e.g. Arrays, Dynamic Programming...'}
               className="w-full bg-muted/40 border border-border/10 rounded-[20px] px-6 py-4 text-foreground text-sm font-bold focus:outline-none focus:border-primary transition-all" />
           </div>
+
+          {isAptitude && (
+            <div>
+              <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">Subtopic Group</label>
+              <input
+                value={form.subtopic || ''}
+                onChange={(e) => set('subtopic', e.target.value)}
+                placeholder="e.g. Linear and Parallel Arrangements + New Types"
+                className="w-full bg-muted/40 border border-border/10 rounded-[20px] px-6 py-4 text-foreground text-sm font-bold focus:outline-none focus:border-primary transition-all"
+              />
+            </div>
+          )}
 
           {/* Difficulty + Platform */}
           <div className="grid grid-cols-2 gap-6">
@@ -495,12 +580,13 @@ export default function DSATrackerView() {
   const [sortAsc, setSortAsc] = useState(false);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
+  const [collapsedSubtopics, setCollapsedSubtopics] = useState<Record<string, boolean>>({});
 
   const tabProblems = state.problems.filter(p => p.category === activeTab);
   const uniqueTopics = useMemo(() => Array.from(new Set(tabProblems.map(p => p.topic))).sort(), [tabProblems]);
 
   type FlatListItem =
-    | { type: 'header'; topic: string; count: number; variant: 'topic' | 'subtopic' }
+    | { type: 'header'; topic: string; count: number; solved: number; variant: 'topic' | 'subtopic'; groupKey?: string; collapsed?: boolean }
     | { type: 'problem'; problem: Problem };
 
   const problems = useMemo(() => {
@@ -553,10 +639,17 @@ export default function DSATrackerView() {
     const items: FlatListItem[] = [];
     groupedProblems.forEach(({ topic, subtopics }) => {
       const topicCount = subtopics.reduce((total, [, topicProblems]) => total + topicProblems.length, 0);
-      items.push({ type: 'header', topic, count: topicCount, variant: 'topic' });
+      const topicSolved = subtopics.reduce((total, [, topicProblems]) => total + topicProblems.filter((problem) => problem.status === 'Done').length, 0);
+      items.push({ type: 'header', topic, count: topicCount, solved: topicSolved, variant: 'topic' });
       subtopics.forEach(([subtopic, topicProblems]) => {
+        const groupKey = `${activeTab}:${topic}:${subtopic}`;
+        const collapsed = Boolean(collapsedSubtopics[groupKey]);
+        const solved = topicProblems.filter((problem) => problem.status === 'Done').length;
         if (activeTab === 'Aptitude') {
-          items.push({ type: 'header', topic: subtopic, count: topicProblems.length, variant: 'subtopic' });
+          items.push({ type: 'header', topic: subtopic, count: topicProblems.length, solved, variant: 'subtopic', groupKey, collapsed });
+        }
+        if (activeTab === 'Aptitude' && collapsed) {
+          return;
         }
         topicProblems.forEach((problem) => {
           items.push({ type: 'problem', problem });
@@ -564,7 +657,7 @@ export default function DSATrackerView() {
       });
     });
     return items;
-  }, [activeTab, groupedProblems]);
+  }, [activeTab, collapsedSubtopics, groupedProblems]);
 
   const stats = {
     total: tabProblems.length,
@@ -727,7 +820,18 @@ export default function DSATrackerView() {
                         if (item.type === 'header') {
                           return (
                             <div style={style}>
-                              <TopicHeader topic={item.topic} count={item.count} variant={item.variant} />
+                              <TopicHeader
+                                topic={item.topic}
+                                count={item.count}
+                                solved={item.solved}
+                                variant={item.variant}
+                                collapsed={item.collapsed}
+                                onToggle={
+                                  item.groupKey
+                                    ? () => setCollapsedSubtopics((current) => ({ ...current, [item.groupKey!]: !current[item.groupKey!] }))
+                                    : undefined
+                                }
+                              />
                             </div>
                           );
                         }
@@ -753,7 +857,7 @@ export default function DSATrackerView() {
                           rowHeight={(index: number) => {
                             const item = flatList[index];
                             if (item.type === 'header') {
-                              return item.variant === 'topic' ? 62 : 48;
+                              return item.variant === 'topic' ? 62 : 74;
                             }
                             return item.problem.category === 'Aptitude' ? 252 : 182;
                           }}
