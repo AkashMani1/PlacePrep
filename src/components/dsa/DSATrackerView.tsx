@@ -80,12 +80,10 @@ const VirtualRow = memo(({ index, style, flatList, updateProblem, deleteProblem,
 
   return (
     <div style={style} className="px-1 pt-1 pb-4 pr-4">
-      <motion.div whileHover={{ scale: 1.01, y: -2 }} transition={magneticSpring}>
-        <ProblemItem
-          problem={item.problem} onUpdate={updateProblem} onDelete={deleteProblem} onEdit={setEditingProblem}
-          editingNote={editingNote} setEditingNote={setEditingNote} noteDraft={noteDraft} setNoteDraft={setNoteDraft}
-        />
-      </motion.div>
+      <ProblemItem
+        problem={item.problem} onUpdate={updateProblem} onDelete={deleteProblem} onEdit={setEditingProblem}
+        editingNote={editingNote} setEditingNote={setEditingNote} noteDraft={noteDraft} setNoteDraft={setNoteDraft}
+      />
     </div>
   );
 });

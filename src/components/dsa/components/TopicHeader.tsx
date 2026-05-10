@@ -51,10 +51,7 @@ const TopicHeader = memo(({
   );
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
+    <div
       className={`${isSubtopic ? 'mt-4 mb-2 ml-0 md:ml-4 rounded-2xl border border-border/10 bg-card/55 shadow-sm' : 'mt-6 mb-3 sticky top-0 z-20 rounded-2xl bg-background/90 backdrop-blur-xl'} overflow-hidden`}
     >
       {onToggle ? (
@@ -70,7 +67,7 @@ const TopicHeader = memo(({
           {content}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 });
 

@@ -93,7 +93,6 @@ const ProblemItem = memo(({
 
   return (
     <motion.div 
-      variants={itemVariants}
       whileHover={{ y: -4, scale: 1.002 }}
       className="group/card relative flex h-full flex-col overflow-hidden rounded-[28px] border border-border/10 bg-card/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.18)] transition-all hover:border-primary/30 hover:bg-card/90"
     >
