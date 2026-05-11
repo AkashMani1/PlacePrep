@@ -126,7 +126,12 @@ export interface Question {
   type: 'mcq' | 'coding' | 'aptitude';
   difficulty: Difficulty;
   tags: string[];
+  company?: string;
+  topic?: string;
+  options: string[];
+  correctAnswer: number;
   solutionExplanation?: string;
+  estimatedTimeSeconds?: number;
   testCases?: any;
 }
 

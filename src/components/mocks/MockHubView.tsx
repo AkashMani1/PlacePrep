@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Plus, Video, X, Award, MessageSquare, 
   ChevronRight, Calendar, Target, ShieldCheck, Zap, BarChart3,
@@ -15,12 +15,14 @@ import { BentoCard } from '@/components/ui/Bento';
 import dynamic from 'next/dynamic';
 import { MockHero } from './components/MockHero';
 import { MockArena } from './components/MockArena';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { AssessmentEngine } from './components/AssessmentEngine';
 import { MockSocial } from './components/MockSocial';
 import { MockRecommendations } from './components/MockRecommendations';
 import { AssessmentResults } from './components/AssessmentResults';
 import { MockNotifications } from './components/MockNotifications';
 import { useMockStore } from '@/store/useMockStore';
+import { toast } from 'sonner';
 
 const AssessmentPortal = dynamic(() => import('./components/AssessmentPortal').then(mod => mod.AssessmentPortal), { ssr: false });
 const InterviewRoom = dynamic(() => import('./components/InterviewRoom').then(mod => mod.InterviewRoom), { ssr: false });
@@ -138,11 +140,25 @@ function AddMockModal({ onClose }: { onClose: () => void }) {
 
 export default function MockHubView() {
   const { state, deleteMock } = useApp();
-  const { isAssessmentActive, activeRoom, lastSubmission } = useMockStore();
+  const { isAssessmentActive, activeRoom, lastSubmission, submissions, onlineCount } = useMockStore();
   const [showModal, setShowModal] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const mocks = [...state.mocks].sort((a, b) => b.date.localeCompare(a.date));
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    const handleOnline = () => { setIsOnline(true); toast.success('Internet connection restored.'); };
+    const handleOffline = () => { setIsOnline(false); toast.error('Working Offline', { description: 'Some features like matchmaking may be limited.' }); };
+    
+    setIsOnline(navigator.onLine);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   return (
     <>
@@ -167,7 +183,13 @@ export default function MockHubView() {
         animate="visible"
         className="max-w-[1600px] mx-auto px-4 pb-40"
       >
-        <MockHero />
+        <ErrorBoundary>
+            <MockHero />
+            <MockArena />
+            <MockRecommendations />
+            <AssessmentEngine />
+            <MockSocial />
+         </ErrorBoundary>
       
       <div className="col-span-12 flex flex-col md:flex-row items-center justify-between gap-8 py-10 mt-12 border-y border-white/5">
          <div className="flex items-center gap-6">
@@ -181,8 +203,9 @@ export default function MockHubView() {
             <div className="flex flex-col">
                <span className="text-[11px] font-black text-foreground uppercase tracking-widest flex items-center gap-2">
                   <Activity className="w-3.5 h-3.5 text-primary" /> Elite Pulse
+                  {!isOnline && <span className="text-[9px] text-rose-500 ml-2 animate-pulse">(Offline Mode)</span>}
                </span>
-               <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">42 Peers Active Now</span>
+               <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">{submissions.length} Assessments Completed</span>
             </div>
          </div>
 
@@ -200,12 +223,6 @@ export default function MockHubView() {
             </span>
           </motion.button>
       </div>
-
-      <MockArena />
-      
-      <AssessmentEngine />
-      
-      <MockSocial />
       
       <MockRecommendations />
 
@@ -241,7 +258,9 @@ export default function MockHubView() {
         </div>
       </div>
 
-      <MockNotifications />
+      <ErrorBoundary>
+        <MockNotifications />
+      </ErrorBoundary>
     </motion.div>
     </>
   );
