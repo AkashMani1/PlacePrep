@@ -136,7 +136,7 @@ export function AssessmentPortal() {
       await submitAssessment(userId, timeSpent, warnings);
       // Clean up recovery data
       localStorage.removeItem('placeprep-assessment-recovery');
-      router.push('/mockhub/assessment/history');
+      router.push('/mockhub/assessment');
     } catch (e) {
       console.error(e);
     }

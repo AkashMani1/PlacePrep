@@ -28,7 +28,7 @@ const MODULES = [
     title: 'Assessment Engine',
     desc: 'Full-screen proctored aptitude tests modeled after TCS NQT, Infosys, Amazon, and Accenture.',
     icon: Target,
-    href: '/mockhub/assessment/history',
+    href: '/mockhub/assessment',
     color: 'from-primary/10 to-indigo-600/10',
     border: 'border-primary/20',
     iconColor: 'text-primary',
@@ -136,7 +136,7 @@ export default function MockHubView() {
                 Join Live Arena
               </button>
               <button
-                onClick={() => router.push('/mockhub/assessment/history')}
+                onClick={() => router.push('/mockhub/assessment')}
                 className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-[0.15em] hover:bg-white/10 active:scale-95 transition-all duration-200"
               >
                 <Target className="w-3.5 h-3.5 text-primary" />
