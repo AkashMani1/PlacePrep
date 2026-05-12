@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { LayoutDashboard, GitMerge, Code2, Video, BookOpen, Target, Layers, Loader2 } from 'lucide-react';
+import { LayoutDashboard, GitMerge, Code2, Video, BookOpen, Target, Layers, Loader2, Settings } from 'lucide-react';
 import Sidebar, { TabId } from '@/components/layout/Sidebar';
 import SettingsModal from '@/components/layout/SettingsModal';
 import { useApp } from '@/context/AppContext';
@@ -22,6 +22,7 @@ const DSASheetView = dynamic(() => import('@/components/dsa-sheet/DSASheetView')
 const MockHubView = dynamic(() => import('@/components/mocks/MockHubView'), { loading: () => <PageLoader /> });
 const NotesVaultView = dynamic(() => import('@/components/notes/NotesVaultView'), { loading: () => <PageLoader /> });
 const ProjectLabView = dynamic(() => import('@/components/projects/ProjectLabView'), { loading: () => <PageLoader /> });
+const AdminPanelView = dynamic(() => import('@/components/admin/AdminPanelView'), { loading: () => <PageLoader /> });
 
 const TAB_LABELS: Record<TabId, { label: string; icon: React.ElementType }> = {
   dashboard: { label: 'Overview', icon: LayoutDashboard },
@@ -31,6 +32,7 @@ const TAB_LABELS: Record<TabId, { label: string; icon: React.ElementType }> = {
   mocks: { label: 'Mock Hub', icon: Video },
   notes: { label: 'Knowledge', icon: BookOpen },
   projects: { label: 'Projects', icon: Layers },
+  admin: { label: 'Admin', icon: Settings },
 };
 
 // Custom Premium Easing (Linear/Vercel style)
@@ -129,6 +131,7 @@ export default function AppShell() {
               {activeTab === 'mocks' && <MockHubView />}
               {activeTab === 'notes' && <NotesVaultView />}
               {activeTab === 'projects' && <ProjectLabView />}
+              {activeTab === 'admin' && <AdminPanelView />}
             </motion.div>
           </AnimatePresence>
         </div>

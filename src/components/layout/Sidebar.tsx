@@ -12,9 +12,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import Link from 'next/link';
 
-export type TabId = 'dashboard' | 'roadmap' | 'dsa' | 'dsaSheet' | 'mocks' | 'notes' | 'projects';
+export type TabId = 'dashboard' | 'roadmap' | 'dsa' | 'dsaSheet' | 'mocks' | 'notes' | 'projects' | 'admin';
 
-const NAV_ITEMS: { id: TabId; icon: React.ElementType; label: string; badge?: string }[] = [
+const NAV_ITEMS: { id: TabId; icon: React.ElementType; label: string; badge?: string; adminOnly?: boolean }[] = [
   { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { id: 'roadmap', icon: Compass, label: '3-Month Roadmap' },
   { id: 'dsa', icon: ListChecks, label: 'Must Do List' },
@@ -22,6 +22,7 @@ const NAV_ITEMS: { id: TabId; icon: React.ElementType; label: string; badge?: st
   { id: 'mocks', icon: PlayCircle, label: 'Mock Hub' },
   { id: 'notes', icon: Library, label: 'Knowledge Base' },
   { id: 'projects', icon: FlaskConical, label: 'Project Lab' },
+  { id: 'admin', icon: Settings, label: 'Admin Panel', adminOnly: true },
 ];
 
 interface SidebarProps {
@@ -80,7 +81,7 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen }: Side
 
       {/* Navigation */}
       <nav className="flex-1 py-10 space-y-2 overflow-y-auto custom-scrollbar pt-12">
-        {NAV_ITEMS.map(({ id, icon: Icon, label, badge }) => (
+        {NAV_ITEMS.filter(item => !item.adminOnly || user?.email === 'akashmani9955@gmail.com').map(({ id, icon: Icon, label, badge }) => (
           <Link
             key={id}
             href={id === 'dashboard' ? '/' : `/${id}`}
