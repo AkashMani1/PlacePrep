@@ -9,9 +9,11 @@ import {
 import { useMockStore } from '@/store/useMockStore';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 export function AssessmentPortal() {
+  const router = useRouter();
   const { user } = useAuth();
   const {
     currentAssessment, isAssessmentActive, submitAssessment,
@@ -118,7 +120,7 @@ export function AssessmentPortal() {
     return () => clearInterval(autosave);
   }, [isAssessmentActive, assessmentAnswers, flaggedQuestions, currentQuestionIndex, warnings]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (!currentAssessment) return;
 
     const timeSpent = Math.floor((Date.now() - startTimeRef.current) / 1000);
@@ -126,15 +128,19 @@ export function AssessmentPortal() {
 
     if (timerRef.current) clearInterval(timerRef.current);
 
-    submitAssessment(userId, timeSpent, warnings);
-
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     }
 
-    // Clean up recovery data
-    localStorage.removeItem('placeprep-assessment-recovery');
-  }, [currentAssessment, user, warnings, submitAssessment]);
+    try {
+      await submitAssessment(userId, timeSpent, warnings);
+      // Clean up recovery data
+      localStorage.removeItem('placeprep-assessment-recovery');
+      router.push('/mockhub/assessment/history');
+    } catch (e) {
+      console.error(e);
+    }
+  }, [currentAssessment, user, warnings, submitAssessment, router]);
 
   if (!currentAssessment || !isMounted) return null;
 

@@ -429,10 +429,12 @@ export const useMockStore = create<MockState>()(
           get().computeLeaderboard();
 
           toast.success('Assessment graded and saved securely!');
+          return submission.id;
         } catch (err) {
           console.error(err);
           set({ isSubmittingAssessment: false });
           toast.error('Failed to submit assessment to server. Please check your connection.', { duration: 5000 });
+          throw err;
         }
       },
 

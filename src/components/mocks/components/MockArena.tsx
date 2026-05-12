@@ -7,9 +7,11 @@ import { BentoCard } from '@/components/ui/Bento';
 import { useMockStore } from '@/store/useMockStore';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 export function MockArena() {
+  const router = useRouter();
   const {
     availableRooms, isLoadingRooms, joinRoom, createRoom,
     scheduledSessions, addScheduledSession, cancelSession,
@@ -53,7 +55,7 @@ export function MockArena() {
           ) : availableRooms.length === 0 ? (
             <div className="py-16 text-center rounded-[28px] border-2 border-dashed border-white/5 bg-white/[0.02]">
               <Globe className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-20" />
-              <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground opacity-40 mb-4">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40 mb-4">
                 No active rooms right now
               </p>
               <button
@@ -69,7 +71,7 @@ export function MockArena() {
                 <motion.div
                   key={room.id}
                   whileHover={{ x: 8, backgroundColor: 'rgba(255, 255, 255, 0.04)' }}
-                  onClick={() => joinRoom(room.id)}
+                  onClick={() => router.push(`/mockhub/interview/${room.id}`)}
                   className="group relative flex items-center justify-between p-5 rounded-[28px] bg-card/40 border border-white/5 backdrop-blur-xl transition-all cursor-pointer overflow-hidden shadow-xl"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

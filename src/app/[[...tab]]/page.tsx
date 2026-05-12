@@ -58,6 +58,10 @@ export default function AppShell() {
 
   // Sync state with URL changes
   useEffect(() => {
+    if (currentTab === 'mocks') {
+      router.replace('/mockhub');
+      return;
+    }
     if (!TAB_LABELS[currentTab]) {
       setActiveTab('dashboard');
       router.replace('/');
@@ -76,6 +80,10 @@ export default function AppShell() {
   }, []);
 
   const handleTabChange = (id: TabId) => {
+    if (id === 'mocks') {
+      router.push('/mockhub');
+      return;
+    }
     setActiveTab(id);
     router.push(id === 'dashboard' ? '/' : `/${id}`);
   };

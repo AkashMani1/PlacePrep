@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { useMockStore } from '@/store/useMockStore';
 import { toast } from 'sonner';
 import { MonacoBinding } from 'y-monaco';
+import { useRouter } from 'next/navigation';
 import { useWebRTC } from '@/hooks/useWebRTC';
 import { MockWhiteboard } from './MockWhiteboard';
 
@@ -23,6 +24,7 @@ interface ChatMessage {
 }
 
 export function InterviewRoom() {
+  const router = useRouter();
   const { activeRoom, leaveRoom } = useMockStore();
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isMicEnabled, setIsMicEnabled] = useState(true);
@@ -222,7 +224,8 @@ export function InterviewRoom() {
     providerRef.current?.destroy();
     docRef.current?.destroy();
     leaveRoom();
-  }, [leaveRoom]);
+    router.push('/mockhub/arena');
+  }, [leaveRoom, router]);
 
   if (!activeRoom || !isMounted) return null;
 

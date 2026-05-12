@@ -1,14 +1,38 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, Brain, Code2, ChevronRight, AlertCircle, BarChart, Zap, Plus } from 'lucide-react';
-import { BentoCard } from '@/components/ui/Bento';
-import { Button } from '@/components/ui/Button';
+import { Target, Brain, Code2, Clock, Zap, BarChart3, ChevronRight, AlertCircle } from 'lucide-react';
 import { useMockStore } from '@/store/useMockStore';
 import { toast } from 'sonner';
 
+const COMPANY_COLORS: Record<string, string> = {
+  TCS: 'from-blue-500 to-indigo-600',
+  Amazon: 'from-orange-400 to-amber-600',
+  Accenture: 'from-purple-500 to-violet-600',
+  Cognizant: 'from-cyan-500 to-teal-600',
+  Infosys: 'from-emerald-500 to-green-600',
+  Wipro: 'from-rose-500 to-pink-600',
+  Capgemini: 'from-sky-500 to-blue-600',
+  Deloitte: 'from-amber-500 to-yellow-600',
+};
+
+function getColor(tags: string[]) {
+  for (const tag of tags) {
+    if (COMPANY_COLORS[tag]) return COMPANY_COLORS[tag];
+  }
+  return 'from-primary to-indigo-600';
+}
+
+const DIFF_STYLES: Record<string, string> = {
+  Easy: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  Medium: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+  Hard: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+};
+
 export function AssessmentEngine() {
+  const router = useRouter();
   const { assessments, startAssessment, submissions, analytics, restoreAssessment } = useMockStore();
   const [activeTab, setActiveTab] = useState<'exams' | 'reports'>('exams');
   const [recoveryData, setRecoveryData] = useState<any>(null);
@@ -20,25 +44,16 @@ export function AssessmentEngine() {
     } catch {}
   }, []);
 
-  const COLORS: Record<string, string> = {
-    TCS: 'from-blue-500 to-indigo-600',
-    Amazon: 'from-orange-400 to-amber-600',
-    Accenture: 'from-purple-500 to-violet-600',
-    Cognizant: 'from-cyan-500 to-teal-600',
-    Infosys: 'from-emerald-500 to-green-600',
-    Wipro: 'from-rose-500 to-pink-600',
-    Capgemini: 'from-sky-500 to-blue-600',
-    Deloitte: 'from-amber-500 to-yellow-600',
-  };
-
-  const getColor = (tags: string[]) => {
-    for (const tag of tags) {
-      if (COLORS[tag]) return COLORS[tag];
+  const handleStartAssessment = (examId: string) => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {
+        toast.info('Fullscreen recommended for the best experience.');
+      });
     }
-    return 'from-primary to-indigo-600';
+    router.push(`/mockhub/assessment/${examId}`);
   };
 
-  // Compute real topic accuracy from submissions
+  // Compute topic stats
   const topicStats = submissions.length > 0
     ? (() => {
         const topics: Record<string, { correct: number; total: number }> = {};
@@ -49,256 +64,268 @@ export function AssessmentEngine() {
             const topic = q.topic || q.type;
             if (!topics[topic]) topics[topic] = { correct: 0, total: 0 };
             topics[topic].total++;
-            if (sub.telemetry) {
-              // Approximate: if overall accuracy is known
-              topics[topic].correct += sub.accuracy / 100;
-            }
+            topics[topic].correct += sub.accuracy / 100;
           });
         });
         return Object.entries(topics).map(([label, data]) => ({
           label,
           value: data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0,
-          color: label.includes('Quant') ? 'text-blue-500' : label.includes('DSA') || label.includes('coding') ? 'text-primary' : label.includes('Verbal') ? 'text-emerald-500' : 'text-amber-500',
         }));
       })()
     : [
-        { label: 'Quantitative', value: 0, color: 'text-blue-500' },
-        { label: 'Coding / DSA', value: 0, color: 'text-primary' },
-        { label: 'Verbal', value: 0, color: 'text-emerald-500' },
-        { label: 'Logical', value: 0, color: 'text-amber-500' },
+        { label: 'Quantitative', value: 0 },
+        { label: 'Coding / DSA', value: 0 },
+        { label: 'Verbal', value: 0 },
+        { label: 'Logical', value: 0 },
       ];
 
-  const handleStartAssessment = (examId: string) => {
-    startAssessment(examId);
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {
-        toast.info('Fullscreen recommended for the best experience.');
-      });
-    }
-  };
-
   return (
-    <div className="mt-20 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-2">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <Target className="w-6 h-6 text-primary" />
-            <h2 className="text-2xl font-black uppercase tracking-tight text-foreground">Assessment Engine</h2>
-          </div>
-          <p className="text-sm font-medium text-muted-foreground tracking-tight max-w-xl">
-            Simulate real hiring assessments with fullscreen immersion and sectional timing.
-          </p>
+    <div className="space-y-8 mt-12">
+
+      {/* Section Header + Tabs */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Target className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-black tracking-tight text-white">Assessment Engine</h2>
         </div>
 
-        <div className="flex items-center gap-3 bg-black/40 p-2 rounded-[24px] border border-white/5 backdrop-blur-xl">
-          <button
-            onClick={() => setActiveTab('exams')}
-            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-              activeTab === 'exams' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Exam Hall
-          </button>
-          <button
-            onClick={() => setActiveTab('reports')}
-            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-              activeTab === 'reports' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Past Reports ({submissions.length})
-          </button>
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/8">
+          {(['exams', 'reports'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`relative px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-200 ${
+                activeTab === tab
+                  ? 'text-white'
+                  : 'text-muted-foreground hover:text-white/80'
+              }`}
+            >
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="engine-tab-pill"
+                  className="absolute inset-0 bg-primary rounded-lg"
+                  transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                />
+              )}
+              <span className="relative z-10">
+                {tab === 'exams' ? 'Exam Hall' : `Reports (${submissions.length})`}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {recoveryData && activeTab === 'exams' && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 p-6 rounded-[24px] bg-amber-500/10 border border-amber-500/20 flex items-center justify-between"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-amber-500" />
+      {/* Recovery Banner */}
+      <AnimatePresence>
+        {recoveryData && activeTab === 'exams' && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="flex items-center gap-4 p-4 rounded-2xl bg-amber-500/8 border border-amber-500/20"
+          >
+            <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/20 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 text-amber-400" />
             </div>
-            <div>
-              <h3 className="text-sm font-black text-amber-500 uppercase tracking-widest">Ongoing Assessment Detected</h3>
-              <p className="text-[10px] font-medium text-amber-500/80">You have an unfinished assessment. Would you like to resume?</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-black text-amber-400 uppercase tracking-widest">Session Recovery Available</p>
+              <p className="text-[10px] text-amber-400/70 font-medium mt-0.5">Unfinished assessment detected — resume or discard.</p>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button onClick={() => {
-              localStorage.removeItem('placeprep-assessment-recovery');
-              setRecoveryData(null);
-            }} variant="secondary" className="text-rose-500 hover:text-rose-400">Discard</Button>
-            <Button onClick={() => {
-              restoreAssessment(recoveryData);
-              if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => {});
-              }
-              setRecoveryData(null);
-            }} className="bg-amber-500 text-black hover:bg-amber-400">Resume Now</Button>
-          </div>
-        </motion.div>
-      )}
-
-      {activeTab === 'exams' ? (
-        <div className="grid grid-cols-12 gap-8">
-          <div className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {assessments.map((exam, i) => (
-              <motion.div
-                key={exam.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -8 }}
-                className="group relative rounded-[40px] border border-white/5 bg-card/40 backdrop-blur-3xl p-8 overflow-hidden shadow-2xl transition-all hover:border-primary/40"
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { localStorage.removeItem('placeprep-assessment-recovery'); setRecoveryData(null); }}
+                className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-rose-400 hover:bg-rose-500/10 transition-colors"
               >
-                <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${getColor(exam.companyTags)} opacity-10 blur-[50px] group-hover:opacity-20 transition-opacity`} />
+                Discard
+              </button>
+              <button
+                onClick={() => {
+                  restoreAssessment(recoveryData);
+                  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+                  setRecoveryData(null);
+                }}
+                className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-amber-500 text-black hover:bg-amber-400 transition-colors"
+              >
+                Resume
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-                <div className="flex flex-col h-full gap-6 relative z-10">
-                  <div className="flex items-start justify-between">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getColor(exam.companyTags)} flex items-center justify-center shadow-lg`}>
-                      {exam.difficulty === 'Hard' ? <Code2 className="w-6 h-6 text-white" /> : <Brain className="w-6 h-6 text-white" />}
+      <AnimatePresence mode="wait">
+        {activeTab === 'exams' ? (
+          <motion.div
+            key="exams"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+          >
+            {/* Exam Cards */}
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {assessments.map((exam, i) => (
+                <motion.div
+                  key={exam.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06, ease: [0.32, 0.72, 0, 1] }}
+                  className="group relative flex flex-col rounded-[20px] border border-white/8 bg-card/40 backdrop-blur-xl p-5 overflow-hidden hover:border-white/15 transition-all duration-200"
+                >
+                  {/* Subtle gradient accent */}
+                  <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${getColor(exam.companyTags)} opacity-[0.07] blur-2xl pointer-events-none`} />
+
+                  <div className="flex items-start justify-between mb-4 relative z-10">
+                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${getColor(exam.companyTags)} flex items-center justify-center shadow-lg`}>
+                      {exam.difficulty === 'Hard'
+                        ? <Code2 className="w-4 h-4 text-white" />
+                        : <Brain className="w-4 h-4 text-white" />
+                      }
                     </div>
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/10">
-                      {exam.category}
+                    <span className={`px-2.5 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest ${DIFF_STYLES[exam.difficulty] || DIFF_STYLES.Medium}`}>
+                      {exam.difficulty}
                     </span>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <h3 className="text-xl font-black tracking-tight text-foreground">{exam.title}</h3>
-                    <p className="text-[10px] font-medium text-muted-foreground leading-relaxed">{exam.description}</p>
-                    <div className="flex items-center gap-4 text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-2">
-                      <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-yellow-500" /> {exam.totalQuestions} Qs</span>
-                      <span className="flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5 text-primary" /> {exam.durationMinutes}m</span>
-                    </div>
+                  <div className="flex-1 relative z-10 space-y-1.5 mb-4">
+                    <h3 className="text-sm font-black text-white tracking-tight leading-tight">{exam.title}</h3>
+                    <p className="text-[10px] text-muted-foreground/70 font-medium leading-relaxed line-clamp-2">{exam.description}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4 relative z-10">
+                    <span className="flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-amber-500/60" />
+                      {exam.totalQuestions} questions
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-white/10" />
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {exam.durationMinutes}m
+                    </span>
                   </div>
 
                   <button
                     onClick={() => handleStartAssessment(exam.id)}
-                    className="mt-auto w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-[11px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white hover:border-primary transition-all shadow-xl group/btn flex items-center justify-center gap-3"
+                    className="relative z-10 w-full py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground hover:bg-primary hover:text-white hover:border-primary group/btn transition-all duration-200 flex items-center justify-center gap-2"
                   >
-                    Enter Simulation
-                    <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    Begin Assessment
+                    <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
                   </button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
 
-          {/* Telemetry */}
-          <div className="col-span-12 lg:col-span-4 space-y-6">
-            <BentoCard className="bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent border-white/5 shadow-2xl h-full">
-              <div className="space-y-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                    <BarChart className="w-5 h-5 text-indigo-500" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black uppercase tracking-widest text-foreground">Assessment IQ</h4>
-                    <p className="text-[10px] font-semibold text-muted-foreground">
-                      {submissions.length > 0 ? `Based on ${submissions.length} attempts` : 'Complete assessments to see stats'}
-                    </p>
-                  </div>
+            {/* Topic Performance Sidebar */}
+            <div className="space-y-4">
+              <div className="p-5 rounded-[20px] bg-card/40 border border-white/8 backdrop-blur-xl space-y-5">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-primary" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Topic Accuracy</p>
                 </div>
 
-                <div className="space-y-6">
-                  {topicStats.map((metric) => (
-                    <div key={metric.label} className="space-y-2">
-                      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                        <span className="text-muted-foreground">{metric.label}</span>
-                        <span className={metric.color}>{metric.value}%</span>
+                <div className="space-y-4">
+                  {topicStats.slice(0, 6).map((topic) => (
+                    <div key={topic.label} className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-muted-foreground/70 truncate pr-2">{topic.label}</span>
+                        <span className={`text-[10px] font-black tabular-nums ${
+                          topic.value >= 70 ? 'text-emerald-400' : topic.value >= 50 ? 'text-amber-400' : 'text-rose-400'
+                        }`}>{topic.value}%</span>
                       </div>
-                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-1 w-full bg-white/[0.04] rounded-full overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
-                          animate={{ width: `${metric.value}%` }}
-                          transition={{ duration: 1.5, ease: [0.32, 0.72, 0, 1] }}
-                          className={`h-full bg-current ${metric.color}`}
+                          animate={{ width: `${topic.value}%` }}
+                          transition={{ duration: 1, ease: [0.32, 0.72, 0, 1], delay: 0.2 }}
+                          className={`h-full rounded-full ${
+                            topic.value >= 70 ? 'bg-emerald-500' : topic.value >= 50 ? 'bg-amber-500' : 'bg-rose-500'
+                          }`}
                         />
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="p-6 rounded-[28px] bg-indigo-500/5 border border-indigo-500/10">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Zap className="w-4 h-4 text-indigo-500" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">
-                      {submissions.length > 0 ? 'Adaptive Goal' : 'Get Started'}
-                    </span>
-                  </div>
-                  <p className="text-xs font-semibold text-muted-foreground leading-relaxed">
-                    {submissions.length > 0
-                      ? `Your overall accuracy is ${analytics.avgAccuracy.toFixed(0)}%. ${
-                          analytics.avgAccuracy < 70
-                            ? 'Focus on fundamentals and timed practice.'
-                            : 'Try harder assessments to push your limits.'
-                        }`
-                      : 'Take your first assessment to generate personalized insights and adaptive goals.'
-                    }
+                {submissions.length === 0 && (
+                  <p className="text-[9px] text-muted-foreground/40 font-medium text-center py-2">
+                    Complete assessments to see your topic accuracy
                   </p>
-                </div>
+                )}
               </div>
-            </BentoCard>
-          </div>
-        </div>
-      ) : (
-        /* Past Reports Tab */
-        <div className="space-y-4">
-          {submissions.length === 0 ? (
-            <div className="py-20 text-center rounded-[48px] border-2 border-dashed border-white/5 bg-white/[0.02]">
-              <BarChart className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-              <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground opacity-40">
-                No assessment reports yet
-              </p>
+
+              {/* Adaptive Goal */}
+              <div className="p-5 rounded-[20px] bg-primary/[0.06] border border-primary/15 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-primary" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-primary">Adaptive Goal</p>
+                </div>
+                <p className="text-xs text-muted-foreground/70 font-medium leading-relaxed">
+                  {submissions.length > 0
+                    ? analytics.avgAccuracy < 70
+                      ? `Your accuracy is ${analytics.avgAccuracy.toFixed(0)}%. Focus on Easy/Medium assessments to build fundamentals.`
+                      : `Strong at ${analytics.avgAccuracy.toFixed(0)}%. Push harder with Hard-difficulty assessments.`
+                    : 'Take your first assessment to generate personalized adaptive goals and topic breakdowns.'
+                  }
+                </p>
+              </div>
             </div>
-          ) : (
-            [...submissions].reverse().map((sub, i) => {
-              const assessment = assessments.find(a => a.id === sub.assessmentId);
-              return (
-                <motion.div
-                  key={sub.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="p-6 rounded-[28px] bg-card/40 border border-white/5 flex items-center justify-between gap-6"
-                >
-                  <div className="flex items-center gap-6">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      sub.accuracy >= 80 ? 'bg-emerald-500/20 text-emerald-500' :
-                      sub.accuracy >= 60 ? 'bg-primary/20 text-primary' :
-                      'bg-rose-500/20 text-rose-500'
+          </motion.div>
+        ) : (
+          /* Past Reports */
+          <motion.div
+            key="reports"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-3"
+          >
+            {submissions.length === 0 ? (
+              <div className="py-20 text-center rounded-[20px] border border-dashed border-white/8">
+                <BarChart3 className="w-8 h-8 text-muted-foreground/20 mx-auto mb-3" />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/30">No reports yet</p>
+              </div>
+            ) : (
+              [...submissions].reverse().map((sub, i) => {
+                const assessment = assessments.find(a => a.id === sub.assessmentId);
+                const accColor = sub.accuracy >= 80 ? 'text-emerald-400' : sub.accuracy >= 60 ? 'text-amber-400' : 'text-rose-400';
+                return (
+                  <motion.div
+                    key={sub.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex items-center gap-4 p-4 rounded-[16px] bg-card/40 border border-white/8 hover:bg-white/[0.03] transition-colors"
+                  >
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                      sub.accuracy >= 80 ? 'bg-emerald-500/10' : sub.accuracy >= 60 ? 'bg-amber-500/10' : 'bg-rose-500/10'
                     }`}>
-                      <Target className="w-6 h-6" />
+                      <Target className={`w-4 h-4 ${accColor}`} />
                     </div>
-                    <div>
-                      <h4 className="text-sm font-black text-foreground">{assessment?.title || 'Assessment'}</h4>
-                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
-                        {new Date(sub.completedAt).toLocaleDateString()} • {Math.round(sub.timeSpentSeconds / 60)}m
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-black text-white truncate">{assessment?.title || 'Assessment'}</p>
+                      <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-0.5">
+                        {new Date(sub.completedAt).toLocaleDateString()} · {Math.round(sub.timeSpentSeconds / 60)}m
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-8">
-                    <div className="text-right">
-                      <span className={`text-2xl font-black tabular-nums ${
-                        sub.accuracy >= 80 ? 'text-emerald-500' : sub.accuracy >= 60 ? 'text-primary' : 'text-rose-500'
-                      }`}>
-                        {sub.accuracy.toFixed(0)}%
-                      </span>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Accuracy</p>
+
+                    <div className="flex items-center gap-6 shrink-0">
+                      <div className="text-right">
+                        <p className={`text-xl font-black tabular-nums ${accColor}`}>{sub.accuracy.toFixed(0)}%</p>
+                        <p className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">accuracy</p>
+                      </div>
+                      <div className="text-right hidden sm:block">
+                        <p className="text-sm font-black text-white tabular-nums">{sub.score}/{sub.maxScore}</p>
+                        <p className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">score</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-2xl font-black tabular-nums text-foreground">{sub.score}/{sub.maxScore}</span>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Score</p>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })
-          )}
-        </div>
-      )}
+                  </motion.div>
+                );
+              })
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
