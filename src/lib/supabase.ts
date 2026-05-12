@@ -13,7 +13,16 @@ if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
   );
 }
 
+// ── Browser-safe client (respects RLS) ───────────────────────────────────────
 export const supabase = createClient(supabaseUrl, supabaseKey);
+
+// ── Server-only admin client (bypasses RLS — never expose to browser) ────────
+// Only available in API routes / server components (no NEXT_PUBLIC_ prefix)
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? supabaseKey;
+export const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
+
 
 export type Json =
   | string

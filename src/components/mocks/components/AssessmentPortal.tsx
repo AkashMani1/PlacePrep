@@ -23,6 +23,7 @@ export function AssessmentPortal() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [warnings, setWarnings] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
+  const [timerReady, setTimerReady] = useState(false);
 
   // ── Stable timer with useRef (fixes C7) ─────────────────────────────
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -39,8 +40,10 @@ export function AssessmentPortal() {
     durationRef.current = totalSeconds;
     startTimeRef.current = Date.now();
     setTimeLeft(totalSeconds);
+    setTimerReady(false); // Reset guard
+    // Slight delay before enabling auto-submit guard to prevent false triggers
+    const readyTimer = setTimeout(() => setTimerReady(true), 2000);
 
-    // Single stable interval
     timerRef.current = setInterval(() => {
       const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
       const remaining = Math.max(0, durationRef.current - elapsed);
@@ -49,6 +52,7 @@ export function AssessmentPortal() {
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      clearTimeout(readyTimer);
     };
   }, [currentAssessment?.id, isAssessmentActive]);
 
@@ -62,9 +66,9 @@ export function AssessmentPortal() {
     return () => { document.body.style.overflow = ''; };
   }, [isAssessmentActive]);
 
-  // Auto-submit when time runs out
+  // Auto-submit when time runs out (guard: only fire when timer is initialized)
   useEffect(() => {
-    if (timeLeft === 0 && isAssessmentActive && currentAssessment) {
+    if (timeLeft === 0 && isAssessmentActive && currentAssessment && timerReady) {
       handleSubmit();
     }
   }, [timeLeft]);

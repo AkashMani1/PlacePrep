@@ -4,17 +4,16 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Video, VideoOff, Mic, MicOff, ScreenShare, ScreenShareOff,
-  Settings, X, Code2, PenTool, Send, Play
+  X, Code2, PenTool, Send, Play, Clock
 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { Button } from '@/components/ui/Button';
 import { useMockStore } from '@/store/useMockStore';
 import { toast } from 'sonner';
-import * as Y from 'yjs';
-import { WebrtcProvider } from 'y-webrtc';
 import { MonacoBinding } from 'y-monaco';
 import { useWebRTC } from '@/hooks/useWebRTC';
 import { MockWhiteboard } from './MockWhiteboard';
+
 
 interface ChatMessage {
   id: string;
@@ -34,6 +33,7 @@ export function InterviewRoom() {
   const [chatInput, setChatInput] = useState('');
   const [codeOutput, setCodeOutput] = useState('');
   const [language, setLanguage] = useState('javascript');
+  const [sessionSeconds, setSessionSeconds] = useState(0);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -41,8 +41,20 @@ export function InterviewRoom() {
   const providerRef = useRef<any>(null);
   const docRef = useRef<any>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const sessionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => { setIsMounted(true); }, []);
+
+  // Session timer
+  useEffect(() => {
+    if (!activeRoom) return;
+    sessionTimerRef.current = setInterval(() => {
+      setSessionSeconds(s => s + 1);
+    }, 1000);
+    return () => {
+      if (sessionTimerRef.current) clearInterval(sessionTimerRef.current);
+    };
+  }, [activeRoom]);
 
   useEffect(() => {
     if (activeRoom) {
@@ -92,14 +104,27 @@ export function InterviewRoom() {
   useEffect(() => {
     if (!activeRoom || !isMounted) return;
 
-    docRef.current = new Y.Doc();
-    providerRef.current = new WebrtcProvider(`mock-room-${activeRoom.id}`, docRef.current, {
-      signaling: [
-        'wss://signaling.yjs.dev',
-        'wss://y-webrtc-signaling-eu.herokuapp.com',
-        'wss://y-webrtc-signaling-us.herokuapp.com',
-        'wss://y-webrtc.herokuapp.com'
-      ],
+    // Production-ready signaling servers (ordered by priority)
+    const signalingServers = [
+      // Custom server (set NEXT_PUBLIC_YJS_SERVER for enterprise deployment)
+      ...(process.env.NEXT_PUBLIC_YJS_SERVER ? [`wss://${process.env.NEXT_PUBLIC_YJS_SERVER}`] : []),
+      // Hosted fallbacks
+      'wss://signaling.yjs.dev',
+      'wss://y-webrtc-signaling-eu.onrender.com',
+    ];
+
+    import('yjs').then(Y => {
+      docRef.current = new Y.Doc();
+      import('y-webrtc').then(({ WebrtcProvider }) => {
+        providerRef.current = new WebrtcProvider(
+          `placeprep-editor-${activeRoom.id}`,
+          docRef.current,
+          {
+            signaling: signalingServers,
+            password: activeRoom.id,
+          }
+        );
+      }).catch(e => console.warn('[YJS] WebRTC provider init failed:', e));
     });
 
     return () => {
@@ -107,6 +132,7 @@ export function InterviewRoom() {
       docRef.current?.destroy();
     };
   }, [activeRoom?.id, isMounted]);
+
 
   const handleEditorDidMount = (editor: any) => {
     if (!isMounted || !docRef.current || !providerRef.current) return;
@@ -330,8 +356,16 @@ export function InterviewRoom() {
           </div>
 
           <div className="flex items-center gap-4 md:gap-6">
+            {/* Session Timer */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
+              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-black tabular-nums text-muted-foreground uppercase tracking-widest">
+                {String(Math.floor(sessionSeconds / 60)).padStart(2, '0')}:{String(sessionSeconds % 60).padStart(2, '0')}
+              </span>
+            </div>
             <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+
               <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500 hidden md:inline">Connected</span>
             </div>
             <Button onClick={handleCodeSubmit} size="sm" className="bg-emerald-600 text-[10px]">

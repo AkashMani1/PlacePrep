@@ -5,6 +5,11 @@ import { supabase } from '@/lib/supabase';
 import { SEED_ASSESSMENTS } from '@/lib/mockQuestions';
 import { toast } from 'sonner';
 
+// ── Connection health tracker ─────────────────────────────────
+let _dbHealthy = true;
+const setDbHealth = (healthy: boolean) => { _dbHealthy = healthy; };
+export const isDbHealthy = () => _dbHealthy;
+
 // ── Types ────────────────────────────────────────────────────────────────
 
 interface MockRoom {
@@ -173,7 +178,7 @@ export const useMockStore = create<MockState>()(
       availableRooms: [],
       isLoadingRooms: false,
 
-      assessments: SEED_ASSESSMENTS,
+      assessments: [],
       currentAssessment: null,
       isAssessmentActive: false,
       lastSubmission: null,
@@ -207,40 +212,51 @@ export const useMockStore = create<MockState>()(
         try {
           const { data, error } = await supabase
             .from('mock_rooms')
-            .select('*')
-            .eq('status', 'open');
+            .select('*, room_participants(*)')
+            .eq('status', 'waiting')
+            .order('created_at', { ascending: false })
+            .limit(20);
 
-          if (data && !error && data.length > 0) {
-            set({ availableRooms: data as any, isLoadingRooms: false });
-          } else {
-            set({ availableRooms: [], isLoadingRooms: false });
-          }
+          setDbHealth(!error);
+          set({ availableRooms: (data as any) ?? [], isLoadingRooms: false });
         } catch {
+          setDbHealth(false);
           set({ availableRooms: [], isLoadingRooms: false });
         }
       },
 
       createRoom: async (roomData) => {
+        const roomId = crypto.randomUUID();
         const newRoom: MockRoom = {
-          id: crypto.randomUUID(),
+          id: roomId,
           title: roomData.title || 'New Session',
           type: roomData.type || 'Technical (DSA)',
           company: roomData.company || 'General',
           difficulty: roomData.difficulty || 'Medium',
           duration: '45m',
-          maxParticipants: 4,
-          participants: [{ userId: 'local', displayName: 'You', role: 'interviewer', isOnline: true }],
+          participants: [],
           rating: 0,
-          status: 'open',
+          status: 'waiting',
           ...roomData,
         } as MockRoom;
 
-        try {
-          await supabase.from('mock_rooms').insert([newRoom]);
-        } catch { /* offline mode */ }
+        if (_dbHealthy) {
+          const { error } = await supabase.from('mock_rooms').insert([{
+            id: roomId,
+            title: newRoom.title,
+            type: newRoom.type,
+            difficulty: newRoom.difficulty,
+            company: newRoom.company,
+            status: 'waiting',
+          }]);
+          if (error) {
+            console.warn('Room creation DB error:', error.message);
+            toast.warning('Room created locally — DB sync failed. Check connection.');
+          }
+        }
 
         set({ activeRoom: newRoom });
-        toast.success('Room created successfully');
+        toast.success('Interview room created!');
       },
 
       joinRoom: async (roomId) => {
@@ -249,23 +265,10 @@ export const useMockStore = create<MockState>()(
 
         if (room) {
           set({ activeRoom: room });
+          toast.success('Joined room');
         } else {
-          // Create a local room representation
-          set({
-            activeRoom: {
-              id: roomId,
-              title: 'Live Mock Session',
-              type: 'Technical (DSA)',
-              company: 'General',
-              difficulty: 'Medium',
-              duration: '45m',
-              participants: [{ userId: 'local', displayName: 'You', role: 'interviewee', isOnline: true }],
-              rating: 0,
-              status: 'ongoing',
-            } as MockRoom,
-          });
+          toast.error('Room not found or no longer active.');
         }
-        toast.success('Joined room');
       },
 
       leaveRoom: () => {
@@ -278,20 +281,48 @@ export const useMockStore = create<MockState>()(
       fetchAssessments: async () => {
         set({ isLoadingAssessments: true });
         try {
-          const { data, error } = await supabase.from('assessments').select('*, questions(*)');
+          const { data, error } = await supabase
+            .from('assessments')
+            .select('*, questions(*)')
+            .eq('is_active', true);
+
           if (data && !error && data.length > 0) {
-            set({ assessments: data as any, isLoadingAssessments: false });
+            setDbHealth(true);
+            // Normalize DB column names (snake_case → camelCase)
+            const normalized = data.map((a: any) => ({
+              ...a,
+              durationMinutes: a.duration_minutes ?? a.durationMinutes,
+              totalQuestions: a.total_questions ?? a.totalQuestions,
+              companyTags: a.company_tags ?? a.companyTags ?? [],
+              questions: (a.questions ?? []).map((q: any) => ({
+                ...q,
+                correctAnswer: q.correct_answer ?? q.correctAnswer,
+                solutionExplanation: q.solution_explanation ?? q.solutionExplanation,
+                estimatedTimeSeconds: q.estimated_time_seconds ?? q.estimatedTimeSeconds,
+              })),
+            }));
+            set({ assessments: normalized, isLoadingAssessments: false });
           } else {
+            // DB is empty or schema missing — fall back to seed data
+            setDbHealth(false);
+            console.warn('[Mock Hub] Assessments table empty or missing — using seed data.');
             set({ assessments: SEED_ASSESSMENTS, isLoadingAssessments: false });
           }
-        } catch {
+        } catch (err) {
+          console.warn('[Mock Hub] Cannot reach DB — using seed data.', err);
           set({ assessments: SEED_ASSESSMENTS, isLoadingAssessments: false });
         }
       },
 
       startAssessment: (assessmentId) => {
         const assessments = get().assessments;
-        const exam = assessments.find(a => a.id === assessmentId) || SEED_ASSESSMENTS.find(a => a.id === assessmentId) || SEED_ASSESSMENTS[0];
+        // DB-first, then seed fallback
+        const exam = assessments.find(a => a.id === assessmentId)
+          || SEED_ASSESSMENTS.find(a => a.id === assessmentId);
+        if (!exam) {
+          toast.error('Assessment not found');
+          return;
+        }
         set({
           currentAssessment: exam,
           isAssessmentActive: true,
@@ -300,8 +331,21 @@ export const useMockStore = create<MockState>()(
         });
       },
 
-      restoreAssessment: (recoveryData) => {
-        const assessment = SEED_ASSESSMENTS.find(a => a.id === recoveryData.assessmentId);
+      restoreAssessment: async (recoveryData) => {
+        const assessments = get().assessments;
+        // Try in-memory first (instant), then DB, then seed
+        let assessment = assessments.find(a => a.id === recoveryData.assessmentId)
+          || SEED_ASSESSMENTS.find(a => a.id === recoveryData.assessmentId);
+
+        if (!assessment && _dbHealthy) {
+          const { data } = await supabase
+            .from('assessments')
+            .select('*, questions(*)')
+            .eq('id', recoveryData.assessmentId)
+            .single();
+          assessment = data as any;
+        }
+
         if (assessment) {
           set({
             currentAssessment: assessment,
@@ -311,7 +355,7 @@ export const useMockStore = create<MockState>()(
           });
           toast.success('Assessment session recovered.');
         } else {
-          toast.error('Could not find the original assessment.');
+          toast.error('Could not recover the assessment — it may have been deleted.');
         }
       },
 
@@ -429,91 +473,97 @@ export const useMockStore = create<MockState>()(
       startMatchmaking: async (userId: string, displayName: string) => {
         set({ isMatchmaking: true, matchmakingStatus: 'Joining queue...' });
 
-        // 1. Join queue in Supabase
-        const { error } = await supabase.from('matchmaking_queue').insert([{
+        let channel: ReturnType<typeof supabase.channel> | null = null;
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+        const cleanupAndReset = async (reason?: string) => {
+          if (timeoutId) clearTimeout(timeoutId);
+          if (channel) { supabase.removeChannel(channel); channel = null; }
+          try {
+            await supabase.from('matchmaking_queue').delete().eq('user_id', userId);
+          } catch { /* ignore cleanup errors */ }
+          set({ isMatchmaking: false, matchmakingStatus: '' });
+          if (reason) toast.error(reason);
+        };
+
+        // 1. Upsert into queue (handles duplicate entries gracefully)
+        const { error } = await supabase.from('matchmaking_queue').upsert([{
           user_id: userId,
           display_name: displayName,
-          role: 'interviewee', // Simplified role for now
+          role: 'interviewee',
           company: 'General',
-        }]);
+          difficulty: 'Medium',
+        }], { onConflict: 'user_id' });
 
         if (error) {
-          console.warn('Matchmaking DB error (table might be missing):', error.message);
-          set({ matchmakingStatus: 'Simulating peer discovery (DB Table Missing)...' });
-          
-          // Simulation Fallback for Demo/Audit
-          setTimeout(() => {
-            const mockRoom = {
-              id: crypto.randomUUID(),
-              title: 'Simulated Interview Room',
-              type: 'Technical (DSA)',
-              status: 'active',
-              created_at: new Date().toISOString(),
-              participants: [
-                { userId: userId, displayName: displayName, role: 'interviewee' },
-                { userId: 'simulated-peer', displayName: 'FAANG Interviewer (AI)', role: 'interviewer' }
-              ]
-            };
-            set({
-              isMatchmaking: false,
-              matchmakingStatus: '',
-              activeRoom: mockRoom as any
-            });
-            toast.success('Simulated peer found! Entering room...');
-          }, 5000);
+          console.warn('[Matchmaking] Queue insert failed:', error.code, error.message);
+          setDbHealth(false);
+          await cleanupAndReset();
+          toast.error(
+            error.code === 'PGRST205'
+              ? 'Database not ready — run schema migrations first.'
+              : `Matchmaking unavailable: ${error.message}`
+          );
           return;
         }
 
         set({ matchmakingStatus: 'Searching for peers...' });
 
-        // 2. Subscribe to mock_rooms to detect when a room is created for this user
-        const channel = supabase.channel(`matchmaking:${userId}`)
-          .on('postgres_changes', {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'mock_rooms',
-          }, (payload) => {
-            // Check if this new room has us as a participant
-            supabase.from('room_participants')
-              .select('*')
-              .eq('room_id', payload.new.id)
-              .eq('user_id', userId)
-              .then(async ({ data: partData }) => {
-                if (partData && partData.length > 0) {
-                  // Fetch all participants for this room
-                  const { data: allParticipants } = await supabase
-                    .from('room_participants')
-                    .select('user_id, display_name, role')
-                    .eq('room_id', payload.new.id);
+        // 2. Subscribe to realtime room assignments
+        channel = supabase.channel(`matchmaking:${userId}`, {
+          config: { broadcast: { ack: false } }
+        });
 
-                  // We got matched!
-                  set({
-                    isMatchmaking: false,
-                    matchmakingStatus: '',
-                    activeRoom: {
-                      ...payload.new,
-                      participants: (allParticipants || []).map(p => ({
-                        userId: p.user_id,
-                        displayName: p.display_name,
-                        role: p.role
-                      }))
-                    } as any,
-                  });
-                  supabase.removeChannel(channel);
-                  toast.success('Match found! Entering room...');
-                }
-              });
-          })
-          .subscribe();
+        channel.on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'room_participants',
+          filter: `user_id=eq.${userId}`,
+        }, async (payload: any) => {
+          const roomId = payload.new?.room_id;
+          if (!roomId) return;
 
-        // 3. Fallback edge case: if we don't get matched in 30s, cancel queue
-        setTimeout(async () => {
-          const state = get();
-          if (state.isMatchmaking) {
-            await supabase.from('matchmaking_queue').delete().eq('user_id', userId);
-            supabase.removeChannel(channel);
-            set({ isMatchmaking: false, matchmakingStatus: '' });
-            toast.error('No peers found. Please try again later.');
+          const { data: roomData } = await supabase
+            .from('mock_rooms')
+            .select('*, room_participants(*)')
+            .eq('id', roomId)
+            .single();
+
+          if (roomData) {
+            if (timeoutId) clearTimeout(timeoutId);
+            if (channel) { supabase.removeChannel(channel); channel = null; }
+            set({
+              isMatchmaking: false,
+              matchmakingStatus: '',
+              activeRoom: {
+                id: roomData.id,
+                title: roomData.title,
+                type: roomData.type,
+                company: roomData.company || 'General',
+                difficulty: roomData.difficulty,
+                duration: roomData.duration || '45m',
+                participants: (roomData.room_participants || []).map((p: any) => ({
+                  userId: p.user_id,
+                  displayName: p.display_name || 'Anonymous',
+                  role: p.role,
+                  isOnline: p.is_online ?? true,
+                })),
+                rating: 0,
+                status: roomData.status,
+              } as MockRoom,
+            });
+            toast.success('Match found! Entering interview room...');
+          }
+        }).subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            cleanupAndReset('Realtime connection failed. Check your network.');
+          }
+        });
+
+        // 3. 30-second timeout — surface clear error, never leave infinite state
+        timeoutId = setTimeout(async () => {
+          if (get().isMatchmaking) {
+            await cleanupAndReset('No peers found in 30 seconds. Try again soon.');
           }
         }, 30000);
       },
