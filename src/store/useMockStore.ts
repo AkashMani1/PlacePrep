@@ -111,7 +111,7 @@ interface MockState {
 
   // Actions
   fetchRooms: () => Promise<void>;
-  createRoom: (room: Partial<MockRoom>) => Promise<void>;
+  createRoom: (room: Partial<MockRoom>) => Promise<string>;
   joinRoom: (roomId: string) => Promise<void>;
   leaveRoom: () => void;
 
@@ -256,7 +256,7 @@ export const useMockStore = create<MockState>()(
         }
 
         set({ activeRoom: newRoom });
-        toast.success('Interview room created!');
+        return roomId;
       },
 
       joinRoom: async (roomId) => {
@@ -488,9 +488,8 @@ export const useMockStore = create<MockState>()(
           if (reason) toast.error(reason);
         };
 
-        // 1. Upsert into queue (handles duplicate entries gracefully)
         const { error } = await supabase.from('matchmaking_queue').upsert([{
-          user_id: userId,
+          user_id: userId === 'anon' ? crypto.randomUUID() : userId,
           display_name: displayName,
           role: 'interviewee',
           company: 'General',

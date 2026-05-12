@@ -59,7 +59,11 @@ export function MockArena() {
                 No active rooms right now
               </p>
               <button
-                onClick={() => createRoom({ title: 'Open Practice Room', type: 'Technical (DSA)', difficulty: 'Medium' })}
+                onClick={async () => {
+                  const roomId = await createRoom({ title: 'Open Practice Room', type: 'Technical (DSA)', difficulty: 'Medium' });
+                  toast.success('Interview room created!');
+                  router.push(`/mockhub/interview/${roomId}`);
+                }}
                 className="px-6 py-3 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest"
               >
                 Create First Room
@@ -155,12 +159,41 @@ export function MockArena() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => startMatchmaking(user?.id || 'anon', user?.user_metadata?.full_name || 'Anonymous')}
-                  className="w-full py-3.5 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-[0.3em] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                >
-                  Find Match Now
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => startMatchmaking(user?.id || 'anon', user?.user_metadata?.full_name || 'Anonymous')}
+                    className="w-full py-3.5 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-[0.3em] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    Find Match Now
+                  </button>
+                  
+                  <div className="flex items-center gap-2 my-1">
+                    <div className="h-px bg-white/10 flex-1" />
+                    <span className="text-[8px] font-black text-muted-foreground uppercase">OR</span>
+                    <div className="h-px bg-white/10 flex-1" />
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      toast.loading('Creating private room...', { id: 'create-room' });
+                      try {
+                        const roomId = await createRoom({ title: 'Private Peer Room', type: 'Peer Mock Interview', difficulty: 'Medium' });
+                        const inviteLink = `${window.location.origin}/mockhub/interview/${roomId}`;
+                        
+                        await navigator.clipboard.writeText(`Join my mock interview room on PlacePrep: ${inviteLink}`);
+                        
+                        toast.success('Room created! Invite link copied to clipboard.', { id: 'create-room' });
+                        router.push(`/mockhub/interview/${roomId}`);
+                      } catch (err) {
+                        toast.error('Failed to create room', { id: 'create-room' });
+                      }
+                    }}
+                    className="w-full py-3.5 rounded-xl bg-white/5 border border-white/10 text-primary hover:bg-white/10 text-[10px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2"
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    Create & Share Link
+                  </button>
+                </div>
               )}
             </div>
 
