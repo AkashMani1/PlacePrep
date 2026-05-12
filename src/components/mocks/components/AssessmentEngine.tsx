@@ -33,16 +33,17 @@ const DIFF_STYLES: Record<string, string> = {
 
 export function AssessmentEngine() {
   const router = useRouter();
-  const { assessments, startAssessment, submissions, analytics, restoreAssessment } = useMockStore();
+  const { assessments, fetchAssessments, startAssessment, submissions, analytics, restoreAssessment } = useMockStore();
   const [activeTab, setActiveTab] = useState<'exams' | 'reports'>('exams');
   const [recoveryData, setRecoveryData] = useState<any>(null);
 
   useEffect(() => {
+    fetchAssessments();
     try {
       const data = localStorage.getItem('placeprep-assessment-recovery');
       if (data) setRecoveryData(JSON.parse(data));
     } catch {}
-  }, []);
+  }, [fetchAssessments]);
 
   const handleStartAssessment = (examId: string) => {
     if (!document.fullscreenElement) {
