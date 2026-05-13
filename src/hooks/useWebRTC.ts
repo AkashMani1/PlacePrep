@@ -255,22 +255,36 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
     };
   }, [roomId]);
 
-  // ── Handle local stream changes (screen share swap) ─────────────────────
+  // ── Handle local stream changes (screen share swap & initial load) ────────
   useEffect(() => {
     if (!peerConnection.current || !localStream) return;
     const senders = peerConnection.current.getSenders();
-    const videoTrack = localStream.getVideoTracks()[0];
-    const audioTrack = localStream.getAudioTracks()[0];
-
-    senders.forEach(sender => {
-      if (sender.track?.kind === 'video' && videoTrack && sender.track !== videoTrack) {
-        sender.replaceTrack(videoTrack).catch(console.error);
-      }
-      if (sender.track?.kind === 'audio' && audioTrack && sender.track !== audioTrack) {
-        sender.replaceTrack(audioTrack).catch(console.error);
+    
+    let addedNewTrack = false;
+    localStream.getTracks().forEach(track => {
+      const sender = senders.find(s => s.track?.kind === track.kind);
+      if (sender) {
+        if (sender.track !== track) {
+          sender.replaceTrack(track).catch(console.error);
+        }
+      } else {
+        peerConnection.current?.addTrack(track, localStream);
+        addedNewTrack = true;
       }
     });
-  }, [localStream]);
+
+    // If tracks were added dynamically, WebRTC requires renegotiation
+    if (addedNewTrack && peerConnection.current.signalingState === 'stable') {
+      isNegotiating.current = true;
+      peerConnection.current.createOffer()
+        .then(offer => peerConnection.current?.setLocalDescription(offer))
+        .then(() => {
+          sendSignal({ type: 'offer', offer: peerConnection.current?.localDescription });
+        })
+        .catch(err => console.error('[WebRTC] Renegotiation error:', err))
+        .finally(() => { isNegotiating.current = false; });
+    }
+  }, [localStream, sendSignal]);
 
   return { remoteStream, peerConnectionState, isInitiator };
 }

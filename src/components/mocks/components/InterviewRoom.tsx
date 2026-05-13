@@ -37,6 +37,8 @@ export function InterviewRoom() {
   const [language, setLanguage] = useState('javascript');
   const [sessionSeconds, setSessionSeconds] = useState(0);
 
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const editorRef = useRef<any>(null);
@@ -75,6 +77,7 @@ export function InterviewRoom() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         localStreamRef.current = stream;
+        setLocalStream(stream);
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
         }
@@ -94,7 +97,7 @@ export function InterviewRoom() {
     };
   }, [activeRoom?.id, isMounted]);
 
-  const { remoteStream, peerConnectionState } = useWebRTC(activeRoom?.id || '', localStreamRef.current);
+  const { remoteStream, peerConnectionState } = useWebRTC(activeRoom?.id || '', localStream);
 
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
