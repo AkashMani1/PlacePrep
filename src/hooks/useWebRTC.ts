@@ -45,6 +45,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMounted = useRef(true);
   const isNegotiating = useRef(false);
+  const myPeerId = useRef(Math.random().toString(36).substring(7));
 
   // ── Cleanup helper ─────────────────────────────────────────────────────────
   const cleanup = useCallback(() => {
@@ -193,11 +194,12 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
       }
     });
 
-    // Handle peer ready event — whoever receives it becomes the caller
+    // Handle peer ready event — whoever has the "higher" peerId becomes the caller
     channel.current.on('broadcast', { event: 'peer_ready' }, async ({ payload }: any) => {
       if (!peerConnection.current || !isMounted.current) return;
-      // If the other peer just joined, we send the offer
-      if (payload.peerId !== roomId) {
+      
+      // Deterministic initiator selection to prevent glare
+      if (myPeerId.current > payload.peerId) {
         setIsInitiator(true);
         try {
           isNegotiating.current = true;
@@ -209,6 +211,16 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         } finally {
           isNegotiating.current = false;
         }
+      } else {
+        // Not the initiator, let the other peer know we are here so they can send the offer
+        setIsInitiator(false);
+        if (peerConnection.current.connectionState !== 'connected' && peerConnection.current.signalingState === 'stable') {
+          channel.current?.send({
+            type: 'broadcast',
+            event: 'peer_ready',
+            payload: { peerId: myPeerId.current },
+          });
+        }
       }
     });
 
@@ -219,7 +231,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
         channel.current?.send({
           type: 'broadcast',
           event: 'peer_ready',
-          payload: { peerId: roomId + '_' + Date.now() },
+          payload: { peerId: myPeerId.current },
         });
       } else if (status === 'CHANNEL_ERROR') {
         console.error('[WebRTC] Signaling channel error');
