@@ -133,7 +133,7 @@ export function MockArena() {
                     }`}>
                       {room.difficulty || 'Medium'}
                     </span>
-                    {myCreatedRooms.includes(room.id) && (
+                    {(myCreatedRooms.includes(room.id) || user?.email === 'akashmani9955@gmail.com') && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
