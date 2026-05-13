@@ -433,6 +433,24 @@ export function InterviewRoom() {
           <div>
             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-4">Interview Problem</h3>
             <h2 className="text-lg xl:text-xl font-bold text-white leading-tight mb-4">{activeRoom.title || 'Mock Interview Session'}</h2>
+            
+            {/* Room Metadata */}
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                {activeRoom.company || 'General'}
+              </span>
+              <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                {activeRoom.type || 'Technical'}
+              </span>
+              <span className={`px-2.5 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest ${
+                activeRoom.difficulty === 'Hard' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+                activeRoom.difficulty === 'Medium' ? 'bg-primary/10 text-primary border-primary/20' :
+                'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+              }`}>
+                {activeRoom.difficulty || 'Medium'}
+              </span>
+            </div>
+
             <div className="p-4 xl:p-6 rounded-2xl xl:rounded-3xl bg-white/5 border border-white/10 text-sm font-medium text-muted-foreground leading-relaxed">
               Discuss the problem with your partner using the code editor. Use the chat below for text communication.
             </div>
