@@ -282,14 +282,22 @@ export const useMockStore = create<MockState>()(
       },
 
       joinRoom: async (roomId) => {
-        const rooms = get().availableRooms;
-        const room = rooms.find(r => r.id === roomId);
+        let rooms = get().availableRooms;
+        let room = rooms.find(r => r.id === roomId);
+
+        if (!room && _dbHealthy) {
+          const { data, error } = await supabase.from('mock_rooms').select('*').eq('id', roomId).single();
+          if (data && !error) {
+            room = data as any;
+          }
+        }
 
         if (room) {
           set({ activeRoom: room });
           toast.success('Joined room');
         } else {
           toast.error('Room not found or no longer active.');
+          throw new Error('ROOM_NOT_FOUND');
         }
       },
 

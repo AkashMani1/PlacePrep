@@ -12,9 +12,11 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
 
   useEffect(() => {
     if (!activeRoom && params.roomId) {
-      joinRoom(params.roomId);
+      joinRoom(params.roomId).catch(() => {
+        router.push('/mockhub/arena');
+      });
     }
-  }, [params.roomId, activeRoom, joinRoom]);
+  }, [params.roomId, activeRoom, joinRoom, router]);
 
   if (!activeRoom) {
     return (
