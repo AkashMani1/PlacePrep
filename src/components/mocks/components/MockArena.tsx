@@ -22,6 +22,14 @@ export function MockArena() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleForm, setScheduleForm] = useState({ partnerName: '', type: 'Technical (DSA)', date: '', time: '14:00' });
 
+  const [showCreateRoomModal, setShowCreateRoomModal] = useState(false);
+  const [createRoomForm, setCreateRoomForm] = useState({
+    title: 'Mock Interview Session',
+    type: 'Technical (DSA)',
+    company: 'General',
+    difficulty: 'Medium',
+  });
+
   const handleSchedule = () => {
     if (!scheduleForm.partnerName || !scheduleForm.date) {
       toast.error('Please fill partner name and date.');
@@ -30,6 +38,29 @@ export function MockArena() {
     addScheduledSession({ ...scheduleForm, status: 'confirmed' });
     setShowScheduleModal(false);
     setScheduleForm({ partnerName: '', type: 'Technical (DSA)', date: '', time: '14:00' });
+  };
+
+  const handleCreateRoomSubmit = async () => {
+    if (!createRoomForm.title.trim()) {
+      toast.error('Please provide a room title.');
+      return;
+    }
+    toast.loading('Creating private room...', { id: 'create-room' });
+    try {
+      const roomId = await createRoom({
+        title: createRoomForm.title,
+        type: createRoomForm.type,
+        company: createRoomForm.company,
+        difficulty: createRoomForm.difficulty,
+      });
+      const inviteLink = `${window.location.origin}/mockhub/interview/${roomId}`;
+      await navigator.clipboard.writeText(`Join my mock interview room on PlacePrep: ${inviteLink}`);
+      toast.success('Room created! Invite link copied to clipboard.', { id: 'create-room' });
+      setShowCreateRoomModal(false);
+      router.push(`/mockhub/interview/${roomId}`);
+    } catch (err) {
+      toast.error('Failed to create room', { id: 'create-room' });
+    }
   };
 
   return (
@@ -59,11 +90,7 @@ export function MockArena() {
                 No active rooms right now
               </p>
               <button
-                onClick={async () => {
-                  const roomId = await createRoom({ title: 'Open Practice Room', type: 'Technical (DSA)', difficulty: 'Medium' });
-                  toast.success('Interview room created!');
-                  router.push(`/mockhub/interview/${roomId}`);
-                }}
+                onClick={() => setShowCreateRoomModal(true)}
                 className="px-6 py-3 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest"
               >
                 Create First Room
@@ -186,20 +213,7 @@ export function MockArena() {
                   </div>
 
                   <button
-                    onClick={async () => {
-                      toast.loading('Creating private room...', { id: 'create-room' });
-                      try {
-                        const roomId = await createRoom({ title: 'Private Peer Room', type: 'Peer Mock Interview', difficulty: 'Medium' });
-                        const inviteLink = `${window.location.origin}/mockhub/interview/${roomId}`;
-                        
-                        await navigator.clipboard.writeText(`Join my mock interview room on PlacePrep: ${inviteLink}`);
-                        
-                        toast.success('Room created! Invite link copied to clipboard.', { id: 'create-room' });
-                        router.push(`/mockhub/interview/${roomId}`);
-                      } catch (err) {
-                        toast.error('Failed to create room', { id: 'create-room' });
-                      }
-                    }}
+                    onClick={() => setShowCreateRoomModal(true)}
                     className="w-full py-3.5 rounded-xl bg-white/5 border border-white/10 text-primary hover:bg-white/10 text-[10px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2"
                   >
                     <Globe className="w-3.5 h-3.5" />
@@ -326,6 +340,89 @@ export function MockArena() {
 
               <Button onClick={handleSchedule} className="w-full py-5 bg-primary text-white">
                 Confirm Schedule
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Create Room Modal ────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showCreateRoomModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-background/80 backdrop-blur-2xl z-[100] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 40 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 40 }}
+              className="bg-card/60 border border-white/10 rounded-[40px] p-10 w-full max-w-lg space-y-8"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black uppercase tracking-widest text-foreground">Create Mock Room</h3>
+                <button onClick={() => setShowCreateRoomModal(false)} className="p-2 rounded-full hover:bg-white/5 text-muted-foreground">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-3 block">Room Title</label>
+                  <input
+                    value={createRoomForm.title}
+                    onChange={e => setCreateRoomForm(f => ({ ...f, title: e.target.value }))}
+                    placeholder="e.g., TCS Advanced Coding Prep"
+                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-foreground text-sm font-medium focus:outline-none focus:border-primary transition-all"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-3 block">Type</label>
+                    <select
+                      value={createRoomForm.type}
+                      onChange={e => setCreateRoomForm(f => ({ ...f, type: e.target.value }))}
+                      className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-foreground text-sm font-medium focus:outline-none focus:border-primary transition-all"
+                    >
+                      <option value="Technical (DSA)">Technical (DSA)</option>
+                      <option value="System Design">System Design</option>
+                      <option value="HR & Behavioral">HR & Behavioral</option>
+                      <option value="Core Subjects">Core Subjects</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-3 block">Difficulty</label>
+                    <select
+                      value={createRoomForm.difficulty}
+                      onChange={e => setCreateRoomForm(f => ({ ...f, difficulty: e.target.value }))}
+                      className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-foreground text-sm font-medium focus:outline-none focus:border-primary transition-all"
+                    >
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-3 block">Company Target</label>
+                  <select
+                    value={createRoomForm.company}
+                    onChange={e => setCreateRoomForm(f => ({ ...f, company: e.target.value }))}
+                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-foreground text-sm font-medium focus:outline-none focus:border-primary transition-all"
+                  >
+                    <option value="General">General / None</option>
+                    <option value="TCS">TCS (Ninja/Digital/Prime)</option>
+                    <option value="Amazon">Amazon</option>
+                    <option value="Google">Google</option>
+                    <option value="Microsoft">Microsoft</option>
+                  </select>
+                </div>
+              </div>
+
+              <Button onClick={handleCreateRoomSubmit} className="w-full py-5 bg-primary text-white">
+                Create & Enter Room
               </Button>
             </motion.div>
           </motion.div>
