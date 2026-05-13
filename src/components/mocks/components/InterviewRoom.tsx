@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Video, VideoOff, Mic, MicOff, ScreenShare, ScreenShareOff,
-  X, Code2, PenTool, Send, Play, Clock
+  X, Code2, PenTool, Send, Play, Clock, Link
 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { Button } from '@/components/ui/Button';
@@ -285,6 +285,20 @@ export function InterviewRoom() {
                 <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest">
                   {participants.length > 1 ? participants.find(p => p.displayName !== 'You')?.displayName || 'Peer' : 'Waiting for peer...'}
                 </p>
+                {participants.length <= 1 && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success('Room link copied to clipboard!');
+                    }}
+                    className="mt-4 flex items-center justify-center gap-2 px-4 py-2 mx-auto rounded-lg bg-white/5 border border-white/10 hover:bg-primary/20 hover:border-primary/30 transition-all group/share"
+                  >
+                    <Link className="w-3.5 h-3.5 text-muted-foreground group-hover/share:text-primary transition-colors" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover/share:text-primary transition-colors">
+                      Share Link
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
           )}

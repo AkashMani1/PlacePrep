@@ -79,6 +79,7 @@ interface MockState {
   // Room state
   activeRoom: MockRoom | null;
   availableRooms: MockRoom[];
+  myCreatedRooms: string[];
   isLoadingRooms: boolean;
 
   // Assessment state
@@ -112,6 +113,7 @@ interface MockState {
   // Actions
   fetchRooms: () => Promise<void>;
   createRoom: (room: Partial<MockRoom>) => Promise<string>;
+  deleteRoom: (roomId: string) => Promise<void>;
   joinRoom: (roomId: string) => Promise<void>;
   leaveRoom: () => void;
 
@@ -176,6 +178,7 @@ export const useMockStore = create<MockState>()(
     (set, get) => ({
       activeRoom: null,
       availableRooms: [],
+      myCreatedRooms: [],
       isLoadingRooms: false,
 
       assessments: [],
@@ -255,8 +258,27 @@ export const useMockStore = create<MockState>()(
           }
         }
 
-        set({ activeRoom: newRoom });
+        set((s) => ({
+          activeRoom: newRoom,
+          myCreatedRooms: [...s.myCreatedRooms, roomId]
+        }));
         return roomId;
+      },
+
+      deleteRoom: async (roomId) => {
+        if (_dbHealthy) {
+          const { error } = await supabase.from('mock_rooms').delete().eq('id', roomId);
+          if (error) {
+            console.warn('Room deletion DB error:', error.message);
+            toast.error('Failed to delete room from server.');
+          }
+        }
+        set((s) => ({
+          availableRooms: s.availableRooms.filter(r => r.id !== roomId),
+          myCreatedRooms: s.myCreatedRooms.filter(id => id !== roomId),
+          activeRoom: s.activeRoom?.id === roomId ? null : s.activeRoom
+        }));
+        toast.success('Room deleted successfully.');
       },
 
       joinRoom: async (roomId) => {
@@ -617,6 +639,7 @@ export const useMockStore = create<MockState>()(
       partialize: (state) => ({
         submissions: state.submissions,
         analytics: state.analytics,
+        myCreatedRooms: state.myCreatedRooms,
         leaderboard: state.leaderboard,
         scheduledSessions: state.scheduledSessions,
         notifications: state.notifications,

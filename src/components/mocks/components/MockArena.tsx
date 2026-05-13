@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Calendar, Plus, ChevronRight, Play, Clock, Star, Globe, Search, X } from 'lucide-react';
+import { Users, Calendar, Plus, ChevronRight, Play, Clock, Star, Globe, Search, X, Trash2 } from 'lucide-react';
 import { BentoCard } from '@/components/ui/Bento';
 import { useMockStore } from '@/store/useMockStore';
 import { Button } from '@/components/ui/Button';
@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 export function MockArena() {
   const router = useRouter();
   const {
-    availableRooms, isLoadingRooms, joinRoom, createRoom,
+    availableRooms, isLoadingRooms, joinRoom, createRoom, deleteRoom, myCreatedRooms,
     scheduledSessions, addScheduledSession, cancelSession,
     isMatchmaking, matchmakingStatus, startMatchmaking, cancelMatchmaking,
   } = useMockStore();
@@ -106,6 +106,18 @@ export function MockArena() {
                     }`}>
                       {room.difficulty || 'Medium'}
                     </span>
+                    {myCreatedRooms.includes(room.id) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteRoom(room.id);
+                        }}
+                        className="w-10 h-10 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center hover:bg-rose-500 hover:border-rose-500 transition-all duration-300 group/delete"
+                        title="Delete Room"
+                      >
+                        <Trash2 className="w-4 h-4 text-rose-500 group-hover/delete:text-white" />
+                      </button>
+                    )}
                     <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-300">
                       <ChevronRight className="w-5 h-5 text-white" />
                     </div>
