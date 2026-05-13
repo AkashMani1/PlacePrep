@@ -94,7 +94,7 @@ export function InterviewRoom() {
     };
   }, [activeRoom?.id, isMounted]);
 
-  const { remoteStream } = useWebRTC(activeRoom?.id || '', localStreamRef.current);
+  const { remoteStream, peerConnectionState } = useWebRTC(activeRoom?.id || '', localStreamRef.current);
 
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
@@ -229,7 +229,11 @@ export function InterviewRoom() {
 
   if (!activeRoom || !isMounted) return null;
 
-  const participants = activeRoom.participants || [];
+  // Dynamically generate participants based on WebRTC state
+  const participants = [
+    { displayName: 'You', role: 'Participant', isOnline: true },
+    ...(remoteStream ? [{ displayName: 'Peer', role: 'Participant', isOnline: true }] : [])
+  ];
 
   return (
     <div className="fixed inset-0 bg-[#050505] z-[9999] flex overflow-hidden font-sans">
@@ -283,9 +287,9 @@ export function InterviewRoom() {
               <div className="text-center space-y-2">
                 <Video className="w-8 h-8 md:w-10 md:h-10 text-muted-foreground/20 mx-auto" />
                 <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest">
-                  {participants.length > 1 ? participants.find(p => p.displayName !== 'You')?.displayName || 'Peer' : 'Waiting for peer...'}
+                  {peerConnectionState === 'connecting' ? 'Connecting to peer...' : 'Waiting for peer...'}
                 </p>
-                {participants.length <= 1 && (
+                {peerConnectionState !== 'connecting' && (
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(window.location.href);

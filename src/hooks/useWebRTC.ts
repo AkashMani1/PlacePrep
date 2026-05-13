@@ -154,24 +154,38 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
     });
 
     // Handle incoming signals
+    const pendingCandidates: RTCIceCandidateInit[] = [];
+    
     channel.current.on('broadcast', { event: 'webrtc_signal' }, async ({ payload }: any) => {
       if (!peerConnection.current || !isMounted.current) return;
 
       try {
         if (payload.type === 'offer') {
-          // Only accept if we're not already negotiating
           if (peerConnection.current.signalingState !== 'stable' && !isNegotiating.current) return;
           await peerConnection.current.setRemoteDescription(new RTCSessionDescription(payload.offer));
           const answer = await peerConnection.current.createAnswer();
           await peerConnection.current.setLocalDescription(answer);
           sendSignal({ type: 'answer', answer: peerConnection.current.localDescription });
+          
+          // Process any queued candidates
+          while (pendingCandidates.length > 0) {
+            const candidate = pendingCandidates.shift();
+            if (candidate) await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+          }
         } else if (payload.type === 'answer') {
           if (peerConnection.current.signalingState === 'have-local-offer') {
             await peerConnection.current.setRemoteDescription(new RTCSessionDescription(payload.answer));
+            // Process any queued candidates
+            while (pendingCandidates.length > 0) {
+              const candidate = pendingCandidates.shift();
+              if (candidate) await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+            }
           }
         } else if (payload.type === 'ice_candidate') {
           if (peerConnection.current.remoteDescription) {
             await peerConnection.current.addIceCandidate(new RTCIceCandidate(payload.candidate));
+          } else {
+            pendingCandidates.push(payload.candidate);
           }
         }
       } catch (err) {
