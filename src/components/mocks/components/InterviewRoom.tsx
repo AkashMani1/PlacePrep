@@ -280,9 +280,9 @@ export function InterviewRoom() {
             ref={remoteVideoRef}
             autoPlay
             playsInline
-            className={`w-full h-full object-cover ${!remoteStream ? 'hidden' : ''}`}
+            className={`w-full h-full object-cover ${(peerConnectionState !== 'connected' && !remoteStream) ? 'hidden' : ''}`}
           />
-          {!remoteStream && (
+          {peerConnectionState !== 'connected' && !remoteStream && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center space-y-2">
                 <Video className="w-8 h-8 md:w-10 md:h-10 text-muted-foreground/20 mx-auto" />
