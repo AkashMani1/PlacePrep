@@ -127,4 +127,73 @@ export const DSA_KILL_LIST: Problem[] = [
   d('dsa_098','Triangle','Multi Dimensional DP','Medium','https://leetcode.com/problems/triangle/','https://www.youtube.com/results?search_query=LeetCode+Triangle'),
   d('dsa_099','Best Time to Buy and Sell Stock III','Multi Dimensional DP','Hard','https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/','https://www.youtube.com/results?search_query=LeetCode+Best+Time+to+Buy+and+Sell+Stock+III'),
   d('dsa_100','Best Time to Buy and Sell Stock IV','Multi Dimensional DP','Hard','https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/','https://www.youtube.com/results?search_query=LeetCode+Best+Time+to+Buy+and+Sell+Stock+IV'),
+
+  // --- NEWLY ADDED FROM USER REQUEST ---
+  // Math
+  d('dsa_101','Reverse Integer','Math','Medium','https://leetcode.com/problems/reverse-integer/','https://www.youtube.com/watch?v=HAgLH58IgJQ'),
+  d('dsa_102','Count Primes','Math','Medium','https://leetcode.com/problems/count-primes/','https://www.youtube.com/watch?v=eKp56OLhoQs'),
+  d('dsa_103','Find Greatest Common Divisor of Array','Math','Easy','https://leetcode.com/problems/find-greatest-common-divisor-of-array/','https://www.youtube.com/watch?v=J63JPxqmyzg'),
+  
+  // Arrays
+  d('dsa_104','Running Sum of 1d Array','Arrays','Easy','https://leetcode.com/problems/running-sum-of-1d-array/','https://www.youtube.com/watch?v=Y8qz0kWJt1E'),
+  d('dsa_105','Max Consecutive Ones','Arrays','Easy','https://leetcode.com/problems/max-consecutive-ones/','https://www.youtube.com/watch?v=Mo33MjjMlyA'),
+  d('dsa_106','Move Zeroes','Arrays','Easy','https://leetcode.com/problems/move-zeroes/','https://www.youtube.com/watch?v=wtVYyoy6z4Q'),
+  d('dsa_107','Remove Duplicates from Sorted Array','Arrays','Easy','https://leetcode.com/problems/remove-duplicates-from-sorted-array/','https://www.youtube.com/watch?v=Fm_p9lJ4Z_8'),
+  d('dsa_108','Missing Number','Arrays','Easy','https://leetcode.com/problems/missing-number/','https://www.youtube.com/watch?v=WnPLSRLSANE'),
+  d('dsa_109','Sort Colors','Arrays','Medium','https://leetcode.com/problems/sort-colors/','https://www.youtube.com/watch?v=oaVa-9wmpns'),
+  d('dsa_110','Next Permutation','Arrays','Medium','https://leetcode.com/problems/next-permutation/','https://www.youtube.com/watch?v=JDOXKqF60RQ'),
+  d('dsa_111','Majority Element','Arrays','Easy','https://leetcode.com/problems/majority-element/','https://www.youtube.com/watch?v=nP_ns3uSh80'),
+  d('dsa_112','Majority Element II','Arrays','Medium','https://leetcode.com/problems/majority-element-ii/','https://www.youtube.com/watch?v=vwZj1K0e9U0'),
+  d('dsa_113','Subarray Sum Equals K','Arrays','Medium','https://leetcode.com/problems/subarray-sum-equals-k/','https://www.youtube.com/watch?v=fFVZt-6sgyo'),
+  d('dsa_114','Maximum Points You Can Obtain from Cards','Arrays','Medium','https://leetcode.com/problems/maximum-points-you-can-obtain-from-cards/','https://www.youtube.com/watch?v=O8r0Z0Gx8fM'),
+
+  // Strings
+  d('dsa_115','Reverse String','Strings','Easy','https://leetcode.com/problems/reverse-string/','https://www.youtube.com/watch?v=8g1c1t8z8pY'),
+  d('dsa_116','Largest Odd Number in String','Strings','Easy','https://leetcode.com/problems/largest-odd-number-in-string/','https://www.youtube.com/watch?v=5zvY2Zg0UeA'),
+  d('dsa_117','Rotate String','Strings','Easy','https://leetcode.com/problems/rotate-string/','https://www.youtube.com/watch?v=Zs9sXnYfO2Y'),
+  d('dsa_118','Sort Characters By Frequency','Strings','Medium','https://leetcode.com/problems/sort-characters-by-frequency/','https://www.youtube.com/watch?v=2n1fO0r8i6g'),
+  d('dsa_119','Longest Substring with At Most K Distinct Characters','Strings','Medium','https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/','https://www.youtube.com/watch?v=teM9ZsVRQyc'),
+  d('dsa_120','Number of Substrings Containing All Three Characters','Strings','Medium','https://leetcode.com/problems/number-of-substrings-containing-all-three-characters/','https://www.youtube.com/watch?v=xtqN4qlgr8s'),
+
+  // Sliding Window
+  d('dsa_121','Sliding Window Core Playlist (Striver)','Sliding Window','Medium','https://www.youtube.com/watch?v=MK-NZ4hN7rs','https://www.youtube.com/watch?v=MK-NZ4hN7rs'),
+  d('dsa_122','Sliding Window Core Playlist (Aditya Verma)','Sliding Window','Medium','https://www.youtube.com/watch?v=KtpqeN0GxgQ','https://www.youtube.com/watch?v=KtpqeN0GxgQ'),
+
+  // Hashmap
+  d('dsa_123','Top K Frequent Elements','Hashmap','Medium','https://leetcode.com/problems/top-k-frequent-elements/','https://www.youtube.com/watch?v=YPTqKIgVk-k'),
+
+  // --- FURTHER ADDITIONS ---
+  // Math
+  d('dsa_124','Count Digits','Math','Easy','https://www.google.com/search?q=Count+digits+in+a+number','https://youtu.be/HAgLH58IgJQ'),
+  d('dsa_125','Count Odd Digits','Math','Easy','https://www.google.com/search?q=Count+odd+digits+in+a+number','https://www.youtube.com/results?search_query=Count+odd+digits'),
+  d('dsa_126','Largest Digit','Math','Easy','https://www.google.com/search?q=Largest+digit+in+a+number','https://www.youtube.com/results?search_query=Largest+digit+in+a+number'),
+  d('dsa_127','Divisors of a Number','Math','Easy','https://www.geeksforgeeks.org/find-all-factors-of-a-natural-number/','https://youtu.be/1xNbjMdbjug'),
+  d('dsa_128','Factorial Trailing Zeroes','Math','Medium','https://leetcode.com/problems/factorial-trailing-zeroes/','https://youtu.be/8xCBt3tI3sE'),
+  d('dsa_129','Armstrong Number','Math','Easy','https://www.geeksforgeeks.org/program-for-armstrong-numbers/','https://www.youtube.com/results?search_query=Armstrong+Number'),
+  d('dsa_130','Perfect Number','Math','Easy','https://www.geeksforgeeks.org/perfect-number/','https://www.youtube.com/results?search_query=Perfect+Number'),
+  d('dsa_131','LCM (Least Common Multiple)','Math','Easy','https://www.google.com/search?q=LCM+of+two+numbers','https://www.youtube.com/results?search_query=LCM+of+two+numbers+using+GCD'),
+  d('dsa_132','Print Primes','Math','Easy','https://www.google.com/search?q=Print+all+primes+till+N','https://www.youtube.com/results?search_query=Print+all+primes+till+N'),
+  d('dsa_133','Prime Factorization','Math','Medium','https://www.geeksforgeeks.org/prime-factorization-using-sieve-olog-n-multiple-queries/','https://www.youtube.com/results?search_query=Prime+Factorization'),
+  d('dsa_134','Count Primes in Range','Math','Medium','https://www.geeksforgeeks.org/count-primes-range/','https://www.youtube.com/results?search_query=Count+Primes+in+Range'),
+
+  // Arrays
+  d('dsa_135','Count Odd Numbers in Array','Arrays','Easy','https://www.google.com/search?q=Count+odd+numbers+in+array','https://www.youtube.com/results?search_query=Count+odd+numbers+in+array'),
+  d('dsa_136','Check if Array is Sorted','Arrays','Easy','https://www.google.com/search?q=Check+if+array+is+sorted','https://www.youtube.com/results?search_query=Check+if+array+is+sorted'),
+  d('dsa_137','Second Highest Frequency Element','Arrays','Medium','https://www.google.com/search?q=Second+highest+frequency+element+in+array','https://www.youtube.com/results?search_query=Second+highest+frequency+element+in+array'),
+  d('dsa_138','Linear Search','Arrays','Easy','https://www.google.com/search?q=Linear+search+in+array','https://www.youtube.com/results?search_query=Linear+search+in+array'),
+  d('dsa_139','Largest Element in Array','Arrays','Easy','https://www.google.com/search?q=Largest+element+in+array','https://www.youtube.com/results?search_query=Largest+element+in+array'),
+  d('dsa_140','Second Largest Element in Array','Arrays','Easy','https://www.google.com/search?q=Second+largest+element+in+array','https://www.youtube.com/results?search_query=Second+largest+element+in+array'),
+  d('dsa_141','Union of Two Sorted Arrays','Arrays','Medium','https://www.geeksforgeeks.org/union-of-two-sorted-arrays/','https://www.youtube.com/results?search_query=Union+of+Two+Sorted+Arrays'),
+  d('dsa_142','Intersection of Two Arrays','Arrays','Easy','https://leetcode.com/problems/intersection-of-two-arrays/','https://www.youtube.com/results?search_query=Intersection+of+Two+Arrays'),
+  d('dsa_143','Leaders in an Array','Arrays','Medium','https://www.geeksforgeeks.org/leaders-in-an-array/','https://www.youtube.com/results?search_query=Leaders+in+an+Array'),
+  d('dsa_144','Rearrange Array Elements by Sign','Arrays','Medium','https://leetcode.com/problems/rearrange-array-elements-by-sign/','https://www.youtube.com/results?search_query=Rearrange+Array+Elements+by+Sign'),
+  d('dsa_145','Pascal\'s Triangle','Arrays','Easy','https://leetcode.com/problems/pascals-triangle/','https://www.youtube.com/results?search_query=Pascal+Triangle'),
+  d('dsa_146','Missing and Repeating Number','Arrays','Medium','https://www.geeksforgeeks.org/find-a-repeating-and-a-missing-number/','https://www.youtube.com/results?search_query=Missing+and+Repeating+Number'),
+
+  // Story / Company
+  d('dsa_147','Greater Than Previous Elements','Story / Company','Medium','https://www.geeksforgeeks.org/count-elements-which-are-greater-than-all-previous-elements/','https://www.youtube.com/results?search_query=Count+elements+which+are+greater+than+all+previous+elements'),
+  d('dsa_148','Maximum Guests in Party','Story / Company','Medium','https://www.geeksforgeeks.org/find-the-point-where-maximum-intervals-overlap/','https://www.youtube.com/results?search_query=Find+the+point+where+maximum+intervals+overlap'),
+  d('dsa_149','Relative Sorting','Story / Company','Medium','https://www.geeksforgeeks.org/sort-array-according-order-defined-another-array/','https://www.youtube.com/results?search_query=Sort+array+according+to+order+defined+by+another+array'),
+  d('dsa_150','Row With Max 1s','Story / Company','Medium','https://www.geeksforgeeks.org/row-with-max-1s-in-binary-matrix/','https://www.youtube.com/results?search_query=Row+with+max+1s+in+binary+matrix'),
+  d('dsa_151','Curtains (Sliding Window Technique)','Story / Company','Medium','https://www.geeksforgeeks.org/window-sliding-technique/','https://www.youtube.com/results?search_query=Window+Sliding+Technique'),
 ];
