@@ -38,7 +38,7 @@ function BadgeCard({ badge, earned, index }: { badge: Badge; earned: boolean; in
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...smoothSpring, delay: index * 0.03 }}
       whileHover={{ y: -4, scale: 1.02 }}
-      className={`relative p-5 rounded-[24px] border flex flex-col items-center gap-3 text-center transition-all duration-300 shadow-lg group cursor-default ${
+      className={`relative h-full p-5 rounded-[24px] border flex flex-col items-center gap-3 text-center transition-all duration-300 shadow-lg group cursor-default ${
         earned
           ? 'bg-card/80 border-border/40 hover:border-white/20 backdrop-blur'
           : 'bg-card/20 border-border/10 opacity-50 grayscale'
@@ -128,12 +128,14 @@ export const BadgeVault = memo(function BadgeVault() {
           </div>
         </div>
 
-        {/* Badge Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        {/* Badge List - Horizontal Scroll */}
+        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent snap-x snap-mandatory hide-scrollbar">
           {allBadges
             .sort((a, b) => (b.earned ? 1 : 0) - (a.earned ? 1 : 0)) // Earned first
             .map(({ badge, earned }, i) => (
-              <BadgeCard key={badge.id} badge={badge} earned={earned} index={i} />
+              <div key={badge.id} className="w-[160px] sm:w-[180px] shrink-0 snap-start">
+                <BadgeCard badge={badge} earned={earned} index={i} />
+              </div>
             ))}
         </div>
       </div>

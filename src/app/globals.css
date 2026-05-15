@@ -114,6 +114,13 @@
   .neon-glow-purple {
     box-shadow: 0 0 20px -5px rgba(168, 85, 247, 0.3);
   }
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* ── Custom scrollbar ─────────────────────────────────────────────────── */
