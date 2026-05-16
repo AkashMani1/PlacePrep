@@ -1,6 +1,7 @@
 import { useState, memo } from 'react';
 import { Target, PenTool, CalendarDays, Activity, CheckSquare, Settings, Minus, Plus, CheckCheck, Save, ShieldCheck } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { motion } from 'framer-motion';
 import { today, calcCurrentWeek } from '@/lib/utils';
 import { DEFAULT_HABIT_GROUPS } from '@/lib/defaultData';
 

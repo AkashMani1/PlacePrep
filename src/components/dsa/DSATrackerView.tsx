@@ -312,7 +312,8 @@ export default function DSATrackerView() {
 
       {/* Main List Area */}
       <div className="col-span-12 lg:col-span-9 space-y-8 mt-2">
-         {/* Sleek Filter           <div className="flex flex-col gap-4">
+         {/* Sleek Filter Bar */}
+         <div className="flex flex-col gap-4">
             <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
               <div className="relative flex-1">
                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
@@ -327,7 +328,7 @@ export default function DSATrackerView() {
                   <Filter className="w-4 h-4" /> Filters
                 </motion.button>
               </div>
-            </div>  </div>
+            </div>
 
             <AnimatePresence>
               {showFilters && (
