@@ -30,6 +30,15 @@ export default function AdminPanelView() {
   const [editingAssessment, setEditingAssessment] = useState<any | null>(null);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>('');
+  
+  // Global Content State
+  const [activeGlobalTab, setActiveGlobalTab] = useState<'dsa' | 'aptitude' | 'kb'>('dsa');
+  const [globalQuestions, setGlobalQuestions] = useState<any[]>([]);
+  const GLOBAL_IDS = {
+    dsa: '11111111-1111-1111-1111-111111111111',
+    aptitude: '22222222-2222-2222-2222-222222222222',
+    kb: '33333333-3333-3333-3333-333333333333'
+  };
 
   // Extra security check
   if (user?.email !== 'akashmani9955@gmail.com') {
@@ -77,8 +86,22 @@ export default function AdminPanelView() {
   useEffect(() => {
     if (activeTab === 'questions' && selectedAssessmentId) {
       loadQuestions(selectedAssessmentId);
+    } else if (activeTab === 'global') {
+      loadGlobalQuestions();
     }
-  }, [activeTab, selectedAssessmentId]);
+  }, [activeTab, selectedAssessmentId, activeGlobalTab]);
+
+  const loadGlobalQuestions = async () => {
+    setLoading(true);
+    try {
+      const data = await dbCall('SELECT', 'questions', undefined, { assessment_id: GLOBAL_IDS[activeGlobalTab] });
+      setGlobalQuestions(data || []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // --- Handlers ---
   const handleSaveAssessment = async (e: React.FormEvent) => {
@@ -123,17 +146,19 @@ export default function AdminPanelView() {
         await dbCall('UPDATE', 'questions', payload, { id: editingQuestion.id });
       }
       setEditingQuestion(null);
-      loadQuestions(selectedAssessmentId);
+      if (activeTab === 'global') loadGlobalQuestions();
+      else loadQuestions(selectedAssessmentId);
     } catch (err: any) {
       alert(err.message);
     }
   };
 
   const handleDeleteQuestion = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this question?')) return;
+    if (!confirm('Are you sure you want to delete this?')) return;
     try {
       await dbCall('DELETE', 'questions', undefined, { id });
-      loadQuestions(selectedAssessmentId);
+      if (activeTab === 'global') loadGlobalQuestions();
+      else loadQuestions(selectedAssessmentId);
     } catch (err: any) {
       alert(err.message);
     }
@@ -149,18 +174,24 @@ export default function AdminPanelView() {
       {error && <div className="bg-red-500/10 text-red-500 p-4 rounded-xl text-sm font-bold">{error}</div>}
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-border/30 pb-4">
+      <div className="flex gap-2 border-b border-border/30 pb-4 overflow-x-auto">
         <button
           onClick={() => setActiveTab('assessments')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'assessments' ? 'bg-primary text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'assessments' ? 'bg-primary text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
         >
-          Manage Assessments
+          Mock Hub Assessments
         </button>
         <button
           onClick={() => setActiveTab('questions')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'questions' ? 'bg-primary text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'questions' ? 'bg-primary text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
         >
-          Manage Questions & Answers
+          Mock Hub Questions
+        </button>
+        <button
+          onClick={() => setActiveTab('global' as any)}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'global' as any ? 'bg-amber-500 text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
+        >
+          Global Site Content (DSA / Aptitude / KB)
         </button>
       </div>
 
@@ -273,6 +304,51 @@ export default function AdminPanelView() {
                 ))}
               </div>
             )
+          )}
+        </div>
+      )}
+
+      {/* GLOBAL CONTENT TAB */}
+      {activeTab === 'global' as any && (
+        <div className="space-y-4">
+          <div className="flex gap-2 mb-4">
+            <button onClick={() => setActiveGlobalTab('dsa')} className={`px-4 py-2 rounded-lg text-xs font-bold ${activeGlobalTab === 'dsa' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground'}`}>DSA Tracker</button>
+            <button onClick={() => setActiveGlobalTab('aptitude')} className={`px-4 py-2 rounded-lg text-xs font-bold ${activeGlobalTab === 'aptitude' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground'}`}>Aptitude Tracker</button>
+            <button onClick={() => setActiveGlobalTab('kb')} className={`px-4 py-2 rounded-lg text-xs font-bold ${activeGlobalTab === 'kb' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground'}`}>Knowledge Base</button>
+            
+            <button
+              onClick={() => setEditingQuestion({ isNew: true, id: `g-${Date.now()}`, assessment_id: GLOBAL_IDS[activeGlobalTab], title: '', content: '', options: '', correct_answer: 0, difficulty: 'Medium', type: activeGlobalTab })}
+              className="ml-auto flex items-center gap-2 bg-amber-500/20 text-amber-500 px-4 py-2 rounded-xl text-sm font-bold hover:bg-amber-500/30"
+            >
+              <Plus className="w-4 h-4" /> Add New Item
+            </button>
+          </div>
+
+          {loading ? <div className="flex items-center gap-2 text-muted-foreground"><RefreshCw className="w-4 h-4 animate-spin" /> Loading...</div> : (
+            <div className="space-y-4">
+              {globalQuestions.length === 0 && <p className="text-muted-foreground text-sm italic">No items found.</p>}
+              {globalQuestions.map((q, idx) => (
+                <div key={q.id} className="glass p-5 rounded-2xl border border-border/20 flex flex-col gap-3 relative group">
+                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => setEditingQuestion({ ...q, options: Array.isArray(q.options) ? q.options.join(', ') : q.options })} className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDeleteQuestion(q.id)} className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="font-black text-muted-foreground">{idx + 1}.</span>
+                    <div>
+                      <h3 className="font-bold text-foreground">{q.title}</h3>
+                      {q.content && <p className="text-sm text-foreground/80 mt-1 whitespace-pre-wrap">{q.content}</p>}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 mt-2">
+                    <span className="text-[10px] bg-muted/40 px-2 py-1 rounded-md uppercase font-bold">{q.difficulty}</span>
+                    {q.topic && <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-md uppercase font-bold">{q.topic}</span>}
+                    {q.company && <span className="text-[10px] bg-secondary/10 text-secondary px-2 py-1 rounded-md uppercase font-bold">{q.company}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
