@@ -157,7 +157,7 @@ export default function AppShell() {
         transition={{ duration: 0.4, ease: premiumEasing }}
         className="flex-1 min-w-0 min-h-screen relative pb-32 md:pb-0 transition-all z-10 flex flex-col"
       >
-        <div className="w-full max-w-[1400px] mx-auto px-4 md:px-12 py-6 md:py-12 flex-1">
+        <div className="w-full max-w-[1400px] mx-auto px-4 md:px-12 pt-16 md:pt-12 pb-6 md:py-12 flex-1">
           
           {/* Header Section Removed as per new Awwwards-style UI */}
 

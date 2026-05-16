@@ -33,8 +33,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ErrorBoundary>
           <AuthProvider>
             <AppProvider>
-              {children}
-              <Toaster richColors position="top-right" closeButton theme="dark" />
+              {/* mobile-viewport-shell applies ONLY on <768px via CSS — no-op on desktop */}
+              <div className="mobile-viewport-shell">
+                {children}
+                <Toaster richColors position="top-right" closeButton theme="dark" />
+              </div>
             </AppProvider>
           </AuthProvider>
         </ErrorBoundary>

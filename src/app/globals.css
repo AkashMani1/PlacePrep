@@ -192,44 +192,293 @@ select option {
   .card { @apply bg-card/40 border border-border/50 rounded-2xl transform-gpu; }
 }
 
-/* ── Mobile Design System (< 768px) ────────────────────────────────────── */
-/* ── Mobile Responsive System (< 768px) ────────────────────────────────── */
+/* ── Textarea ──────────────────────────────────────────────────────────── */
+textarea { resize: none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE WINDOWED VIEWPORT SYSTEM  (max-width: 767px)
+   Approach: Floating "App Window" container — desktop structure preserved,
+   scaled and contained inside a centered chrome shell on mobile.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (max-width: 767px) {
-  body {
-    background: var(--background) !important;
-    overflow-x: hidden;
-  }
 
-  body::after {
-    background: radial-gradient(circle at 50% 50%, rgba(var(--primary-rgb), 0.1) 0%, transparent 80%);
-    opacity: 0.3;
-  }
-
-  /* Structural Overrides */
-  aside.hidden.md\:flex { display: none !important; }
-  main { padding-left: 0 !important; width: 100% !important; }
-  
-  /* Modern Fluid Typography */
-  :root { --mobile-scale: 0.95; }
-  @media (max-width: 380px) { :root { --mobile-scale: 0.9; } }
-  
-  h1, .text-4xl, .text-5xl, .text-6xl, .text-7xl { 
-    font-size: clamp(1.75rem, 8vw, 2.5rem) !important;
-    line-height: 1.1 !important;
-  }
-
-  /* Interaction Targets */
-  button, a {
-    min-height: 44px;
-    touch-action: manipulation;
-  }
-
-  /* Smooth Scrolling */
+  /* ── 1. OUTER SHELL: the "wallpaper" behind the floating window ── */
   html {
-    scroll-behavior: smooth;
+    background: #08080d;
     -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100dvh;
+    background: transparent !important;
+    overflow: hidden;
+    position: fixed;
+    inset: 0;
+  }
+
+  /* Animated ambient glow behind the window */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 10%,  rgba(76,79,229,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 80% 90%,  rgba(6,182,212,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%,  rgba(76,79,229,0.08) 0%, transparent 70%);
+    filter: blur(40px);
+    z-index: 0;
+    pointer-events: none;
+    animation: ambient-pulse 8s ease-in-out infinite alternate;
+  }
+
+  /* ── 2. THE FLOATING WINDOW CONTAINER ── */
+  .mobile-viewport-shell {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 440px;
+    min-width: 320px;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Window chrome effect */
+    border-left:  1px solid rgba(255,255,255,0.08);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.04),
+      0 40px 120px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    /* The background is the app itself */
+    background: hsl(var(--background));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+
+  .mobile-viewport-shell::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── 3. FLUID TYPOGRAPHY ENGINE ── */
+  /* Scale text using clamp() — no font-size !important hacks */
+  html { font-size: clamp(13px, 3.8vw, 16px); }
+
+  h1 { font-size: clamp(1.6rem, 7vw, 2.4rem)  !important; line-height: 1.1 !important; letter-spacing: -0.03em !important; }
+  h2 { font-size: clamp(1.3rem, 5.5vw, 1.9rem) !important; line-height: 1.2 !important; letter-spacing: -0.02em !important; }
+  h3 { font-size: clamp(1.1rem, 4.5vw, 1.5rem) !important; line-height: 1.3 !important; }
+
+  /* Large decorative display numbers used in stat cards */
+  .tabular-nums.text-6xl,
+  .text-6xl.font-black,
+  .text-7xl.font-black {
+    font-size: clamp(2rem, 10vw, 3.5rem) !important;
+    line-height: 1 !important;
+  }
+
+  /* ── 4. STRUCTURAL LAYOUT FIXES ── */
+  /* Hide desktop sidebar — mobile uses drawer + bottom nav */
+  aside { display: none !important; }
+
+  /* Main content area fills the shell */
+  main {
+    padding-left: 0 !important;
+    width: 100% !important;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Content wrapper — compact horizontal padding */
+  .w-full.max-w-\[1400px\],
+  .w-full.max-w-\[1600px\] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 1.25rem !important;
+  }
+
+  /* Push content above fixed bottom nav */
+  .flex-1.min-w-0.min-h-screen {
+    padding-bottom: 5rem !important;
+  }
+
+  /* ── 5. GRID SYSTEM: kill multi-column desktop grids ── */
+  .grid-cols-12 { grid-template-columns: 1fr !important; }
+  .col-span-12 { grid-column: span 1 / span 1 !important; }
+  .col-span-8,
+  .col-span-9,
+  .col-span-7,
+  .col-span-6,
+  .col-span-5,
+  .col-span-4,
+  .col-span-3 { grid-column: span 1 / span 1 !important; }
+
+  /* Exception: 2-col grids inside cards are fine */
+  .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+  /* xl:grid-cols-2 patterns are fine — left at 1col on mobile */
+  .xl\\:grid-cols-2 { grid-template-columns: 1fr !important; }
+  .lg\\:col-span-8,
+  .lg\\:col-span-4,
+  .lg\\:col-span-9 { grid-column: span 1 / span 1 !important; }
+
+  /* ── 6. CARD & BENTO SYSTEM ── */
+  .bento-card {
+    border-radius: 20px !important;
+    padding: 1rem !important;
+    /* Remove hover lift on touch devices */
+    transform: none !important;
+    transition: opacity 0.15s ease !important;
+  }
+  .bento-card:active { opacity: 0.85 !important; }
+
+  /* Glass blur: reduce intensity for mobile GPU */
+  .glass {
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  /* ── 7. TOUCH INTERACTION LAYER ── */
+  /* All tappable elements must be >= 44px */
+  button,
+  a[role="button"],
+  [role="tab"],
+  [role="option"],
+  .touch-target {
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Fast tap response */
+  button:active, a:active {
+    transform: scale(0.96) !important;
+    transition: transform 0.08s ease !important;
+  }
+
+  /* Reduce all framer-motion animation durations by 30% on mobile */
+  * {
+    --motion-reduce: 0.7;
+  }
+
+  /* ── 8. SCROLL MANAGEMENT ── */
+  /* Prevent horizontal overflow from any component */
+  .mobile-viewport-shell * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Overflow-x guard */
+  section,
+  article,
+  div {
+    overflow-x: clip;
+  }
+
+  /* Re-allow scroll in containers that need it */
+  .overflow-x-auto,
+  .overflow-y-auto,
+  .custom-scrollbar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── 9. BOTTOM NAV SYSTEM ── */
+  /* The nav is fixed at bottom of the viewport-shell, not the html viewport */
+  nav.fixed.bottom-0 {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 440px !important;
+    border-top: 1px solid rgba(255,255,255,0.07) !important;
+    background: hsl(var(--background) / 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    padding-bottom: env(safe-area-inset-bottom, 8px) !important;
+    z-index: 9999 !important;
+    box-shadow: 0 -1px 0 rgba(255,255,255,0.05), 0 -20px 60px rgba(0,0,0,0.5) !important;
+  }
+
+  /* ── 10. FLOATING HAMBURGER MENU ── */
+  /* Ensure the hamburger toggle doesn't overlap status bar */
+  .fixed.top-4.left-4 {
+    top: max(16px, env(safe-area-inset-top, 16px)) !important;
+  }
+
+  /* ── 11. VISUAL SYSTEM ADJUSTMENTS ── */
+  /* Lighter shadows on mobile */
+  .shadow-2xl { box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important; }
+  .shadow-xl   { box-shadow: 0 4px 20px rgba(0,0,0,0.25) !important; }
+
+  /* Neon glows: halved intensity */
+  .neon-glow-indigo { box-shadow: 0 0 10px -4px rgba(99,102,241,0.2) !important; }
+  .neon-glow-cyan   { box-shadow: 0 0 10px -4px rgba(6,182,212,0.2)  !important; }
+  .neon-glow-purple { box-shadow: 0 0 10px -4px rgba(168,85,247,0.2) !important; }
+
+  /* Reduce background blur blobs */
+  .blur-\[150px\] { filter: blur(60px) !important; }
+  .blur-\[100px\] { filter: blur(40px) !important; }
+
+  /* ── 12. FLEX STACK ADAPTATION ── */
+  /* Desktop flex-rows that should stack on mobile */
+  .mobile-stack { flex-direction: column !important; }
+
+  /* Horizontal tab/filter bars: allow horizontal scroll instead of wrap */
+  .flex.gap-2.p-2.rounded-2xl,
+  .flex.items-center.gap-2.p-2 {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+
+  /* ── 13. FOOTER ── */
+  footer {
+    display: none !important;
+  }
+
+  /* ── 14. INTERVIEW / EDITOR PANELS ── */
+  /* Split panels stack vertically on mobile */
+  .split-panel-container {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+  .split-panel-container > * {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 300px;
+  }
+
+  /* Monaco / code editor: ensure it doesn't overflow */
+  .monaco-editor,
+  .view-lines {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  /* ── AMBIENT PULSE ANIMATION ── */
+  @keyframes ambient-pulse {
+    0%   { opacity: 0.6; transform: scale(1); }
+    50%  { opacity: 0.85; transform: scale(1.05); }
+    100% { opacity: 0.6; transform: scale(1); }
   }
 }
 
-/* ── Textarea ──────────────────────────────────────────────────────────── */
-textarea { resize: none; }
+/* Extra small phones: 320px */
+@media (max-width: 359px) {
+  html { font-size: 12px; }
+  .mobile-viewport-shell { min-width: 320px; }
+}
+
