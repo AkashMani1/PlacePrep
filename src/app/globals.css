@@ -195,6 +195,24 @@ select option {
 /* ── Textarea ──────────────────────────────────────────────────────────── */
 textarea { resize: none; }
 
+/* ── Modal Portal System ───────────────────────────────────────────────── */
+/*
+  Portals render into document.body, ABOVE the .mobile-viewport-shell.
+  This guarantees modals are always viewport-fixed and scroll-independent.
+*/
+#modal-portal-root {
+  position: relative;
+  z-index: 99999;
+}
+
+/* Ensure no stacking context on the shell traps portal-fixed elements */
+.mobile-viewport-shell > * {
+  transform: none;
+  filter: none;
+}
+
+
+
 /* ═══════════════════════════════════════════════════════════════════════════
    MOBILE WINDOWED VIEWPORT SYSTEM  (max-width: 767px)
    Approach: Floating "App Window" container — desktop structure preserved,

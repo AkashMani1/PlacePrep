@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { X, Target, Plus } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Difficulty, Platform, Problem } from '@/lib/types';
+import ModalPortal from '@/components/ui/ModalPortal';
 
 interface AddProblemModalProps {
   onClose: () => void;
@@ -38,12 +39,8 @@ export default function AddProblemModal({ onClose, activeCategory }: AddProblemM
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4 overflow-y-auto">
-      <motion.div 
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="bg-card border border-border/20 rounded-[32px] shadow-2xl w-full max-w-lg my-auto"
-      >
+    <ModalPortal onClose={onClose}>
+      <div className="bg-card border border-border/20 rounded-[32px] shadow-2xl w-full overflow-hidden">
         <div className="flex items-center justify-between px-10 py-8 border-b border-border/10 bg-muted/20">
           <div className="flex items-center gap-4">
              <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]">
@@ -130,7 +127,7 @@ export default function AddProblemModal({ onClose, activeCategory }: AddProblemM
              Add Problem
            </button>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </ModalPortal>
   );
 }

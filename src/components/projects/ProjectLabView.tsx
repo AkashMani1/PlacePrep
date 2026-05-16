@@ -11,6 +11,7 @@ import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
 import { ProjectRecord, ProjectChallenge } from '@/lib/types';
 import { BentoCard, ActivityRing } from '@/components/ui/Bento';
+import ModalPortal from '@/components/ui/ModalPortal';
 
 // ── Animation Variants ────────────────────────────────────────────────────────
 
@@ -79,14 +80,8 @@ function AddProjectModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-2xl z-[100] flex items-center justify-center p-4">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={smoothSpring}
-        className="bg-card/80 backdrop-blur-2xl border border-white/10 rounded-[40px] shadow-[0_30px_100px_rgba(0,0,0,0.5)] w-full max-w-2xl overflow-hidden"
-      >
+    <ModalPortal onClose={onClose}>
+      <div className="bg-card/90 backdrop-blur-2xl border border-white/10 rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.5)] w-full overflow-hidden">
         <div className="flex items-center justify-between px-6 md:px-10 py-6 md:py-8 border-b border-border/10 bg-black/10 dark:bg-white/5 backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/20 rounded-xl md:rounded-2xl flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]">
@@ -171,8 +166,8 @@ function AddProjectModal({ onClose }: { onClose: () => void }) {
             <Save className="w-4 h-4 md:w-5 md:h-5" /> Commit
           </motion.button>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </ModalPortal>
   );
 }
 
