@@ -1,8 +1,6 @@
 'use client';
 
-/* Developed by Akash Mani - This site is developed by Akash Mani. Original watermark of Akash Mani. */
-
-/* Developed by Akash Mani - This site is developed by Akash Mani. Original watermark of Akash Mani. */
+/* Developed by Akash Mani - PlacePrep Premium OS */
 
 import { Target, LayoutDashboard, Compass, ListChecks, Code2, PlayCircle, Library, FlaskConical, Settings, Sun, Moon, Cloud, ChevronRight } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
@@ -47,12 +45,12 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
     <motion.aside 
       initial={false}
       animate={{ 
-        width: isExpanded ? '240px' : '80px',
-        boxShadow: (isMobile || isSidebarHovered) ? '20px 0 50px rgba(0,0,0,0.3)' : '0 0 0 rgba(0,0,0,0)'
+        width: isExpanded ? '280px' : '80px',
+        boxShadow: (isMobile || isSidebarHovered) ? '40px 0 80px rgba(0,0,0,0.6)' : '0 0 0 rgba(0,0,0,0)'
       }}
       onMouseEnter={() => !isMobile && setSidebarHovered(true)}
       onMouseLeave={() => !isMobile && setSidebarHovered(false)}
-      className={`${isMobile ? 'flex' : 'hidden md:flex'} fixed left-0 top-0 h-screen glass border-r border-border/10 flex flex-col z-50 select-none overflow-hidden`}
+      className={`${isMobile ? 'flex' : 'hidden md:flex'} fixed left-0 top-0 h-screen bg-background/80 backdrop-blur-2xl border-r border-white/5 flex flex-col z-[100] select-none overflow-hidden transition-colors duration-500`}
     >
       {/* Logo Area */}
       <div className="py-8 flex items-center border-b border-border/10 px-4">
@@ -81,7 +79,7 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-10 space-y-2 overflow-y-auto custom-scrollbar pt-12">
+      <nav className="flex-1 py-8 space-y-1.5 overflow-y-auto custom-scrollbar px-3">
         {NAV_ITEMS.filter(item => !item.adminOnly || user?.email === 'akashmani9955@gmail.com').map(({ id, icon: Icon, label, badge }) => (
           <Link
             key={id}
@@ -89,14 +87,14 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
             onClick={(e) => {
               onTabChange(id);
             }}
-            className={`w-full group relative flex items-center rounded-[18px] transition-all duration-300 text-left px-4 ${
+            className={`w-full group relative flex items-center h-12 rounded-xl transition-all duration-300 text-left px-3 ${
               activeTab === id
-                ? 'bg-primary text-white shadow-[0_10px_25px_rgba(var(--primary-rgb),0.2)]'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/20'
+                ? 'bg-primary/10 text-primary border border-primary/20'
+                : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
             }`}
           >
-            <div className={`w-12 h-12 flex-shrink-0 flex items-center justify-center transition-transform duration-300 ${activeTab === id ? 'scale-110' : 'group-hover:scale-110'}`}>
-               <Icon className={`w-5 h-5 ${activeTab === id ? 'text-white' : 'group-hover:text-primary'}`} />
+            <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center transition-transform duration-300 ${activeTab === id ? 'scale-110' : 'group-hover:scale-110'}`}>
+               <Icon className={`w-5 h-5 ${activeTab === id ? 'text-primary' : 'group-hover:text-primary/80 opacity-60'}`} />
             </div>
             <AnimatePresence initial={false}>
               {isExpanded && (
@@ -105,12 +103,17 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
                   transition={{ duration: 0.3, delay: 0.1 }}
-                  className="flex-1 text-sm font-bold tracking-tight whitespace-nowrap ml-2"
+                  className="flex-1 text-[13px] font-bold tracking-tight whitespace-nowrap ml-3"
                 >
                   {label}
                 </motion.span>
               )}
             </AnimatePresence>
+            
+            {activeTab === id && (
+              <motion.div layoutId="sidebar-active-indicator" className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
+            )}
+
             <AnimatePresence initial={false}>
               {isExpanded && badge && (
                 <motion.span 
@@ -118,7 +121,7 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.2 }}
-                  className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-tighter ml-auto mr-1 ${activeTab === id ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'}`}
+                  className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-tighter ml-auto mr-1 ${activeTab === id ? 'bg-primary/20 text-primary' : 'bg-primary/10 text-primary'}`}
                 >
                   {badge}
                 </motion.span>

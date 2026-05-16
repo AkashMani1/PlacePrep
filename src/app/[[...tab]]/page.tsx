@@ -108,12 +108,12 @@ export default function AppShell() {
       {isMobileViewport && (
         <button 
           onClick={() => setSidebarOpen(true)}
-          className="fixed top-6 left-6 z-[60] w-12 h-12 rounded-2xl glass flex items-center justify-center border border-white/10 shadow-2xl active:scale-95 transition-all"
+          className="fixed top-4 left-4 z-[60] w-12 h-12 rounded-xl bg-background/80 backdrop-blur-xl border border-white/10 shadow-2xl active:scale-95 transition-all flex items-center justify-center group"
         >
-          <div className="w-5 h-4 flex flex-col justify-between">
-            <div className="w-full h-0.5 bg-primary rounded-full" />
-            <div className="w-2/3 h-0.5 bg-primary rounded-full" />
-            <div className="w-full h-0.5 bg-primary rounded-full" />
+          <div className="w-5 h-4 flex flex-col justify-between items-start">
+            <div className="w-5 h-0.5 bg-foreground rounded-full group-hover:bg-primary transition-colors" />
+            <div className="w-3 h-0.5 bg-foreground rounded-full group-hover:bg-primary transition-colors" />
+            <div className="w-5 h-0.5 bg-foreground rounded-full group-hover:bg-primary transition-colors" />
           </div>
         </button>
       )}
@@ -127,21 +127,23 @@ export default function AppShell() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSidebarOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70]"
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[70]"
             />
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-[280px] z-[80] glass border-r border-white/10"
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed inset-y-0 left-0 w-[280px] z-[80] bg-background border-r border-white/10 shadow-[20px_0_60px_rgba(0,0,0,0.5)]"
             >
-              <Sidebar 
-                activeTab={activeTab} 
-                onTabChange={(id) => { setSidebarOpen(false); handleTabChange(id); }} 
-                onSettingsOpen={() => { setSidebarOpen(false); setSettingsOpen(true); }}
-                isMobile={true}
-              />
+              <div className="h-full flex flex-col">
+                <Sidebar 
+                  activeTab={activeTab} 
+                  onTabChange={(id) => { setSidebarOpen(false); handleTabChange(id); }} 
+                  onSettingsOpen={() => { setSidebarOpen(false); setSettingsOpen(true); }}
+                  isMobile={true}
+                />
+              </div>
             </motion.div>
           </>
         )}
@@ -153,9 +155,9 @@ export default function AppShell() {
         initial={false}
         animate={{ paddingLeft: mainPaddingLeft }}
         transition={{ duration: 0.4, ease: premiumEasing }}
-        className="flex-1 min-w-0 min-h-screen relative pb-24 md:pb-0 transition-all z-10 flex flex-col"
+        className="flex-1 min-w-0 min-h-screen relative pb-32 md:pb-0 transition-all z-10 flex flex-col"
       >
-        <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 py-8 md:py-12 flex-1">
+        <div className="w-full max-w-[1400px] mx-auto px-4 md:px-12 py-6 md:py-12 flex-1">
           
           {/* Header Section Removed as per new Awwwards-style UI */}
 
@@ -192,8 +194,8 @@ export default function AppShell() {
         </footer>
       </motion.main>
 
-      {/* Mobile Nav - Simplified for Premium Feel */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-t border-border/50 dark:border-white/[0.06] flex md:hidden z-50 px-2 pb-safe">
+      {/* Mobile Nav - Minimalist Production Feel */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-t border-white/[0.08] flex md:hidden z-50 px-4 pb-6 pt-3 shadow-[0_-10px_40px_rgba(0,0,0,0.4)]">
         {(Object.entries(TAB_LABELS) as [TabId, { label: string; icon: React.ElementType }][])
           .filter(([id]) => ['dashboard', 'roadmap', 'dsa', 'mocks', 'notes'].includes(id))
           .map(([id, { label, icon: Icon }]) => {
@@ -202,17 +204,17 @@ export default function AppShell() {
             <button
               key={id}
               onClick={() => handleTabChange(id)}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-all ${
+              className={`flex-1 flex flex-col items-center gap-1.5 transition-all duration-300 ${
                 isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <div className="relative">
-                <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : 'opacity-70'}`} strokeWidth={isActive ? 2.5 : 2} />
+                <Icon className={`w-6 h-6 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]' : 'opacity-60 grayscale'}`} strokeWidth={isActive ? 2.5 : 2} />
                 {isActive && (
-                  <motion.div layoutId="mobilenav-dot" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                  <motion.div layoutId="mobilenav-dot" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]" />
                 )}
               </div>
-              <span className={`tracking-wide text-[9px] ${isActive ? 'font-black' : 'font-medium'}`}>{label.split(' ')[0]}</span>
+              <span className={`tracking-tight text-[10px] ${isActive ? 'font-black opacity-100' : 'font-medium opacity-40'}`}>{label.split(' ')[0]}</span>
             </button>
           );
         })}
