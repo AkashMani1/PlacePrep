@@ -31,11 +31,11 @@ export function DSASheetProgressCard() {
 
   return (
     <BentoCard className="col-span-12 lg:col-span-5 !p-0">
-      <div className="px-6 pt-5 pb-5 h-full flex flex-col gap-4">
-        <h3 className="text-sm font-semibold tracking-wide text-foreground leading-none">DSA Sheet Progress</h3>
+      <div className="px-6 pt-5 pb-5 h-full flex flex-col gap-6">
+        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground leading-none">Execution Progress</h3>
 
-        <div className="flex items-center gap-6 flex-1 mt-2">
-          <div className="relative shrink-0" style={{ width: SVG, height: SVG }}>
+        <div className="flex flex-col sm:flex-row items-center gap-8 flex-1 mt-2">
+          <div className="relative shrink-0 flex items-center justify-center" style={{ width: SVG, height: SVG }}>
             <svg width={SVG} height={SVG} className="-rotate-90" style={{ overflow: 'visible' }}>
               {ringDefs.map((ring) => {
                 const circ = 2 * Math.PI * ring.r;
@@ -50,20 +50,20 @@ export function DSASheetProgressCard() {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
               <p className="leading-none flex flex-col gap-0.5">
-                <span className="text-[20px] font-bold text-foreground">{solved}</span>
-                <span className="text-[11px] font-medium text-muted-foreground">/ {total}</span>
+                <span className="text-[24px] font-black text-foreground tabular-nums">{solved}</span>
+                <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40 tracking-widest">Solved</span>
               </p>
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col justify-center gap-4">
+          <div className="w-full flex-1 flex flex-col justify-center gap-5">
             {diffRows.map((row) => (
-              <div key={row.label} className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center text-[11px] font-medium">
+              <div key={row.label} className="flex flex-col gap-2">
+                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
                   <span className="text-muted-foreground">{row.label}</span>
-                  <span className="text-foreground/80">{row.solved} / {row.total}</span>
+                  <span className="text-foreground/80 tabular-nums">{row.solved} / {row.total}</span>
                 </div>
-                <div className="h-1.5 w-full rounded-full overflow-hidden bg-black/5 dark:bg-white/[0.05]">
+                <div className="h-2 w-full rounded-full overflow-hidden bg-black/10 dark:bg-white/[0.05] shadow-inner">
                   <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${row.total > 0 ? (row.solved / row.total) * 100 : 0}%`, backgroundColor: row.color }} />
                 </div>
               </div>

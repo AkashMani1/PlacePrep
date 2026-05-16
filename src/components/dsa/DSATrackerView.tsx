@@ -230,24 +230,24 @@ export default function DSATrackerView() {
       {/* Row 1: Hero & Readiness */}
       <BentoCard className="col-span-12 lg:col-span-8 overflow-hidden backdrop-blur-2xl bg-card/60 shadow-2xl border-white/10 relative !p-0">
         <div className={`absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t ${activeTab === 'DSA' ? 'from-primary/5' : 'from-amber-500/5'} to-transparent pointer-events-none`} />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-10 px-10 py-8">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8 px-6 md:px-10 py-8">
            <div className="max-w-md">
-              <h2 className="text-4xl font-black text-foreground mb-4 leading-none tracking-tighter uppercase">FOCUS PROTOCOL</h2>
-              <p className="text-muted-foreground text-base font-semibold leading-relaxed">
+              <h2 className="text-2xl md:text-4xl font-black text-foreground mb-4 leading-none tracking-tighter uppercase">FOCUS PROTOCOL</h2>
+              <p className="text-muted-foreground text-[13px] md:text-base font-semibold leading-relaxed">
                  Active tracking pipeline. Managing <span className={`${activeTab === 'DSA' ? 'text-primary' : 'text-amber-500'} font-black transition-colors`}>{stats.total} entries</span>. 
                  Mastery level is at <span className={`${activeTab === 'DSA' ? 'text-primary' : 'text-amber-500'} font-black transition-colors`}>{masterPct}%</span>.
               </p>
            </div>
            
-           <div className="flex gap-14 items-center bg-black/5 dark:bg-white/5 p-8 rounded-3xl border border-white/5 shadow-inner">
+           <div className="flex gap-10 md:gap-14 items-center justify-between md:justify-center bg-black/5 dark:bg-white/5 p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 shadow-inner">
               <div className="text-center group">
-                 <p className={`text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-2 transition-all tabular-nums tracking-tighter group-hover:from-${activeTab === 'DSA' ? 'primary' : 'amber-400'} group-hover:to-${activeTab === 'DSA' ? 'indigo-500' : 'orange-500'}`}>{stats.done}</p>
-                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Completed</p>
+                 <p className={`text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-1 md:mb-2 transition-all tabular-nums tracking-tighter group-hover:from-${activeTab === 'DSA' ? 'primary' : 'amber-400'} group-hover:to-${activeTab === 'DSA' ? 'indigo-500' : 'orange-500'}`}>{stats.done}</p>
+                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Done</p>
               </div>
-              <div className="w-px h-16 bg-border/50" />
+              <div className="w-px h-12 md:h-16 bg-border/50" />
               <div className="text-center group">
-                 <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-2 transition-all tabular-nums tracking-tighter">{stats.total - stats.done}</p>
-                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Pending</p>
+                 <p className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-1 md:mb-2 transition-all tabular-nums tracking-tighter">{stats.total - stats.done}</p>
+                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Pending</p>
               </div>
            </div>
         </div>
@@ -312,21 +312,22 @@ export default function DSATrackerView() {
 
       {/* Main List Area */}
       <div className="col-span-12 lg:col-span-9 space-y-8 mt-2">
-         {/* Sleek Filter Bar */}
-         <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <div className="relative flex-1 max-w-xl">
-                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+         {/* Sleek Filter           <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+              <div className="relative flex-1">
+                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
                  <input
                    value={search} onChange={(e) => setSearch(e.target.value)}
-                   placeholder="Search problems, topics..."
-                   className="w-full bg-card/80 backdrop-blur-xl border border-white/10 shadow-inner rounded-2xl py-5 pl-14 pr-6 text-base font-bold text-foreground focus:outline-none focus:border-primary/50 transition-all placeholder:opacity-40"
+                   placeholder="Search entries..."
+                   className="w-full bg-card/80 backdrop-blur-xl border border-white/10 shadow-inner rounded-2xl py-4 pl-14 pr-6 text-sm font-bold text-foreground focus:outline-none focus:border-primary/50 transition-all placeholder:opacity-40"
                  />
               </div>
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={magneticSpring} onClick={() => setShowFilters(!showFilters)} className={`ml-6 flex items-center gap-3 px-8 py-5 rounded-2xl border text-[11px] font-black tracking-[0.3em] uppercase transition-all shadow-lg ${showFilters ? 'bg-primary text-white border-primary/50' : 'bg-card/60 backdrop-blur-xl border-white/10 text-muted-foreground hover:text-foreground'}`}>
-                <Filter className="w-4 h-4" /> Filters
-              </motion.button>
-            </div>
+              <div className="flex items-center gap-4">
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={magneticSpring} onClick={() => setShowFilters(!showFilters)} className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border text-[10px] font-black tracking-[0.2em] uppercase transition-all shadow-lg ${showFilters ? 'bg-primary text-white border-primary/50' : 'bg-card/60 backdrop-blur-xl border-white/10 text-muted-foreground hover:text-foreground'}`}>
+                  <Filter className="w-4 h-4" /> Filters
+                </motion.button>
+              </div>
+            </div>  </div>
 
             <AnimatePresence>
               {showFilters && (
@@ -363,15 +364,15 @@ export default function DSATrackerView() {
                   <p className="text-muted-foreground text-[13px] font-black uppercase tracking-[0.4em]">No entries found</p>
                </motion.div>
             ) : (
-               <div className="h-[750px] w-full rounded-[40px] border border-white/10 bg-card/60 backdrop-blur-2xl p-6 relative shadow-2xl shadow-black/5">
+               <div className="h-[600px] md:h-[750px] w-full rounded-[32px] md:rounded-[40px] border border-white/10 bg-card/60 backdrop-blur-2xl p-4 md:p-6 relative shadow-2xl shadow-black/5">
                  <List
-                   style={{ height: 702, width: '100%' }}
+                   style={{ height: '100%', width: '100%' }}
                    rowCount={flatList.length}
                    rowProps={itemData}
                    rowHeight={(index: number) => {
                      const item = flatList[index];
-                     if (item.type === 'header') return item.variant === 'topic' ? 92 : 84;
-                     return item.problem.category === 'Aptitude' ? 252 : 182;
+                     if (item.type === 'header') return item.variant === 'topic' ? 82 : 74;
+                     return item.problem.category === 'Aptitude' ? 240 : 170;
                    }}
                    className="scrollbar-hide"
                    overscanCount={5}

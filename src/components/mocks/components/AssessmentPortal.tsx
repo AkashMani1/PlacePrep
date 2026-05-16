@@ -26,6 +26,7 @@ export function AssessmentPortal() {
   const [warnings, setWarnings] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
   const [timerReady, setTimerReady] = useState(false);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   // ── Stable timer with useRef (fixes C7) ─────────────────────────────
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -204,9 +205,9 @@ export function AssessmentPortal() {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden relative z-10">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative z-10">
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-16 custom-scrollbar bg-gradient-to-b from-transparent to-black/20">
+        <main className="flex-1 overflow-y-auto p-4 md:p-16 custom-scrollbar bg-gradient-to-b from-transparent to-black/20 pb-24 md:pb-16">
           <div className="max-w-4xl mx-auto space-y-12 md:space-y-16">
             <AnimatePresence mode="wait">
               {currentQuestion ? (
@@ -216,14 +217,14 @@ export function AssessmentPortal() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-8 md:space-y-12"
+                  className="space-y-6 md:space-y-12"
                 >
                   <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="px-4 py-2 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-3 md:px-4 py-1.5 md:py-2 rounded-2xl bg-white/5 border border-white/10 text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                         {currentQuestion.type}
                       </span>
-                      <span className={`px-4 py-2 rounded-2xl border text-[10px] font-black uppercase tracking-widest ${
+                      <span className={`px-3 md:px-4 py-1.5 md:py-2 rounded-2xl border text-[9px] md:text-[10px] font-black uppercase tracking-widest ${
                         currentQuestion.difficulty === 'Hard' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
                         currentQuestion.difficulty === 'Medium' ? 'bg-primary/10 text-primary border-primary/20' :
                         'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
@@ -231,38 +232,38 @@ export function AssessmentPortal() {
                         {currentQuestion.difficulty}
                       </span>
                       {currentQuestion.company && (
-                        <span className="px-4 py-2 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black text-primary uppercase tracking-widest">
+                        <span className="px-3 md:px-4 py-1.5 md:py-2 rounded-2xl bg-white/5 border border-white/10 text-[9px] md:text-[10px] font-black text-primary uppercase tracking-widest">
                           {currentQuestion.company}
                         </span>
                       )}
                     </div>
                     {warnings > 0 && (
-                      <span className="flex items-center gap-2 text-rose-500 text-[10px] font-black uppercase tracking-widest bg-rose-500/10 px-4 py-2 rounded-full border border-rose-500/20">
+                      <span className="flex items-center gap-2 text-rose-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest bg-rose-500/10 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-rose-500/20">
                         <AlertTriangle className="w-4 h-4" /> {warnings} alerts
                       </span>
                     )}
                   </div>
 
-                  <div className="space-y-8 md:space-y-10">
-                    <div className="space-y-3">
-                      <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px]">Question {currentQuestionIndex + 1}</span>
-                      <h2 className="text-2xl md:text-4xl font-black text-white leading-tight tracking-tight">{currentQuestion.title}</h2>
+                  <div className="space-y-6 md:space-y-10">
+                    <div className="space-y-2 md:space-y-3">
+                      <span className="text-primary font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-[10px]">Question {currentQuestionIndex + 1}</span>
+                      <h2 className="text-xl md:text-4xl font-black text-white leading-tight tracking-tight">{currentQuestion.title}</h2>
                     </div>
 
-                    <div className="p-6 md:p-10 rounded-[28px] md:rounded-[40px] bg-white/[0.02] border border-white/5 backdrop-blur-sm shadow-inner">
-                      <div className="prose prose-invert max-w-none text-muted-foreground leading-loose text-base md:text-lg font-medium">
+                    <div className="p-4 md:p-10 rounded-[20px] md:rounded-[40px] bg-white/[0.02] border border-white/5 backdrop-blur-sm shadow-inner">
+                      <div className="prose prose-invert max-w-none text-muted-foreground leading-relaxed md:leading-loose text-sm md:text-lg font-medium">
                         {currentQuestion.content}
                       </div>
                     </div>
 
                     {/* Real Options */}
-                    <div className="grid grid-cols-1 gap-4 md:gap-5 mt-8 md:mt-12">
+                    <div className="grid grid-cols-1 gap-3 md:gap-5 mt-6 md:mt-12">
                       {(currentQuestion.options || []).map((option, i) => (
                         <motion.button
                           key={i}
                           whileHover={{ x: 8, backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
                           onClick={() => setAnswer(currentQuestion.id, i)}
-                          className={`p-5 md:p-8 rounded-[24px] md:rounded-[32px] border text-left transition-all relative group overflow-hidden ${
+                          className={`p-4 md:p-8 rounded-[16px] md:rounded-[32px] border text-left transition-all relative group overflow-hidden touch-target ${
                             assessmentAnswers[currentQuestion.id] === i
                               ? 'bg-primary/10 border-primary text-white shadow-2xl shadow-primary/10'
                               : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/10'
@@ -274,15 +275,15 @@ export function AssessmentPortal() {
                               className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none"
                             />
                           )}
-                          <div className="flex items-center gap-4 md:gap-6 relative z-10">
-                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl border flex items-center justify-center text-sm font-black transition-all shrink-0 ${
+                          <div className="flex items-center gap-3 md:gap-6 relative z-10">
+                            <div className={`w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-2xl border flex items-center justify-center text-xs md:text-sm font-black transition-all shrink-0 ${
                               assessmentAnswers[currentQuestion.id] === i
                                 ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20'
                                 : 'border-white/10 group-hover:border-white/20'
                             }`}>
                               {String.fromCharCode(65 + i)}
                             </div>
-                            <span className="font-bold text-sm md:text-lg tracking-tight">{option}</span>
+                            <span className="font-bold text-sm md:text-lg tracking-tight leading-snug">{option}</span>
                           </div>
                         </motion.button>
                       ))}
@@ -299,13 +300,19 @@ export function AssessmentPortal() {
         </main>
 
         {/* Question Palette Sidebar */}
-        <aside className="hidden md:flex w-80 lg:w-96 border-l border-white/5 bg-black/40 backdrop-blur-3xl p-6 lg:p-10 flex-col gap-8 lg:gap-10">
+        {isPaletteOpen && (
+          <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={() => setIsPaletteOpen(false)} />
+        )}
+        <aside className={`${isPaletteOpen ? 'flex' : 'hidden'} md:flex fixed md:relative inset-y-0 right-0 z-50 w-[85vw] md:w-80 lg:w-96 border-l border-white/5 bg-[#09090b] md:bg-black/40 backdrop-blur-3xl p-6 lg:p-10 flex-col gap-8 lg:gap-10 shadow-2xl md:shadow-none transition-transform`}>
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground">Execution Flow</h3>
               <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-1">Jump to any challenge</p>
             </div>
-            <LayoutGrid className="w-5 h-5 text-muted-foreground" />
+            <button className="md:hidden p-2 bg-white/5 rounded-full" onClick={() => setIsPaletteOpen(false)}>
+              <X className="w-4 h-4 text-white" />
+            </button>
+            <LayoutGrid className="w-5 h-5 text-muted-foreground hidden md:block" />
           </div>
 
           <div className="grid grid-cols-4 gap-3 lg:gap-4 overflow-y-auto custom-scrollbar pr-2">
@@ -369,14 +376,18 @@ export function AssessmentPortal() {
 
         <button
           onClick={() => currentQuestion && toggleFlag(currentQuestion.id)}
-          className={`flex items-center gap-2 md:gap-3 text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] transition-all duration-300 px-4 py-2 rounded-xl ${
+          className={`hidden sm:flex items-center gap-2 md:gap-3 text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] transition-all duration-300 px-4 py-2 rounded-xl ${
             currentQuestion && flaggedQuestions.includes(currentQuestion.id)
               ? 'text-amber-500 bg-amber-500/10 border border-amber-500/20'
               : 'text-muted-foreground hover:text-amber-500'
           }`}
         >
           <Flag className="w-4 h-4" />
-          {currentQuestion && flaggedQuestions.includes(currentQuestion.id) ? 'Flagged' : 'Flag for Review'}
+          {currentQuestion && flaggedQuestions.includes(currentQuestion.id) ? 'Flagged' : 'Flag'}
+        </button>
+
+        <button onClick={() => setIsPaletteOpen(true)} className="md:hidden flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 text-[10px] font-black uppercase tracking-widest text-primary border border-primary/20">
+          <LayoutGrid className="w-4 h-4" /> Map
         </button>
 
         <Button

@@ -239,9 +239,9 @@ export function InterviewRoom() {
   ];
 
   return (
-    <div className="fixed inset-0 bg-[#050505] z-[9999] flex overflow-hidden font-sans">
-      {/* Left: Video Feeds */}
-      <aside className="w-64 md:w-80 border-r border-white/5 bg-black/40 backdrop-blur-3xl flex flex-col p-4 md:p-6 gap-4 md:gap-6">
+    <div className="fixed inset-0 bg-[#050505] z-[9999] flex flex-col md:flex-row overflow-hidden font-sans mobile-app-window md:mobile-app-window-none">
+      {/* Top/Left: Video Feeds */}
+      <aside className="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/5 bg-black/40 backdrop-blur-3xl flex flex-col p-4 md:p-6 gap-4 md:gap-6 flex-shrink-0 md:h-full overflow-y-auto max-h-[40vh] md:max-h-none hide-scrollbar">
         <div className="flex items-center justify-between mb-2 md:mb-4">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -319,7 +319,7 @@ export function InterviewRoom() {
         </div>
 
         {/* Controls */}
-        <div className="mt-auto grid grid-cols-4 gap-2 md:gap-3 bg-white/5 p-3 md:p-4 rounded-[24px] md:rounded-[32px] border border-white/10">
+        <div className="mt-auto grid grid-cols-4 gap-2 md:gap-3 bg-white/5 p-2 md:p-4 rounded-[16px] md:rounded-[32px] border border-white/10 shrink-0">
           <button
             onClick={toggleMic}
             className={`aspect-square rounded-xl md:rounded-2xl flex items-center justify-center transition-all ${isMicEnabled ? 'bg-white/10 text-white' : 'bg-rose-500 text-white'}`}
@@ -351,9 +351,9 @@ export function InterviewRoom() {
         </div>
       </aside>
 
-      {/* Center: Workspace */}
-      <main className="flex-1 flex flex-col relative">
-        <header className="h-14 md:h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-black/20">
+      {/* Center/Bottom: Workspace */}
+      <main className="flex-1 flex flex-col relative min-h-[50vh]">
+        <header className="h-12 md:h-16 border-b border-white/5 flex items-center justify-between px-2 md:px-8 bg-black/20 shrink-0 overflow-x-auto hide-scrollbar">
           <div className="flex items-center gap-3 md:gap-4">
             <button
               onClick={() => setActiveTab('editor')}

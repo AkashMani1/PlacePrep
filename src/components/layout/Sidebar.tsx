@@ -29,12 +29,13 @@ interface SidebarProps {
   activeTab: TabId;
   onTabChange: (id: TabId) => void;
   onSettingsOpen: () => void;
+  isMobile?: boolean;
 }
 
-export default function Sidebar({ activeTab, onTabChange, onSettingsOpen }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobile = false }: SidebarProps) {
   const { state, toggleSidebar, toggleTheme, setSidebarHovered, isSidebarHovered } = useApp();
   const { user, signInWithGoogle, signOut } = useAuth();
-  const isExpanded = isSidebarHovered; // Purely hover-based expansion
+  const isExpanded = isMobile || isSidebarHovered; // Always expanded on mobile drawer
   
   const streak = calcStreak(state.dailyLogs);
   const currentWeek = calcCurrentWeek(state.startDate);
@@ -47,11 +48,11 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen }: Side
       initial={false}
       animate={{ 
         width: isExpanded ? '240px' : '80px',
-        boxShadow: isSidebarHovered ? '20px 0 50px rgba(0,0,0,0.3)' : '0 0 0 rgba(0,0,0,0)'
+        boxShadow: (isMobile || isSidebarHovered) ? '20px 0 50px rgba(0,0,0,0.3)' : '0 0 0 rgba(0,0,0,0)'
       }}
-      onMouseEnter={() => setSidebarHovered(true)}
-      onMouseLeave={() => setSidebarHovered(false)}
-      className="fixed left-0 top-0 h-screen glass border-r border-border/10 hidden md:flex flex-col z-50 select-none overflow-hidden"
+      onMouseEnter={() => !isMobile && setSidebarHovered(true)}
+      onMouseLeave={() => !isMobile && setSidebarHovered(false)}
+      className={`${isMobile ? 'flex' : 'hidden md:flex'} fixed left-0 top-0 h-screen glass border-r border-border/10 flex flex-col z-50 select-none overflow-hidden`}
     >
       {/* Logo Area */}
       <div className="py-8 flex items-center border-b border-border/10 px-4">

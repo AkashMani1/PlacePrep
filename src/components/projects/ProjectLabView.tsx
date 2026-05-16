@@ -87,17 +87,17 @@ function AddProjectModal({ onClose }: { onClose: () => void }) {
         transition={smoothSpring}
         className="bg-card/80 backdrop-blur-2xl border border-white/10 rounded-[40px] shadow-[0_30px_100px_rgba(0,0,0,0.5)] w-full max-w-2xl overflow-hidden"
       >
-        <div className="flex items-center justify-between px-10 py-8 border-b border-border/10 bg-black/10 dark:bg-white/5 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-6 md:px-10 py-6 md:py-8 border-b border-border/10 bg-black/10 dark:bg-white/5 backdrop-blur-xl">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]">
-              <Layers className="w-6 h-6 text-primary" />
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/20 rounded-xl md:rounded-2xl flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]">
+              <Layers className="w-5 h-5 md:w-6 md:h-6 text-primary" />
             </div>
-            <h2 className="text-foreground font-black uppercase tracking-[0.2em] text-sm">Add New Project</h2>
+            <h2 className="text-foreground font-black uppercase tracking-[0.2em] text-[11px] md:text-sm">New Project</h2>
           </div>
-          <button onClick={onClose} className="p-3 rounded-2xl text-muted-foreground hover:text-foreground hover:bg-white/10 transition-all"><X className="w-6 h-6" /></button>
+          <button onClick={onClose} className="p-2 md:p-3 rounded-xl md:rounded-2xl text-muted-foreground hover:text-foreground hover:bg-white/10 transition-all"><X className="w-5 h-5 md:w-6 md:h-6" /></button>
         </div>
         
-        <div className="p-10 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar bg-card/60">
+        <div className="p-6 md:p-10 space-y-8 max-h-[60vh] md:max-h-[70vh] overflow-y-auto custom-scrollbar bg-card/60">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="md:col-span-2">
               <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ml-1">Project Title</label>
@@ -164,11 +164,11 @@ function AddProjectModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex gap-6 px-10 pb-10 pt-6 bg-black/10 dark:bg-white/5 backdrop-blur-xl">
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onClose} className="flex-1 py-5 rounded-[24px] border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/10 text-[11px] font-black uppercase tracking-[0.3em] transition-all">Cancel</motion.button>
+        <div className="flex gap-4 md:gap-6 px-6 md:px-10 pb-6 md:pb-10 pt-4 md:pt-6 bg-black/10 dark:bg-white/5 backdrop-blur-xl">
+          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onClose} className="flex-1 py-4 md:py-5 rounded-xl md:rounded-[24px] border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/10 text-[9px] md:text-[11px] font-black uppercase tracking-[0.3em] transition-all">Cancel</motion.button>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={save}
-            className="flex-[2] py-5 rounded-[24px] bg-primary text-white text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-[0_10px_30px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3">
-            <Save className="w-5 h-5" /> Save Project
+            className="flex-[2] py-4 md:py-5 rounded-xl md:rounded-[24px] bg-primary text-white text-[9px] md:text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-[0_10px_30px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3">
+            <Save className="w-4 h-4 md:w-5 md:h-5" /> Commit
           </motion.button>
         </div>
       </motion.div>
@@ -307,24 +307,23 @@ export default function ProjectLabView() {
       {/* Row 1: Hero & Readiness */}
       <BentoCard className="col-span-12 lg:col-span-8 overflow-hidden backdrop-blur-2xl bg-card/60 shadow-2xl border-white/10 relative">
          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-secondary/5 to-transparent pointer-events-none" />
-         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-10 py-4">
+         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-10 py-4">
             <div className="max-w-md">
-               <h2 className="text-4xl font-black text-foreground mb-4 leading-none tracking-tighter uppercase">PORTFOLIO DEPLOYMENT</h2>
-               <p className="text-muted-foreground text-base font-semibold leading-relaxed">
+               <h2 className="text-2xl md:text-4xl font-black text-foreground mb-4 leading-none tracking-tighter uppercase">PORTFOLIO DEPLOYMENT</h2>
+               <p className="text-muted-foreground text-[13px] md:text-base font-semibold leading-relaxed">
                   Comprehensive project portfolio. Currently maintaining <span className="text-secondary font-black">{projects.length} project modules</span>. 
-                  <span className="text-emerald-500 font-black"> {readinessCount} modules</span> are interview-optimized.
                </p>
             </div>
             
-            <div className="flex gap-12 items-center bg-black/5 dark:bg-white/5 p-8 rounded-3xl border border-white/5 shadow-inner">
+            <div className="flex gap-10 md:gap-12 items-center justify-between md:justify-center bg-black/5 dark:bg-white/5 p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 shadow-inner">
                <div className="text-center group">
-                  <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-2 transition-all tabular-nums tracking-tighter group-hover:from-secondary group-hover:to-purple-500">{projects.length}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Project Map</p>
+                  <p className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-1 md:mb-2 transition-all tabular-nums tracking-tighter group-hover:from-secondary group-hover:to-purple-500">{projects.length}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Map</p>
                </div>
-               <div className="w-px h-16 bg-border/50" />
+               <div className="w-px h-12 md:h-16 bg-border/50" />
                <div className="text-center group">
-                  <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-2 transition-all tabular-nums tracking-tighter group-hover:from-emerald-400 group-hover:to-emerald-600">{readinessCount}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Deployed</p>
+                  <p className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-1 md:mb-2 transition-all tabular-nums tracking-tighter group-hover:from-emerald-400 group-hover:to-emerald-600">{readinessCount}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Ready</p>
                </div>
             </div>
          </div>
@@ -378,44 +377,44 @@ export default function ProjectLabView() {
                 transition={smoothSpring}
                 className={`bg-card/60 backdrop-blur-2xl border border-white/5 rounded-[40px] overflow-hidden hover:border-primary/40 transition-all shadow-xl ${isOpen ? 'ring-2 ring-primary/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)]' : ''}`}
               >
-                <button onClick={() => setExpandedId(isOpen ? null : project.id)} className="w-full flex flex-col lg:flex-row lg:items-center gap-10 px-10 py-10 text-left group">
-                  <div className={`w-16 h-16 rounded-[24px] flex items-center justify-center border border-primary/30 bg-primary/10 text-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] group-hover:scale-110 group-hover:rotate-6 transition-all flex-shrink-0 duration-500`}>
-                    <Cpu className="w-8 h-8" />
+                <button onClick={() => setExpandedId(isOpen ? null : project.id)} className="w-full flex flex-col lg:flex-row lg:items-center gap-6 md:gap-10 px-6 md:px-10 py-8 md:py-10 text-left group">
+                  <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-[24px] flex items-center justify-center border border-primary/30 bg-primary/10 text-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] group-hover:scale-110 group-hover:rotate-6 transition-all flex-shrink-0 duration-500`}>
+                    <Cpu className="w-6 h-6 md:w-8 md:h-8" />
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-4 mb-4 flex-wrap">
-                       <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-80">{project.role}</span>
-                       <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
-                       <span className={`text-[10px] px-4 py-1.5 rounded-full border font-black uppercase tracking-widest ${
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                       <span className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-80">{project.role}</span>
+                       <div className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                       <span className={`text-[8px] md:text-[10px] px-3 py-1 rounded-full border font-black uppercase tracking-widest ${
                          project.status === 'Live' ? 'border-emerald-500/50 text-emerald-500 bg-emerald-500/10 shadow-[0_0_10px_rgba(16,185,129,0.2)]' : 'border-white/10 text-muted-foreground bg-black/10 dark:bg-white/10'
                        }`}>{project.status}</span>
                     </div>
-                    <h4 className="text-foreground text-3xl md:text-4xl font-black tracking-tighter mb-5 group-hover:text-primary transition-colors uppercase">{project.name}</h4>
-                    <div className="flex flex-wrap gap-3">
+                    <h4 className="text-foreground text-xl md:text-4xl font-black tracking-tighter mb-4 group-hover:text-primary transition-colors uppercase">{project.name}</h4>
+                    <div className="flex flex-wrap gap-2 md:gap-3">
                       {project.techStack.map(t => (
-                        <span key={t} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-4 py-2 bg-background rounded-xl border border-border/50 shadow-sm"># {t}</span>
+                        <span key={t} className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-1.5 bg-background rounded-lg border border-border/50 shadow-sm"># {t}</span>
                       ))}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-12 flex-shrink-0 lg:border-l border-white/10 lg:pl-12">
+                  <div className="flex items-center justify-between lg:justify-start gap-8 md:gap-12 flex-shrink-0 lg:border-l border-white/10 lg:pl-12 pt-4 lg:pt-0">
                     <div className="text-center">
                        <motion.span 
                           animate={{ opacity: [0.7, 1, 0.7] }}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className={`text-6xl font-black ${scoreColor} tabular-nums mb-1 block tracking-tighter`}
+                          className={`text-3xl md:text-6xl font-black ${scoreColor} tabular-nums mb-1 block tracking-tighter`}
                         >
                          {project.readinessScore}%
                        </motion.span>
-                       <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-60">Ready Score</span>
+                       <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-60">Ready</span>
                     </div>
                     <motion.div 
                       animate={{ rotate: isOpen ? 180 : 0 }}
                       transition={smoothSpring}
-                      className={`p-4 rounded-2xl transition-all duration-500 ${isOpen ? 'text-primary bg-primary/20 shadow-inner' : 'bg-black/5 dark:bg-white/5 text-muted-foreground'}`}
+                      className={`p-3 md:p-4 rounded-xl md:rounded-2xl transition-all duration-500 ${isOpen ? 'text-primary bg-primary/20 shadow-inner' : 'bg-black/5 dark:bg-white/5 text-muted-foreground'}`}
                     >
-                       <ChevronDown className="w-6 h-6" />
+                       <ChevronDown className="w-5 h-5 md:w-6 md:h-6" />
                     </motion.div>
                   </div>
                 </button>

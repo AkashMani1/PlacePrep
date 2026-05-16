@@ -33,8 +33,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ErrorBoundary>
           <AuthProvider>
             <AppProvider>
-              {children}
-              <Toaster richColors position="top-right" closeButton theme="dark" />
+              <div className="mobile-app-window">
+                {children}
+                <Toaster richColors position="top-right" closeButton theme="dark" />
+              </div>
             </AppProvider>
           </AuthProvider>
         </ErrorBoundary>

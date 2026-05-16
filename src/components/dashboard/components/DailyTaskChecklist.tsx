@@ -39,33 +39,34 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-center justify-between gap-6 py-4 border-b border-border/50 dark:border-white/[0.05] px-2">
-        <div className="flex items-center gap-8">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-semibold tracking-wider text-muted-foreground opacity-60">Date</span>
-            <span className="text-xs font-bold text-foreground">{todayStr}</span>
-          </div>
-          <div className="w-[1px] h-6 bg-black/5 dark:bg-white/[0.05]" />
-          <div className="flex flex-col">
-            <span className="text-[10px] font-semibold tracking-wider text-muted-foreground opacity-60">Phase</span>
-            <span className="text-xs font-bold text-primary">Week {currentWeek} / {(state.goalDurationMonths || 3) * 4}</span>
-          </div>
-          <div className="w-[1px] h-6 bg-black/5 dark:bg-white/[0.05] hidden sm:block" />
-          <div className="hidden sm:flex flex-col">
-            <span className="text-[10px] font-semibold tracking-wider text-muted-foreground opacity-60">Efficiency</span>
-            <div className="flex items-center gap-3">
-              <div className="h-1.5 w-24 bg-black/5 dark:bg-white/[0.05] rounded-full overflow-hidden">
-                <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-              </div>
-              <span className="text-[11px] font-bold text-primary tabular-nums">{pct}%</span>
+      <div className="flex flex-col gap-6 py-4 border-b border-border/50 dark:border-white/[0.05] px-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Date</span>
+              <span className="text-[11px] font-black text-foreground tabular-nums">{todayStr}</span>
+            </div>
+            <div className="w-[1px] h-6 bg-border/50" />
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Phase</span>
+              <span className="text-[11px] font-black text-primary uppercase">Week {currentWeek}</span>
             </div>
           </div>
+          <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isEditing ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-black/5 dark:bg-white/[0.03] text-muted-foreground hover:bg-white/[0.08]'}`}>
+            {isEditing ? <CheckSquare className="w-3.5 h-3.5" /> : <Settings className="w-3.5 h-3.5" />}
+            {isEditing ? 'Save' : 'Plan'}
+          </button>
         </div>
 
-        <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-semibold tracking-wider transition-all ${isEditing ? 'bg-primary text-white' : 'bg-black/5 dark:bg-white/[0.03] text-muted-foreground hover:bg-white/[0.08]'}`}>
-          {isEditing ? <CheckSquare className="w-3.5 h-3.5" /> : <Settings className="w-3.5 h-3.5" />}
-          {isEditing ? 'Save Template' : 'Edit Plan'}
-        </button>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Execution Efficiency</span>
+            <span className="text-[11px] font-black text-primary tabular-nums">{pct}%</span>
+          </div>
+          <div className="h-1.5 w-full bg-black/5 dark:bg-white/[0.05] rounded-full overflow-hidden shadow-inner">
+            <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1 }} className="h-full bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 px-2 items-start">

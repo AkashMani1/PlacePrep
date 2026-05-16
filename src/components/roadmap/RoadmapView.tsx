@@ -84,9 +84,9 @@ function WeekCard({ week, isExpanded, onToggle }: {
       {isActive && <div className="absolute inset-0 bg-primary/5 pointer-events-none" />}
       <button
         onClick={onToggle}
-        className={`w-full flex items-center gap-6 px-8 py-6 text-left transition-all ${isExpanded ? 'bg-black/5 dark:bg-white/[0.02]' : 'hover:bg-black/5 dark:bg-white/[0.02]'}`}
+        className={`w-full flex items-center gap-4 px-4 md:px-8 py-5 md:py-6 text-left transition-all ${isExpanded ? 'bg-black/5 dark:bg-white/[0.02]' : 'hover:bg-black/5 dark:bg-white/[0.02]'}`}
       >
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg flex-shrink-0 border transition-all shadow-lg ${
+        <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center font-black text-sm md:text-lg flex-shrink-0 border transition-all shadow-lg ${
           isActive 
             ? 'bg-gradient-to-tr from-primary to-indigo-500 border-white/20 text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)]' 
             : isPast ? 'bg-black/10 dark:bg-white/5 border-border/50 dark:border-white/10 text-muted-foreground' : 'bg-black/5 dark:bg-white/[0.02] border-border/50 dark:border-white/[0.05] text-muted-foreground/60'
@@ -95,26 +95,31 @@ function WeekCard({ week, isExpanded, onToggle }: {
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-1.5">
-            <span className={`text-xl font-black tracking-tight ${isActive ? 'text-foreground' : 'text-foreground/90'}`}>
+          <div className="flex items-center gap-2 mb-1">
+            <span className={`text-sm md:text-xl font-black tracking-tight ${isActive ? 'text-foreground' : 'text-foreground/90'}`}>
               Week {week.week}
             </span>
-            <span className={`text-[10px] px-3 py-1 rounded-full border font-black tracking-widest uppercase ${phase.badge}`}>
+            <span className={`text-[8px] md:text-[10px] px-2 py-0.5 rounded-full border font-black tracking-widest uppercase ${phase.badge}`}>
               {week.phase}
             </span>
-            {isActive && (
-              <span className="text-[10px] px-3 py-1 rounded-full bg-emerald-500 text-white border border-emerald-400 font-black tracking-widest uppercase shadow-[0_0_15px_rgba(16,185,129,0.5)] animate-pulse">
-                Active
-              </span>
-            )}
           </div>
-          <div className="flex items-center gap-2 opacity-90">
-             <Target className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
-             <p className={`text-sm font-semibold truncate tracking-tight ${isActive ? 'text-foreground' : 'text-muted-foreground/80'}`}>{week.focus}</p>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 opacity-90">
+              <Target className={`w-3.5 h-3.5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+              <p className={`text-[11px] md:text-sm font-bold truncate tracking-tight ${isActive ? 'text-foreground' : 'text-muted-foreground/80'}`}>{week.focus}</p>
+            </div>
+            <div className="flex sm:hidden flex-col gap-1">
+              <div className="flex justify-between items-center">
+                <span className={`text-[8px] font-black tracking-widest uppercase ${pct === 100 ? 'text-emerald-500' : 'text-muted-foreground/40'}`}>{pct}% Done</span>
+              </div>
+              <div className="w-full h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                <div className={`h-full ${phase.bar} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-8 flex-shrink-0">
+        <div className="flex items-center gap-4 md:gap-8 flex-shrink-0">
           <div className="hidden sm:flex flex-col items-end gap-1.5 min-w-[100px]">
             <span className={`text-[11px] font-black tracking-widest uppercase ${pct === 100 ? 'text-emerald-500' : 'text-muted-foreground'}`}>{pct}% Done</span>
             <div className="w-24 h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden shadow-inner">
@@ -129,9 +134,9 @@ function WeekCard({ week, isExpanded, onToggle }: {
           <motion.div 
             animate={{ rotate: isExpanded ? 90 : 0 }}
             transition={smoothSpring}
-            className={`p-3 rounded-xl transition-colors duration-500 ${isExpanded ? 'bg-primary/20 text-primary' : 'bg-black/5 dark:bg-white/5 text-muted-foreground/40'}`}
+            className={`p-2 md:p-3 rounded-lg md:rounded-xl transition-colors duration-500 ${isExpanded ? 'bg-primary/20 text-primary' : 'bg-black/5 dark:bg-white/5 text-muted-foreground/40'}`}
           >
-             <ChevronRight className="w-5 h-5" />
+             <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
           </motion.div>
         </div>
       </button>

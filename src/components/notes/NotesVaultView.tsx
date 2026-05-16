@@ -71,52 +71,52 @@ function StarForm({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={smoothSpring}
-      className="bg-card/80 backdrop-blur-2xl border border-white/10 rounded-[40px] p-10 space-y-10 relative overflow-hidden group hover:border-primary/40 transition-all shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
+      className="bg-card/80 backdrop-blur-2xl border border-white/10 rounded-[32px] md:rounded-[40px] p-6 md:p-10 space-y-8 md:space-y-10 relative overflow-hidden group hover:border-primary/40 transition-all shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
     >
       <div className="absolute -top-10 -right-10 p-12 opacity-5 group-hover:opacity-20 transition-opacity duration-700">
          <Star className="w-24 h-24 text-primary" />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 relative z-10">
         <div>
            <label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.3em] mb-3 block ml-1">Core Scenario</label>
            <select value={form.tag} onChange={(e) => set('tag', e.target.value)}
-            className="w-full bg-background border border-border/10 rounded-[24px] px-6 py-4 text-foreground text-md font-bold focus:outline-none focus:border-primary/40 appearance-none transition-all cursor-pointer shadow-inner">
+            className="w-full bg-background border border-border/10 rounded-2xl md:rounded-[24px] px-6 py-4 text-foreground text-sm md:text-md font-bold focus:outline-none focus:border-primary/40 appearance-none transition-all cursor-pointer shadow-inner">
             {TAGS.map((t) => <option key={t} className="bg-card text-foreground">{t} Dynamic</option>)}
            </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 relative z-10">
         {[
-          { k: 'situation' as const, label: 'SITUATION', icon: Database, color: 'text-secondary', placeholder: 'Standardized context/background reporting...' },
-          { k: 'task' as const, label: 'TASK', icon: Target, color: 'text-primary', placeholder: 'Specific project goals and requirements...' },
-          { k: 'action' as const, label: 'ACTION', icon: Zap, color: 'text-primary', placeholder: 'Action items and implementation steps...' },
-          { k: 'result' as const, label: 'RESULT', icon: ShieldCheck, color: 'text-emerald-500', placeholder: 'Quantified metrics and project outcomes...' },
+          { k: 'situation' as const, label: 'SITUATION', icon: Database, color: 'text-secondary', placeholder: 'Context reporting...' },
+          { k: 'task' as const, label: 'TASK', icon: Target, color: 'text-primary', placeholder: 'Project goals...' },
+          { k: 'action' as const, label: 'ACTION', icon: Zap, color: 'text-primary', placeholder: 'Implementation steps...' },
+          { k: 'result' as const, label: 'RESULT', icon: ShieldCheck, color: 'text-emerald-500', placeholder: 'Quantified outcomes...' },
         ].map(({ k, label, icon: Icon, color, placeholder }) => (
           <div key={k} className="space-y-4">
             <div className="flex items-center gap-3 mb-1 px-1">
                <div className={`p-2 rounded-lg bg-black/5 dark:bg-white/5 border border-border/50 ${color} shadow-sm`}>
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                </div>
-               <label className="text-muted-foreground text-[11px] font-black uppercase tracking-[0.3em]">{label} CORE</label>
+               <label className="text-muted-foreground text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em]">{label}</label>
             </div>
             <textarea
               value={form[k]}
               onChange={(e) => set(k, e.target.value)}
               placeholder={placeholder}
-              rows={4}
-              className="w-full bg-background border border-border/10 rounded-[28px] px-6 py-5 text-foreground text-sm focus:outline-none focus:border-primary/40 resize-none transition-all placeholder:opacity-30 font-medium leading-relaxed shadow-inner"
+              rows={3}
+              className="w-full bg-background border border-border/10 rounded-2xl md:rounded-[28px] px-6 py-5 text-foreground text-sm focus:outline-none focus:border-primary/40 resize-none transition-all placeholder:opacity-30 font-medium leading-relaxed shadow-inner"
             />
           </div>
         ))}
       </div>
 
-      <div className="flex gap-6 pt-6 relative z-10">
-        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onCancel} className="flex-1 py-5 rounded-[24px] border border-white/10 text-muted-foreground hover:text-foreground hover:bg-black/10 dark:hover:bg-white/10 text-[11px] font-black uppercase tracking-[0.3em] transition-all">Cancel</motion.button>
+      <div className="flex gap-4 md:gap-6 pt-4 md:pt-6 relative z-10">
+        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onCancel} className="flex-1 py-4 md:py-5 rounded-xl md:rounded-[24px] border border-white/10 text-muted-foreground hover:text-foreground hover:bg-black/10 dark:hover:bg-white/10 text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] transition-all">Cancel</motion.button>
         <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => valid && onSave(form)} disabled={!valid}
-          className="flex-[2] py-5 rounded-[24px] bg-primary text-white disabled:opacity-30 text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-[0_10px_30px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3">
-          <Save className="w-5 h-5" /> Commit to Vault
+          className="flex-[2] py-4 md:py-5 rounded-xl md:rounded-[24px] bg-primary text-white disabled:opacity-30 text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-[0_10px_30px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3">
+          <Save className="w-4 h-4 md:w-5 md:h-5" /> Commit
         </motion.button>
       </div>
     </motion.div>
@@ -202,24 +202,24 @@ export default function NotesVaultView() {
       {/* Row 1: Hero & Density */}
       <BentoCard className="col-span-12 lg:col-span-8 overflow-hidden backdrop-blur-2xl bg-card/60 shadow-2xl border-white/10 relative">
          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
-         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-10 py-4">
+         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-10 py-4">
             <div className="max-w-md">
-               <h2 className="text-4xl font-black text-foreground mb-4 leading-none tracking-tighter uppercase">KNOWLEDGE BASE</h2>
-               <p className="text-muted-foreground text-base font-semibold leading-relaxed">
-                  Central repository for all placement preparation. Currently documenting <span className="text-primary font-black">{STORIES_COUNT} preparation stories</span> and 
-                  <span className="text-secondary font-black"> {KB_COUNT} key study topics</span>.
+               <h2 className="text-2xl md:text-4xl font-black text-foreground mb-4 leading-none tracking-tighter uppercase">KNOWLEDGE BASE</h2>
+               <p className="text-muted-foreground text-[13px] md:text-base font-semibold leading-relaxed">
+                  Central preparation repository. Securely maintaining <span className="text-primary font-black">{STORIES_COUNT} scenarios</span> and 
+                  <span className="text-secondary font-black"> {KB_COUNT} study topics</span>.
                </p>
             </div>
             
-            <div className="flex gap-14 items-center bg-black/5 dark:bg-white/5 p-8 rounded-3xl border border-white/5 shadow-inner">
+            <div className="flex gap-10 md:gap-14 items-center justify-between md:justify-center bg-black/5 dark:bg-white/5 p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 shadow-inner">
                <div className="text-center group">
-                  <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-2 transition-all tabular-nums tracking-tighter group-hover:from-primary group-hover:to-indigo-500">{STORIES_COUNT}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Action Plan</p>
+                  <p className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-1 md:mb-2 transition-all tabular-nums tracking-tighter group-hover:from-primary group-hover:to-indigo-500">{STORIES_COUNT}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Stories</p>
                </div>
-               <div className="w-px h-16 bg-border/50" />
+               <div className="w-px h-12 md:h-16 bg-border/50" />
                <div className="text-center group">
-                  <p className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-2 transition-all tabular-nums tracking-tighter group-hover:from-secondary group-hover:to-purple-500">{KB_COUNT}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Topics</p>
+                  <p className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/60 mb-1 md:mb-2 transition-all tabular-nums tracking-tighter group-hover:from-secondary group-hover:to-purple-500">{KB_COUNT}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Topics</p>
                </div>
             </div>
          </div>
@@ -364,20 +364,20 @@ export default function NotesVaultView() {
                         layout 
                         className={`bg-card/60 backdrop-blur-2xl border border-white/5 rounded-[40px] overflow-hidden hover:border-primary/40 transition-all shadow-xl ${isOpen ? 'ring-2 ring-primary/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)]' : ''}`}
                       >
-                        <button onClick={() => setExpandedStar(isOpen ? null : story.id)} className="w-full flex items-center gap-8 px-10 py-10 text-left group/btn">
-                           <div className={`w-16 h-16 rounded-[24px] flex items-center justify-center border border-primary/30 bg-primary/10 text-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] group-hover/btn:scale-110 group-hover/btn:rotate-6 transition-all duration-500`}>
-                              <Star className="w-8 h-8" />
+                        <button onClick={() => setExpandedStar(isOpen ? null : story.id)} className="w-full flex items-center gap-6 md:gap-8 px-6 md:px-10 py-8 md:py-10 text-left group/btn">
+                           <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-[24px] flex items-center justify-center border border-primary/30 bg-primary/10 text-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] group-hover/btn:scale-110 group-hover/btn:rotate-6 transition-all duration-500`}>
+                              <Star className="w-6 h-6 md:w-8 md:h-8" />
                            </div>
                            <div className="flex-1 min-w-0">
-                              <span className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-80 block mb-2">{story.tag} Interview Story</span>
-                              <h4 className="text-foreground text-2xl font-black tracking-tighter line-clamp-1 uppercase group-hover/btn:text-primary transition-colors">{story.situation}</h4>
+                              <span className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-80 block mb-1 md:mb-2">{story.tag} Story</span>
+                              <h4 className="text-foreground text-lg md:text-2xl font-black tracking-tighter line-clamp-1 uppercase group-hover/btn:text-primary transition-colors">{story.situation}</h4>
                            </div>
                            <motion.div 
                              animate={{ rotate: isOpen ? 180 : 0 }}
                              transition={smoothSpring}
-                             className={`p-4 rounded-2xl transition-all duration-500 ${isOpen ? 'text-primary bg-primary/20 shadow-inner' : 'bg-black/5 dark:bg-white/5 text-muted-foreground'}`}
+                             className={`p-3 md:p-4 rounded-xl md:rounded-2xl transition-all duration-500 ${isOpen ? 'text-primary bg-primary/20 shadow-inner' : 'bg-black/5 dark:bg-white/5 text-muted-foreground'}`}
                            >
-                              <ChevronDown className="w-6 h-6" />
+                              <ChevronDown className="w-5 h-5 md:w-6 md:h-6" />
                            </motion.div>
                         </button>
 
@@ -461,23 +461,23 @@ export default function NotesVaultView() {
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
               {filteredKnowledge.map((qa) => (
-                <motion.div key={qa.id} variants={itemVariants} whileHover={editKbId !== qa.id ? { scale: 1.02, y: -5 } : {}} transition={magneticSpring} className="bg-card/60 backdrop-blur-2xl border border-white/5 rounded-[40px] p-10 space-y-8 group/kb hover:border-secondary/40 transition-all shadow-xl shadow-black/5 relative overflow-hidden">
+                <motion.div key={qa.id} variants={itemVariants} whileHover={editKbId !== qa.id ? { scale: 1.02, y: -5 } : {}} transition={magneticSpring} className="bg-card/60 backdrop-blur-2xl border border-white/5 rounded-[32px] md:rounded-[40px] p-6 md:p-10 space-y-6 md:space-y-8 group/kb hover:border-secondary/40 transition-all shadow-xl shadow-black/5 relative overflow-hidden">
                   <div className={`absolute top-0 right-0 w-48 h-48 bg-secondary/10 blur-[100px] opacity-0 group-hover/kb:opacity-100 transition-opacity duration-1000`} />
-                  <div className="flex items-start justify-between gap-6 relative z-10">
-                    <div className="flex items-start gap-5 flex-1 min-w-0">
-                      <div className="w-14 h-14 bg-secondary/10 rounded-2xl flex items-center justify-center border border-secondary/30 shadow-[0_0_20px_rgba(var(--secondary-rgb),0.2)] group-hover/kb:scale-110 group-hover/kb:rotate-6 transition-all duration-500 shrink-0">
-                        <Terminal className="w-7 h-7 text-secondary" />
+                  <div className="flex items-start justify-between gap-4 md:gap-6 relative z-10">
+                    <div className="flex items-start gap-4 md:gap-5 flex-1 min-w-0">
+                      <div className="w-12 h-12 md:w-14 md:h-14 bg-secondary/10 rounded-xl md:rounded-2xl flex items-center justify-center border border-secondary/30 shadow-[0_0_20px_rgba(var(--secondary-rgb),0.2)] group-hover/kb:scale-110 group-hover/kb:rotate-6 transition-all duration-500 shrink-0">
+                        <Terminal className="w-6 h-6 md:w-7 md:h-7 text-secondary" />
                       </div>
                       <div className="min-w-0">
                         {qa.subcategory && (
-                          <span className="inline-flex items-center gap-1.5 mb-3 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/30 text-secondary text-[10px] font-black uppercase tracking-[0.3em] shadow-sm">
+                          <span className="inline-flex items-center gap-1.5 mb-2 md:mb-3 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/30 text-secondary text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] shadow-sm">
                             <span className="text-sm">{SUBCAT_ICONS[qa.subcategory]}</span> {qa.subcategory}
                           </span>
                         )}
-                        <h4 className="text-foreground text-2xl font-black tracking-tighter leading-snug uppercase">{qa.question}</h4>
+                        <h4 className="text-foreground text-lg md:text-2xl font-black tracking-tighter leading-snug uppercase">{qa.question}</h4>
                       </div>
                     </div>
-                    <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => deleteKnowledgeItem(qa.id)} className="p-4 text-muted-foreground hover:text-rose-500 bg-black/5 dark:bg-white/5 hover:bg-rose-500/20 rounded-2xl transition-all shrink-0"><Trash2 className="w-5 h-5" /></motion.button>
+                    <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => deleteKnowledgeItem(qa.id)} className="p-3 md:p-4 text-muted-foreground hover:text-rose-500 bg-black/5 dark:bg-white/5 hover:bg-rose-500/20 rounded-xl md:rounded-2xl transition-all shrink-0"><Trash2 className="w-4 h-4 md:w-5 md:h-5" /></motion.button>
                   </div>
 
                   {editKbId === qa.id ? (

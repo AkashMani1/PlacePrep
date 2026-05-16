@@ -57,6 +57,7 @@ export default function AppShell() {
   const [activeTab, setActiveTab] = useState<TabId>(resolvedTab);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Sync state with URL changes
   useEffect(() => {
@@ -103,6 +104,49 @@ export default function AppShell() {
          <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-[radial-gradient(circle,rgba(129,140,248,0.03)_0%,transparent_70%)] blur-3xl" />
       </div>
 
+      {/* Floating Toggle for Mobile */}
+      {isMobileViewport && (
+        <button 
+          onClick={() => setSidebarOpen(true)}
+          className="fixed top-6 left-6 z-[60] w-12 h-12 rounded-2xl glass flex items-center justify-center border border-white/10 shadow-2xl active:scale-95 transition-all"
+        >
+          <div className="w-5 h-4 flex flex-col justify-between">
+            <div className="w-full h-0.5 bg-primary rounded-full" />
+            <div className="w-2/3 h-0.5 bg-primary rounded-full" />
+            <div className="w-full h-0.5 bg-primary rounded-full" />
+          </div>
+        </button>
+      )}
+
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {isMobileViewport && sidebarOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70]"
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 left-0 w-[280px] z-[80] glass border-r border-white/10"
+            >
+              <Sidebar 
+                activeTab={activeTab} 
+                onTabChange={(id) => { setSidebarOpen(false); handleTabChange(id); }} 
+                onSettingsOpen={() => { setSidebarOpen(false); setSettingsOpen(true); }}
+                isMobile={true}
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <Sidebar activeTab={activeTab} onTabChange={handleTabChange} onSettingsOpen={() => setSettingsOpen(true)} />
 
       <motion.main 
@@ -148,9 +192,11 @@ export default function AppShell() {
         </footer>
       </motion.main>
 
-      {/* Mobile Nav */}
+      {/* Mobile Nav - Simplified for Premium Feel */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-t border-border/50 dark:border-white/[0.06] flex md:hidden z-50 px-2 pb-safe">
-        {(Object.entries(TAB_LABELS) as [TabId, { label: string; icon: React.ElementType }][]).map(([id, { label, icon: Icon }]) => {
+        {(Object.entries(TAB_LABELS) as [TabId, { label: string; icon: React.ElementType }][])
+          .filter(([id]) => ['dashboard', 'roadmap', 'dsa', 'mocks', 'notes'].includes(id))
+          .map(([id, { label, icon: Icon }]) => {
           const isActive = activeTab === id;
           return (
             <button
@@ -160,8 +206,13 @@ export default function AppShell() {
                 isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : 'opacity-70'}`} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="tracking-wide">{label.split(' ')[0]}</span>
+              <div className="relative">
+                <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : 'opacity-70'}`} strokeWidth={isActive ? 2.5 : 2} />
+                {isActive && (
+                  <motion.div layoutId="mobilenav-dot" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                )}
+              </div>
+              <span className={`tracking-wide text-[9px] ${isActive ? 'font-black' : 'font-medium'}`}>{label.split(' ')[0]}</span>
             </button>
           );
         })}
