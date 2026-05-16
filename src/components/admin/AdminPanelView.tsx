@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Lock, Plus, Edit2, Trash2, Save, X, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ModalPortal from '@/components/ui/ModalPortal';
 
 // --- Generic DB API Caller ---
 async function dbCall(action: string, table: string, payload?: any, match?: any) {
@@ -20,7 +21,7 @@ async function dbCall(action: string, table: string, payload?: any, match?: any)
 export default function AdminPanelView() {
   const { user } = useAuth();
   
-  const [activeTab, setActiveTab] = useState<'assessments' | 'questions'>('assessments');
+  const [activeTab, setActiveTab] = useState<'assessments' | 'questions' | 'global'>('assessments');
   const [assessments, setAssessments] = useState<any[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -355,8 +356,8 @@ export default function AdminPanelView() {
 
       {/* OVERLAYS / FORMS */}
       {editingAssessment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass w-full max-w-lg rounded-[24px] border border-border/20 p-6 flex flex-col max-h-[90vh] overflow-y-auto">
+        <ModalPortal onClose={() => setEditingAssessment(null)}>
+          <div className="glass w-full rounded-[24px] border border-border/20 p-6 flex flex-col overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold">{editingAssessment.isNew ? 'Create Assessment' : 'Edit Assessment'}</h3>
               <button onClick={() => setEditingAssessment(null)} className="p-2 hover:bg-muted/20 rounded-full"><X className="w-5 h-5" /></button>
@@ -411,13 +412,13 @@ export default function AdminPanelView() {
                 <Save className="w-5 h-5" /> Save Assessment
               </button>
             </form>
-          </motion.div>
-        </div>
+          </div>
+        </ModalPortal>
       )}
 
       {editingQuestion && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass w-full max-w-2xl rounded-[24px] border border-border/20 p-6 flex flex-col max-h-[90vh] overflow-y-auto">
+        <ModalPortal onClose={() => setEditingQuestion(null)}>
+          <div className="glass w-full rounded-[24px] border border-border/20 p-6 flex flex-col overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold">{editingQuestion.isNew ? 'Add Question' : 'Edit Question'}</h3>
               <button onClick={() => setEditingQuestion(null)} className="p-2 hover:bg-muted/20 rounded-full"><X className="w-5 h-5" /></button>
@@ -493,8 +494,8 @@ export default function AdminPanelView() {
                 <Save className="w-5 h-5" /> Save Question
               </button>
             </form>
-          </motion.div>
-        </div>
+          </div>
+        </ModalPortal>
       )}
     </motion.div>
   );

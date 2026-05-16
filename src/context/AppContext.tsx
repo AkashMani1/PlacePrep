@@ -289,7 +289,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               newProblems.push(globalProb as any);
             } else {
               // Keep user progress but update problem details
-              newProblems[idx] = { ...newProblems[idx], name: globalProb.name, topic: globalProb.topic, subtopic: globalProb.subtopic, difficulty: globalProb.difficulty, link: globalProb.link, videoLink: globalProb.videoLink };
+              newProblems[idx] = { ...newProblems[idx], name: globalProb.name, topic: globalProb.topic, subtopic: globalProb.subtopic, difficulty: globalProb.difficulty } as any;
             }
           });
 

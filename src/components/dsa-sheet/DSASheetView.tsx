@@ -28,6 +28,7 @@ import {
 import { useApp } from '@/context/AppContext';
 import { DSASheetItem, Difficulty } from '@/lib/types';
 import { today, addDays, formatDisplayDate } from '@/lib/utils';
+import ModalPortal from '@/components/ui/ModalPortal';
 
 // Premium Kinetic Physics
 const magneticSpring = { type: 'spring', stiffness: 150, damping: 15, mass: 0.1 } as any;
@@ -80,12 +81,8 @@ function NoteEditor({
   const [value, setValue] = useState(item.notes || '');
 
   return (
-    <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="w-full max-w-xl rounded-[28px] border border-border/30 bg-card overflow-hidden shadow-2xl"
-      >
+    <ModalPortal onClose={onClose}>
+      <div className="w-full rounded-[28px] border border-border/30 bg-card overflow-hidden shadow-2xl">
         <div className="px-7 py-5 border-b border-border/30 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl border border-border/30 bg-muted/20 flex items-center justify-center text-foreground">
@@ -122,8 +119,8 @@ function NoteEditor({
             Save Note
           </button>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </ModalPortal>
   );
 }
 
@@ -375,12 +372,10 @@ function SheetEditor({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-      <motion.form
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+    <ModalPortal onClose={onClose}>
+      <form
         onSubmit={submit}
-        className="w-full max-w-3xl max-h-[90vh] rounded-[30px] border border-border/30 bg-card overflow-hidden flex flex-col shadow-2xl"
+        className="w-full rounded-[30px] border border-border/30 bg-card overflow-hidden flex flex-col shadow-2xl"
       >
         <div className="px-8 py-6 border-b border-border/30 flex items-center justify-between sticky top-0 bg-card z-10">
           <div>
@@ -457,8 +452,8 @@ function SheetEditor({
           <button type="button" onClick={onClose} className="rounded-2xl border border-border/30 px-5 py-3 text-sm font-bold text-muted-foreground hover:text-foreground">Cancel</button>
           <button type="submit" className="rounded-2xl bg-primary px-5 py-3 text-sm font-black text-white">Save</button>
         </div>
-      </motion.form>
-    </div>
+      </form>
+    </ModalPortal>
   );
 }
 
