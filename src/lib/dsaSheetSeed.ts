@@ -150,6 +150,6 @@ export function mergeDsaSheetItems(localItems?: DSASheetItem[]) {
     };
   });
 
-  const userItems = localItems.filter((item) => !adminSeedIds.has(item.id) || item.source === 'user');
+  const userItems = localItems.filter((item) => item.source === 'user');
   return [...mergedAdminItems, ...userItems];
 }

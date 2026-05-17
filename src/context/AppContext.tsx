@@ -232,6 +232,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [initialized, setState]);
 
+  // DSA sheet refresh: merge local sheet items with the updated admin seed questions
+  useEffect(() => {
+    if (!initialized) return;
+    setState((prev) => {
+      const merged = mergeDsaSheetItems(prev.dsaSheetItems);
+      const same =
+        prev.dsaSheetItems &&
+        prev.dsaSheetItems.length === merged.length &&
+        prev.dsaSheetItems.every((item, idx) => 
+          item.id === merged[idx].id && 
+          item.section === merged[idx].section && 
+          item.subgroup === merged[idx].subgroup && 
+          item.title === merged[idx].title
+        );
+
+      if (same) return prev;
+      return { ...prev, dsaSheetItems: merged };
+    });
+  }, [initialized, setState]);
+
   // Global Site Content Sync
   useEffect(() => {
     if (!initialized) return;
