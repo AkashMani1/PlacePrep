@@ -59,12 +59,12 @@ export default function DashboardView() {
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || state.userName || 'Engineer';
 
   return (
-    <div className="relative min-h-[calc(100vh-8rem)] w-full overflow-hidden pt-4 pb-24">
+    <div className="relative min-h-[calc(100vh-8rem)] w-full overflow-x-clip overflow-y-visible pb-24 pt-4">
       {/* Subtle Grid Background for Texture */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(128,128,128,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(128,128,128,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
       {/* ── MOBILE BENTO DASHBOARD (hidden on md+) ───────────────────── */}
-      <div className="md:hidden relative z-10 max-w-7xl mx-auto">
+      <div className="relative z-10 mx-auto max-w-7xl min-w-0 md:hidden">
         <MobileDashboard />
       </div>
 

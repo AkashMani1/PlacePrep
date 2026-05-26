@@ -39,26 +39,26 @@ function BentoCell({ icon: Icon, label, value, unit, accent, glowColor, span = '
     <motion.div
       variants={cellVariants}
       whileTap={{ scale: 0.97 }}
-      className={`relative overflow-hidden rounded-[22px] flex flex-col justify-between p-4 ${
+      className={`relative flex min-w-0 flex-col justify-between gap-5 overflow-hidden rounded-[24px] p-5 ${
         span === 'full' ? 'col-span-2' : 'col-span-1'
       }`}
       style={{
-        background: 'hsl(var(--card))',
-        border: '1px solid rgba(255,255,255,0.06)',
-        boxShadow: `0 0 0 0.5px rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05)`,
-        minHeight: 110,
+        background: 'linear-gradient(180deg, hsl(var(--card) / 0.96) 0%, hsl(var(--card) / 0.88) 100%)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 1px 0 rgba(255,255,255,0.05), 0 16px 40px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.04)',
+        minHeight: 132,
       }}
     >
       {/* Ambient corner glow */}
       <div
-        className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none"
+        className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full"
         style={{ background: glowColor, filter: 'blur(20px)', opacity: 0.6 }}
       />
 
       {/* Top row: icon + label */}
-      <div className="flex items-center justify-between relative z-10">
+      <div className="relative z-10 flex min-w-0 items-start justify-between gap-3">
         <div
-          className="w-8 h-8 rounded-xl flex items-center justify-center"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl"
           style={{
             background: glowColor.replace('0.6', '0.15'),
             border: `1px solid ${glowColor.replace('0.6', '0.25')}`,
@@ -67,7 +67,7 @@ function BentoCell({ icon: Icon, label, value, unit, accent, glowColor, span = '
           <Icon className={`w-4 h-4 ${accent}`} />
         </div>
         <span
-          className="text-[9px] font-black uppercase tracking-[0.18em] opacity-40"
+          className="line-clamp-2 min-w-0 break-words text-right text-[10px] font-black uppercase tracking-[0.18em] opacity-55 [hyphens:auto] [overflow-wrap:anywhere]"
           style={{ color: 'hsl(var(--muted-foreground))' }}
         >
           {label}
@@ -75,9 +75,9 @@ function BentoCell({ icon: Icon, label, value, unit, accent, glowColor, span = '
       </div>
 
       {/* Bottom row: big number */}
-      <div className="flex items-baseline gap-1 relative z-10 mt-2">
+      <div className="relative z-10 flex min-w-0 flex-wrap items-end gap-x-1 gap-y-2">
         <span
-          className="font-black leading-none tabular-nums"
+          className="min-w-0 font-black leading-none tabular-nums tracking-tight"
           style={{
             fontSize: 'clamp(1.8rem, 9vw, 2.6rem)',
             color: 'hsl(var(--foreground))',
@@ -87,7 +87,7 @@ function BentoCell({ icon: Icon, label, value, unit, accent, glowColor, span = '
           {value}
         </span>
         {unit && (
-          <span className="text-sm font-bold opacity-40" style={{ color: 'hsl(var(--muted-foreground))' }}>
+          <span className="shrink-0 text-sm font-bold opacity-55" style={{ color: 'hsl(var(--muted-foreground))' }}>
             {unit}
           </span>
         )}
@@ -121,16 +121,16 @@ export default function MobileDashboard() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="md:hidden flex flex-col gap-4 px-1 pb-2"
+      className="md:hidden flex min-w-0 flex-col gap-6 px-0 pb-2"
     >
       {/* Greeting */}
-      <motion.div variants={cellVariants} className="flex items-center gap-3 pt-1">
-        <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 flex-shrink-0">
+      <motion.div variants={cellVariants} className="flex min-w-0 items-center gap-4 px-1 pt-1">
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[20px] border border-white/10 bg-primary shadow-[0_12px_28px_rgba(76,79,229,0.32)]">
           <Sparkles className="w-5 h-5 text-white" />
         </div>
-        <div>
+        <div className="min-w-0">
           <h1
-            className="font-black tracking-tight leading-tight"
+            className="line-clamp-2 break-words font-black leading-tight tracking-tight [hyphens:auto] [overflow-wrap:anywhere]"
             style={{
               fontSize: 'clamp(1.4rem, 6vw, 1.8rem)',
               background: 'linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--foreground)/0.6) 100%)',
@@ -140,14 +140,14 @@ export default function MobileDashboard() {
           >
             Hey, {firstName} 👋
           </h1>
-          <p className="text-[11px] font-semibold text-muted-foreground mt-0.5 tracking-tight">
+          <p className="mt-1 line-clamp-2 break-words text-[11px] font-medium tracking-tight text-muted-foreground [hyphens:auto] [overflow-wrap:anywhere]">
             Week {currentWeek} · Keep the momentum going
           </p>
         </div>
       </motion.div>
 
       {/* 2×2 Bento Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3.5">
         <BentoCell
           icon={Flame}
           label="Streak"
@@ -184,38 +184,38 @@ export default function MobileDashboard() {
       {/* DSA Progress Bar — Compact */}
       <motion.div
         variants={cellVariants}
-        className="relative overflow-hidden rounded-[22px] p-4"
+        className="relative overflow-hidden rounded-[24px] p-5"
         style={{
-          background: 'hsl(var(--card))',
-          border: '1px solid rgba(255,255,255,0.06)',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+          background: 'linear-gradient(180deg, hsl(var(--card) / 0.96) 0%, hsl(var(--card) / 0.9) 100%)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 1px 0 rgba(255,255,255,0.05), 0 18px 46px rgba(0,0,0,0.22)',
         }}
       >
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/60">
+        <div className="mb-4 flex min-w-0 items-center justify-between gap-3">
+          <span className="line-clamp-2 min-w-0 break-words text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70 [hyphens:auto] [overflow-wrap:anywhere]">
             DSA Sheet Progress
           </span>
           <Link
             href="/dsaSheet"
-            className="flex items-center gap-1 text-[10px] font-black text-primary/70 hover:text-primary transition-colors"
+            className="flex shrink-0 items-center gap-1 text-[10px] font-black text-primary/75 transition-colors hover:text-primary"
           >
             View all <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex-1 flex flex-col gap-2">
+        <div className="flex flex-col gap-4 min-[360px]:flex-row min-[360px]:items-center">
+          <div className="flex min-w-0 flex-1 flex-col gap-2.5">
             {/* Segmented progress bars for Easy / Medium / Hard */}
             {[
               { label: 'Easy', color: '#10B981', solved: dsaItems.filter(i => i.difficulty === 'Easy' && i.completed).length, total: dsaItems.filter(i => i.difficulty === 'Easy').length },
               { label: 'Med', color: '#F59E0B', solved: dsaItems.filter(i => i.difficulty === 'Medium' && i.completed).length, total: dsaItems.filter(i => i.difficulty === 'Medium').length },
               { label: 'Hard', color: '#EF4444', solved: dsaItems.filter(i => i.difficulty === 'Hard' && i.completed).length, total: dsaItems.filter(i => i.difficulty === 'Hard').length },
             ].map((row) => (
-              <div key={row.label} className="flex items-center gap-2">
-                <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/50 w-6 flex-shrink-0">
+              <div key={row.label} className="flex min-w-0 items-center gap-2.5">
+                <span className="w-7 flex-shrink-0 text-[9px] font-black uppercase tracking-wider text-muted-foreground/55">
                   {row.label}
                 </span>
-                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${row.total > 0 ? (row.solved / row.total) * 100 : 0}%` }}
@@ -224,7 +224,7 @@ export default function MobileDashboard() {
                     style={{ backgroundColor: row.color }}
                   />
                 </div>
-                <span className="text-[9px] font-black text-muted-foreground/50 tabular-nums w-10 text-right flex-shrink-0">
+                <span className="w-10 flex-shrink-0 text-right text-[9px] font-black tabular-nums text-muted-foreground/55">
                   {row.solved}/{row.total}
                 </span>
               </div>
@@ -232,7 +232,10 @@ export default function MobileDashboard() {
           </div>
 
           {/* Big % number */}
-          <div className="flex flex-col items-center flex-shrink-0">
+          <div className="flex flex-shrink-0 items-end justify-between gap-2 min-[360px]:flex-col min-[360px]:items-center">
+            <span className="text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground/55 min-[360px]:hidden">
+              Overall
+            </span>
             <span
               className="font-black tabular-nums leading-none"
               style={{
@@ -243,13 +246,13 @@ export default function MobileDashboard() {
             >
               {dsaPct}
             </span>
-            <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40 mt-0.5">%</span>
+            <span className="mt-0.5 text-[8px] font-black uppercase tracking-widest text-muted-foreground/50">%</span>
           </div>
         </div>
       </motion.div>
 
       {/* Quick-action pills */}
-      <motion.div variants={cellVariants} className="flex gap-2.5">
+      <motion.div variants={cellVariants} className="grid grid-cols-3 gap-3">
         {[
           { href: '/roadmap', label: '🗺 Roadmap', color: 'rgba(167,139,250,0.1)', border: 'rgba(167,139,250,0.2)' },
           { href: '/dsa', label: '✅ Must-Do', color: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)' },
@@ -258,14 +261,15 @@ export default function MobileDashboard() {
           <Link
             key={href}
             href={href}
-            className="flex-1 flex items-center justify-center py-3 rounded-2xl text-[11px] font-black tracking-tight text-foreground/80 active:scale-95 transition-transform touch-manipulation"
+            className="flex min-w-0 items-center justify-center rounded-[20px] px-3 py-3.5 text-center text-[11px] font-black tracking-tight text-foreground/80 transition-transform touch-manipulation active:scale-95"
             style={{
               background: color,
               border: `1px solid ${border}`,
               minHeight: 48,
+              boxShadow: '0 10px 28px rgba(0,0,0,0.12)',
             }}
           >
-            {label}
+            <span className="line-clamp-2 break-words [overflow-wrap:anywhere]">{label}</span>
           </Link>
         ))}
       </motion.div>

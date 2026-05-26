@@ -347,6 +347,7 @@ textarea { resize: none; }
     width: 100% !important;
     flex: 1;
     min-height: 0;
+    overflow-x: clip;
   }
 
   /* Content wrapper — compact horizontal padding */
@@ -354,12 +355,12 @@ textarea { resize: none; }
   .w-full.max-w-\[1600px\] {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
-    padding-top: 1.25rem !important;
+    padding-top: 1rem !important;
   }
 
   /* Push content above fixed bottom nav */
   .flex-1.min-w-0.min-h-[100dvh] {
-    padding-bottom: 76px !important; 
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   /* ── 5. GRID SYSTEM: kill multi-column desktop grids ── */
@@ -429,11 +430,18 @@ textarea { resize: none; }
     box-sizing: border-box;
   }
 
-  /* Overflow-x guard */
-  section,
-  article,
-  div {
-    overflow-x: clip;
+  /* Let flex and grid children shrink instead of forcing text to spill */
+  .mobile-viewport-shell :where(
+    main,
+    section,
+    article,
+    header,
+    footer,
+    div,
+    [class*='flex'],
+    [class*='grid']
+  ) {
+    min-width: 0;
   }
 
   /* Re-allow scroll in containers that need it */
@@ -459,7 +467,7 @@ textarea { resize: none; }
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
     padding-bottom: max(env(safe-area-inset-bottom, 8px), 8px) !important;
     padding-top: 10px !important;
-    z-index: 9999 !important;
+    z-index: 45 !important;
     box-shadow: 0 -1px 0 rgba(255,255,255,0.06), 0 -20px 60px rgba(0,0,0,0.5) !important;
   }
 
@@ -476,14 +484,14 @@ textarea { resize: none; }
   header.sticky {
     position: sticky !important;
     top: 0 !important;
-    z-index: 40 !important;
+    z-index: 50 !important;
     /* Prevent overflow-x: clip from hiding the blur effect */
     overflow: visible !important;
   }
 
   /* Offset the content top padding to account for sticky header height (~56px) */
   .w-full.max-w-\[1400px\] {
-    padding-top: 0.5rem !important;
+    padding-top: 0.75rem !important;
   }
 
   /* ── 11. VISUAL SYSTEM ADJUSTMENTS ── */
@@ -551,4 +559,3 @@ textarea { resize: none; }
   html { font-size: 12px; }
   .mobile-viewport-shell { min-width: 320px; }
 }
-

@@ -1,12 +1,11 @@
 /* Developed by Akash Mani - Refactored for Premium Performance */
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { LayoutDashboard, GitMerge, Code2, Video, BookOpen, Target, Layers, Loader2, Settings } from 'lucide-react';
+import { LayoutDashboard, GitMerge, Code2, Video, BookOpen, Target, Layers, Settings } from 'lucide-react';
 import Sidebar, { TabId } from '@/components/layout/Sidebar';
 import MobileTopBar from '@/components/layout/MobileTopBar';
 import { useApp } from '@/context/AppContext';
@@ -108,7 +107,6 @@ export default function AppShell() {
     router.push(id === 'dashboard' ? '/' : `/${id}`);
   };
 
-  const { label, icon: Icon } = TAB_LABELS[activeTab] ?? TAB_LABELS.dashboard;
   const collapsed = state.sidebarCollapsed;
   const mainPaddingLeft = isMobileViewport ? '0px' : (isSidebarHovered ? '240px' : (collapsed ? '80px' : '240px'));
 
@@ -128,11 +126,11 @@ export default function AppShell() {
         initial={false}
         animate={{ paddingLeft: mainPaddingLeft }}
         transition={{ duration: 0.4, ease: premiumEasing }}
-        className="flex-1 min-w-0 min-h-[100dvh] relative pb-32 md:pb-0 transition-all z-10 flex flex-col"
+        className="relative z-10 flex min-h-[100dvh] min-w-0 flex-1 flex-col overflow-x-clip pb-[7.5rem] transition-all md:pb-0"
       >
         {/* Frosted glass sticky top bar — mobile only, replaces hamburger */}
         <MobileTopBar onSettingsOpen={() => setSettingsOpen(true)} />
-        <div className="w-full max-w-[1400px] mx-auto px-4 md:px-12 pt-2 md:pt-12 pb-6 md:py-12 flex-1">
+        <div className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 px-4 pb-8 pt-3 md:px-12 md:py-12">
           
           {/* Header Section Removed as per new Awwwards-style UI */}
 
@@ -144,6 +142,7 @@ export default function AppShell() {
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
               transition={{ duration: 0.3, ease: premiumEasing }}
+              className="min-w-0 flex-1"
             >
               {activeTab === 'dashboard' && <DashboardView />}
               {activeTab === 'roadmap' && <RoadmapView />}
@@ -178,7 +177,7 @@ export default function AppShell() {
             exit={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-            className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-t border-white/[0.08] flex md:hidden z-50 px-4 pb-6 pt-3 shadow-[0_-10px_40px_rgba(0,0,0,0.4)]"
+            className="safe-bottom fixed inset-x-0 bottom-0 z-[45] flex border-t border-white/10 bg-black/70 px-3 pb-4 pt-3 shadow-[0_-14px_40px_rgba(0,0,0,0.42),0_-1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl supports-[backdrop-filter]:bg-black/55 md:hidden"
           >
             {(Object.entries(TAB_LABELS) as [TabId, { label: string; icon: React.ElementType }][])
               .filter(([id]) => ['dashboard', 'roadmap', 'dsa', 'mocks', 'notes'].includes(id))
@@ -188,7 +187,7 @@ export default function AppShell() {
                 <button
                   key={id}
                   onClick={() => handleTabChange(id)}
-                  className={`flex-1 flex flex-col items-center gap-1.5 transition-all duration-300 btn-press-anim ${
+                  className={`flex min-w-0 flex-1 flex-col items-center gap-1.5 rounded-2xl px-2 py-2 transition-all duration-300 btn-press-anim ${
                     isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -198,7 +197,7 @@ export default function AppShell() {
                       <motion.div layoutId="mobilenav-dot" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]" />
                     )}
                   </div>
-                  <span className={`tracking-tight text-[10px] ${isActive ? 'font-black opacity-100' : 'font-medium opacity-40'}`}>{label.split(' ')[0]}</span>
+                  <span className={`max-w-full truncate tracking-tight text-[10px] ${isActive ? 'font-black opacity-100' : 'font-medium opacity-70'}`}>{label.split(' ')[0]}</span>
                 </button>
               );
             })}

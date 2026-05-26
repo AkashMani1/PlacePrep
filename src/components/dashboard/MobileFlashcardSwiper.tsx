@@ -44,7 +44,7 @@ function Flashcard({ problem, onMastered, onRedo, isTop, index }: FlashcardProps
     // Background stacked cards (non-interactive)
     return (
       <motion.div
-        className="absolute inset-0 rounded-[28px]"
+        className="[grid-area:1/1] min-h-[320px] rounded-[28px]"
         style={{
           background: 'hsl(var(--card))',
           border: '1px solid rgba(255,255,255,0.06)',
@@ -58,7 +58,7 @@ function Flashcard({ problem, onMastered, onRedo, isTop, index }: FlashcardProps
 
   return (
     <motion.div
-      className="absolute inset-0 cursor-grab active:cursor-grabbing touch-none"
+      className="[grid-area:1/1] cursor-grab touch-none active:cursor-grabbing"
       style={{ x, rotate, opacity, zIndex: 20 }}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
@@ -68,7 +68,7 @@ function Flashcard({ problem, onMastered, onRedo, isTop, index }: FlashcardProps
     >
       {/* Card body */}
       <div
-        className="relative h-full rounded-[28px] flex flex-col justify-between overflow-hidden select-none"
+        className="relative flex min-h-[320px] h-full select-none flex-col justify-between overflow-hidden rounded-[28px]"
         style={{
           background: 'hsl(var(--card))',
           border: isOverdue ? '1px solid rgba(245,158,11,0.3)' : '1px solid rgba(255,255,255,0.06)',
@@ -101,11 +101,11 @@ function Flashcard({ problem, onMastered, onRedo, isTop, index }: FlashcardProps
           }}
         />
 
-        <div className="relative z-10 flex flex-col h-full p-6 gap-4">
+        <div className="relative z-10 flex h-full min-w-0 flex-col gap-4 p-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
             <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl"
               style={{
                 background: isOverdue ? 'rgba(245,158,11,0.1)' : 'rgba(var(--primary-rgb),0.1)',
                 border: isOverdue ? '1px solid rgba(245,158,11,0.2)' : '1px solid rgba(var(--primary-rgb),0.2)',
@@ -114,7 +114,7 @@ function Flashcard({ problem, onMastered, onRedo, isTop, index }: FlashcardProps
               <Brain className={`w-5 h-5 ${isOverdue ? 'text-amber-400' : 'text-primary'}`} />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
               {isOverdue && (
                 <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20">
                   <AlertTriangle className="w-3 h-3" />
@@ -128,17 +128,17 @@ function Flashcard({ problem, onMastered, onRedo, isTop, index }: FlashcardProps
           </div>
 
           {/* Problem name */}
-          <div className="flex-1 flex flex-col justify-center">
-            <p className="text-foreground font-black text-xl leading-tight tracking-tight">
+          <div className="flex flex-1 flex-col justify-center min-w-0">
+            <p className="line-clamp-3 break-words text-xl font-black leading-tight tracking-tight text-foreground [hyphens:auto] [overflow-wrap:anywhere]">
               {problem.name}
             </p>
-            <div className="flex items-center gap-2 mt-3">
-              <span className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 bg-white/[0.04] border border-white/[0.06]">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="max-w-full break-words rounded-xl border border-white/[0.06] bg-white/[0.04] px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 [overflow-wrap:anywhere]">
                 {problem.topic}
               </span>
               {problem.difficulty && (
                 <span
-                  className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                  className="rounded-xl px-3 py-1.5 text-[10px] font-black uppercase tracking-widest"
                   style={{
                     color: problem.difficulty === 'Easy' ? '#10B981' : problem.difficulty === 'Medium' ? '#F59E0B' : '#EF4444',
                     background: problem.difficulty === 'Easy' ? 'rgba(16,185,129,0.1)' : problem.difficulty === 'Medium' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
@@ -152,16 +152,16 @@ function Flashcard({ problem, onMastered, onRedo, isTop, index }: FlashcardProps
           </div>
 
           {/* Swipe hints — fades when dragging */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <motion.div
-              className="flex items-center gap-1.5 text-amber-400/50"
+              className="flex min-w-0 items-center gap-1.5 text-amber-400/50"
               style={{ opacity: useTransform(x, [-50, 0], [1, 0.4]) }}
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="text-[10px] font-black uppercase tracking-widest">Re-do</span>
             </motion.div>
             <motion.div
-              className="flex items-center gap-1.5 text-emerald-400/50"
+              className="flex min-w-0 items-center gap-1.5 text-emerald-400/50"
               style={{ opacity: useTransform(x, [0, 50], [0.4, 1]) }}
             >
               <span className="text-[10px] font-black uppercase tracking-widest">Mastered</span>
@@ -269,7 +269,7 @@ export function MobileFlashcardSwiper() {
       </div>
 
       {/* Card Stack */}
-      <div className="relative" style={{ height: 260 }}>
+      <div className="relative grid overflow-visible px-1 pb-6 pt-1 [grid-template-areas:'stack']">
         <AnimatePresence>
           {visible.map((problem, index) => (
             <Flashcard
