@@ -80,7 +80,11 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
 
       {/* Navigation */}
       <nav className="flex-1 py-8 space-y-1.5 overflow-y-auto custom-scrollbar px-3">
-        {NAV_ITEMS.filter(item => !item.adminOnly || user?.email === 'akashmani9955@gmail.com').map(({ id, icon: Icon, label, badge }) => (
+        {NAV_ITEMS.filter(item => {
+          if (item.adminOnly && user?.email !== 'akashmani9955@gmail.com') return false;
+          if (isMobile && item.id === 'dsaSheet') return false;
+          return true;
+        }).map(({ id, icon: Icon, label, badge }) => (
           <Link
             key={id}
             href={id === 'dashboard' ? '/' : `/${id}`}

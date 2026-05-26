@@ -287,9 +287,10 @@ export function MobileFlashcardSwiper() {
       {/* Tap-to-action buttons (backup for users who prefer tapping) */}
       <div className="flex gap-3">
         <motion.button
+          disabled={!dueProblems[0] || dismissed.has(dueProblems[0].id)}
           whileTap={{ scale: 0.96 }}
           onClick={() => dueProblems[0] && handleRedo(dueProblems[0].id)}
-          className="flex-1 flex items-center justify-center gap-2 rounded-2xl font-black text-[11px] uppercase tracking-wider text-amber-400 active:scale-95 transition-transform touch-manipulation"
+          className="flex-1 flex items-center justify-center gap-2 rounded-2xl font-black text-[11px] uppercase tracking-wider text-amber-400 active:scale-95 transition-transform touch-manipulation disabled:opacity-50 disabled:pointer-events-none"
           style={{
             background: 'rgba(245,158,11,0.08)',
             border: '1px solid rgba(245,158,11,0.2)',
@@ -300,9 +301,10 @@ export function MobileFlashcardSwiper() {
           Re-do
         </motion.button>
         <motion.button
+          disabled={!dueProblems[0] || dismissed.has(dueProblems[0].id)}
           whileTap={{ scale: 0.96 }}
           onClick={() => dueProblems[0] && handleMastered(dueProblems[0].id)}
-          className="flex-1 flex items-center justify-center gap-2 rounded-2xl font-black text-[11px] uppercase tracking-wider text-emerald-400 active:scale-95 transition-transform touch-manipulation"
+          className="flex-1 flex items-center justify-center gap-2 rounded-2xl font-black text-[11px] uppercase tracking-wider text-emerald-400 active:scale-95 transition-transform touch-manipulation disabled:opacity-50 disabled:pointer-events-none"
           style={{
             background: 'rgba(16,185,129,0.08)',
             border: '1px solid rgba(16,185,129,0.2)',

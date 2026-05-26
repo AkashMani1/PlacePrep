@@ -147,7 +147,7 @@ export default function MobileDashboard() {
       </motion.div>
 
       {/* 2×2 Bento Grid */}
-      <div className="grid grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3.5">
         <BentoCell
           icon={Flame}
           label="Streak"

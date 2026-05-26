@@ -31,7 +31,7 @@ export function BentoCellSkeleton() {
       style={{
         background: 'hsl(var(--card))',
         border: '1px solid rgba(255,255,255,0.06)',
-        minHeight: 110,
+        minHeight: 132,
       }}
     >
       {/* Icon + label row */}
