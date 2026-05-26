@@ -1,49 +1,49 @@
-# dependencies
+# ─── Dependencies ────────────────────────────────────────────────────────────
 /node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
+.npm-cache/
 
-# testing
-/coverage
-
-# next.js
+# ─── Next.js ─────────────────────────────────────────────────────────────────
 /.next/
 /out/
-
-# production
 /build
 
-# misc
-.DS_Store
-*.pem
+# ─── Testing ─────────────────────────────────────────────────────────────────
+/coverage
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# local env files — block ALL variants, keep only .env.example
+# ─── Environment — keep only the example template ────────────────────────────
 .env
 .env.*
 !.env.example
 
-# vercel
-/.vercel
-
-# typescript
+# ─── TypeScript build artifacts ──────────────────────────────────────────────
 *.tsbuildinfo
 next-env.d.ts
 
-# runtime / build artifacts
+# ─── Runtime / build logs & pids ─────────────────────────────────────────────
 *.log
 *.pid
 build_error.log
 dev.log
 dev.pid
 
-# AI agent tool config dirs (not source code)
+# ─── OS artifacts ────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.pem
+
+# ─── Vercel ──────────────────────────────────────────────────────────────────
+/.vercel
+
+# ─── Scratch / utility scripts (not source code) ─────────────────────────────
+fix-dsa.mjs
+test-db.js
+test-db.ts
+dsa_sheet.csv
+
+# ─── AI agent config dirs ─────────────────────────────────────────────────────
 .adal/
 .agents/
 .augment/
@@ -74,3 +74,9 @@ dev.pid
 .vibe/
 .windsurf/
 .zencoder/
+
+# ─── Editor / IDE ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
