@@ -53,7 +53,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
               <span className="text-[11px] font-black text-primary uppercase">Week {currentWeek}</span>
             </div>
           </div>
-          <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isEditing ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-black/5 dark:bg-white/[0.03] text-muted-foreground hover:bg-white/[0.08]'}`}>
+          <button onClick={() => setIsEditing(!isEditing)} className={`flex items-center justify-center min-h-[48px] gap-2 px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all btn-press-anim ${isEditing ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-black/5 dark:bg-white/[0.03] text-muted-foreground hover:bg-white/[0.08]'}`}>
             {isEditing ? <CheckSquare className="w-3.5 h-3.5" /> : <Settings className="w-3.5 h-3.5" />}
             {isEditing ? 'Save' : 'Plan'}
           </button>
@@ -97,7 +97,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
                         <input type="text" value={item.detail} onChange={(e) => updateHabitItem(group.id, item.id, { detail: e.target.value })} className="bg-transparent text-[10px] font-medium text-muted-foreground/60 w-full focus:outline-none" placeholder="Details..." />
                       </div>
                     ) : (
-                      <button onClick={() => toggleHabit(item.id)} className={`w-full flex items-start gap-3 p-3 rounded-xl border transition-all text-left ${isChecked ? 'bg-primary/10 border-primary/20 text-foreground' : 'bg-black/5 dark:bg-white/[0.02] border-border/50 dark:border-white/[0.04] hover:bg-black/5 dark:bg-white/[0.04] text-muted-foreground'}`}>
+                      <button onClick={() => toggleHabit(item.id)} className={`w-full min-h-[48px] flex items-start gap-3 p-3 rounded-xl border transition-all text-left btn-press-anim ${isChecked ? 'bg-primary/10 border-primary/20 text-foreground' : 'bg-black/5 dark:bg-white/[0.02] border-border/50 dark:border-white/[0.04] hover:bg-black/5 dark:bg-white/[0.04] text-muted-foreground'}`}>
                         <div className={`mt-0.5 w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all ${isChecked ? 'bg-primary border-primary text-white' : 'border-black/20 dark:border-white/20'}`}>
                           {isChecked && <CheckCheck className="w-3 h-3" />}
                         </div>
@@ -111,7 +111,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
                 );
               })}
               {isEditing && (
-                <button onClick={() => addHabitItem(group.id, 'New Goal', '')} className="p-3 rounded-xl border border-dashed border-white/[0.1] text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex items-center justify-center gap-2 text-[10px] font-semibold tracking-wider">
+                <button onClick={() => addHabitItem(group.id, 'New Goal', '')} className="min-h-[48px] p-3 rounded-xl border border-dashed border-white/[0.1] text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex items-center justify-center gap-2 text-[10px] font-semibold tracking-wider btn-press-anim">
                   <Plus className="w-3.5 h-3.5" /> ADD ITEM
                 </button>
               )}
@@ -131,9 +131,9 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
               <div key={diff} className="flex flex-col gap-2.5">
                 <span className="text-[10px] font-medium tracking-wider text-muted-foreground/60 capitalize">{diff} Problems</span>
                 <div className="flex items-center gap-4">
-                  <button onClick={() => updateProbs(diff, -1)} className="w-7 h-7 rounded bg-black/5 dark:bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-muted-foreground transition-colors"><Minus className="w-3 h-3" /></button>
+                  <button onClick={() => updateProbs(diff, -1)} className="min-w-[48px] min-h-[48px] rounded-xl bg-black/5 dark:bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-muted-foreground transition-colors btn-press-anim"><Minus className="w-4 h-4" /></button>
                   <span className="text-base font-bold text-foreground tabular-nums w-6 text-center">{(log.problemsSolved ?? { easy: 0, medium: 0, hard: 0 })[diff]}</span>
-                  <button onClick={() => updateProbs(diff, 1)} className="w-7 h-7 rounded bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary transition-colors"><Plus className="w-3 h-3" /></button>
+                  <button onClick={() => updateProbs(diff, 1)} className="min-w-[48px] min-h-[48px] rounded-xl bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary transition-colors btn-press-anim"><Plus className="w-4 h-4" /></button>
                 </div>
               </div>
             ))}
@@ -196,7 +196,7 @@ export const DailyTaskChecklist = memo(function DailyTaskChecklist() {
         </div>
 
         <div className="pt-8">
-          <button onClick={handleSave} className={`flex items-center gap-3 px-8 py-4 rounded-xl font-semibold tracking-wider text-[11px] transition-all ${saved ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-primary text-primary-foreground shadow-lg hover:bg-primary/90'}`}>
+          <button onClick={handleSave} className={`flex min-h-[48px] items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold tracking-wider text-[11px] transition-all btn-press-anim ${saved ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-primary text-primary-foreground shadow-lg hover:bg-primary/90'}`}>
             {saved ? <ShieldCheck className="w-4 h-4" /> : <Save className="w-4 h-4" />}
             {saved ? 'Data Saved' : 'Commit Log'}
           </button>

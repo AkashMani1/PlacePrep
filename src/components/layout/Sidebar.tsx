@@ -50,7 +50,7 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
       }}
       onMouseEnter={() => !isMobile && setSidebarHovered(true)}
       onMouseLeave={() => !isMobile && setSidebarHovered(false)}
-      className={`${isMobile ? 'flex' : 'hidden md:flex'} fixed left-0 top-0 h-screen bg-background/80 backdrop-blur-2xl border-r border-white/5 flex flex-col z-[100] select-none overflow-hidden transition-colors duration-500`}
+      className={`${isMobile ? 'flex' : 'hidden md:flex'} fixed left-0 top-0 h-[100dvh] bg-background/80 backdrop-blur-2xl border-r border-white/5 flex flex-col z-[100] select-none overflow-hidden transition-colors duration-500`}
     >
       {/* Logo Area */}
       <div className="py-8 flex items-center border-b border-border/10 px-4">

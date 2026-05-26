@@ -47,7 +47,7 @@ export default function MockHubLayout({ children }: { children: ReactNode }) {
   const premiumEasing = [0.32, 0.72, 0, 1] as any;
 
   return (
-    <div className="flex min-h-screen bg-background text-[#EDEDED] selection:bg-primary/30 selection:text-white">
+    <div className="flex min-h-[100dvh] bg-background text-[#EDEDED] selection:bg-primary/30 selection:text-white">
       {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.025)_0%,transparent_70%)] blur-3xl" />
@@ -60,7 +60,7 @@ export default function MockHubLayout({ children }: { children: ReactNode }) {
         initial={false}
         animate={{ paddingLeft: mainPaddingLeft }}
         transition={{ duration: 0.4, ease: premiumEasing }}
-        className="flex-1 min-w-0 min-h-screen relative pb-24 md:pb-0 z-10 flex flex-col"
+        className="flex-1 min-w-0 min-h-[100dvh] relative pb-24 md:pb-0 z-10 flex flex-col"
       >
         {/* Sub-Navigation Header */}
         <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-2xl border-b border-white/[0.06]">

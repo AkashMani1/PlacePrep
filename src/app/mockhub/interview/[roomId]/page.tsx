@@ -23,7 +23,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
 
   if (authLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="flex h-[100dvh] w-full items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
@@ -31,7 +31,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
 
   if (!user) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background relative overflow-hidden">
+      <div className="flex h-[100dvh] w-full items-center justify-center bg-background relative overflow-hidden">
         {/* Ambient Background */}
         <div className="absolute inset-0 pointer-events-none z-0">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.05)_0%,transparent_70%)] blur-3xl" />
@@ -55,7 +55,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
 
   if (!activeRoom) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="flex h-[100dvh] w-full items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );

@@ -24,7 +24,7 @@ export default function AssessmentPage({ params }: { params: { assessmentId: str
 
   if (!isAssessmentActive) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="flex h-[100dvh] w-full items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );

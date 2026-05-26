@@ -54,9 +54,25 @@
 
   * { @apply border-border; }
 
+  html {
+    /* Prevents double-tap zoom delay on ALL interactive elements globally */
+    touch-action: manipulation;
+    /* Removes the gray translucent rectangle iOS/Android paint on tap */
+    -webkit-tap-highlight-color: transparent;
+    /* Disables the rubber-band overscroll bounce on the root */
+    overscroll-behavior-y: none;
+    /* Use dynamic viewport height — accounts for browser UI chrome */
+    height: 100dvh;
+  }
+
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30 min-h-screen overflow-x-hidden;
+    @apply bg-background text-foreground antialiased selection:bg-primary/30 min-h-[100dvh] overflow-x-hidden;
     font-family: var(--font-inter);
+    /* Inherit the no-bounce policy from html */
+    overscroll-behavior-y: none;
+    /* Prevents sub-pixel font rendering shifts between light/dark mode */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body::after {
@@ -121,7 +137,25 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
-}
+
+  /* ── Native press animation ─────────────────────────────────────────── */
+  /* Apply to any interactive element that needs a physical "press" feel.
+     Usage: className="btn-press-anim" on any button/link/card */
+  .btn-press-anim {
+    @apply touch-manipulation transition-transform duration-100 ease-out active:scale-95;
+  }
+
+  /* ── Safe Area Padding Utilities (iPhone Notch / Dynamic Island) ────── */
+  /* Usage: add .safe-top to elements that need to clear the status bar */
+  .safe-top    { padding-top:    max(env(safe-area-inset-top,    0px), 0px); }
+  .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px); }
+  .safe-left   { padding-left:   max(env(safe-area-inset-left,   0px), 0px); }
+  .safe-right  { padding-right:  max(env(safe-area-inset-right,  0px), 0px); }
+
+  /* Margin variants for elements that use margin instead of padding */
+  .safe-mt    { margin-top:    max(env(safe-area-inset-top,    0px), 0px); }
+  .safe-mb    { margin-bottom: max(env(safe-area-inset-bottom, 16px), 16px); }
+} /* end @layer utilities */
 
 /* ── Custom scrollbar ─────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -324,8 +358,8 @@ textarea { resize: none; }
   }
 
   /* Push content above fixed bottom nav */
-  .flex-1.min-w-0.min-h-screen {
-    padding-bottom: 5rem !important;
+  .flex-1.min-w-0.min-h-[100dvh] {
+    padding-bottom: 76px !important; 
   }
 
   /* ── 5. GRID SYSTEM: kill multi-column desktop grids ── */
@@ -365,13 +399,13 @@ textarea { resize: none; }
   }
 
   /* ── 7. TOUCH INTERACTION LAYER ── */
-  /* All tappable elements must be >= 44px */
+  /* All tappable elements must be >= 48px (Apple HIG standard) */
   button,
   a[role="button"],
   [role="tab"],
   [role="option"],
   .touch-target {
-    min-height: 44px !important;
+    min-height: 48px !important;
     touch-action: manipulation !important;
     user-select: none;
     -webkit-user-select: none;
@@ -421,17 +455,35 @@ textarea { resize: none; }
     max-width: 440px !important;
     border-top: 1px solid rgba(255,255,255,0.07) !important;
     background: hsl(var(--background) / 0.96) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    padding-bottom: env(safe-area-inset-bottom, 8px) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    padding-bottom: max(env(safe-area-inset-bottom, 8px), 8px) !important;
+    padding-top: 10px !important;
     z-index: 9999 !important;
-    box-shadow: 0 -1px 0 rgba(255,255,255,0.05), 0 -20px 60px rgba(0,0,0,0.5) !important;
+    box-shadow: 0 -1px 0 rgba(255,255,255,0.06), 0 -20px 60px rgba(0,0,0,0.5) !important;
   }
 
-  /* ── 10. FLOATING HAMBURGER MENU ── */
-  /* Ensure the hamburger toggle doesn't overlap status bar */
-  .fixed.top-4.left-4 {
-    top: max(16px, env(safe-area-inset-top, 16px)) !important;
+  /* Bottom nav buttons — ensure 56px tall tap area */
+  nav.fixed.bottom-0 button {
+    min-height: 56px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  /* ── 10. MOBILE TOP BAR ── */
+  /* The frosted-glass top bar is sticky inside the scrolling shell.
+     It stays locked to the top of the viewport-shell on scroll. */
+  header.sticky {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 40 !important;
+    /* Prevent overflow-x: clip from hiding the blur effect */
+    overflow: visible !important;
+  }
+
+  /* Offset the content top padding to account for sticky header height (~56px) */
+  .w-full.max-w-\[1400px\] {
+    padding-top: 0.5rem !important;
   }
 
   /* ── 11. VISUAL SYSTEM ADJUSTMENTS ── */

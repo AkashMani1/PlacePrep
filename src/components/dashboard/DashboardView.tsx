@@ -7,11 +7,19 @@ import { useAuth } from '@/context/AuthContext';
 import { calcStreak, calcTotalHours, calcCurrentWeek, today } from '@/lib/utils';
 import { BentoCard } from './components/Shared';
 import { StreakPill } from './components/StreakWidgets';
-import { DeploymentLogPanel } from './components/DeploymentLogPanel';
 import { DSASheetProgressCard } from './components/DSASheetProgressCard';
 import { DailyTaskChecklist } from './components/DailyTaskChecklist';
 import { SRSReviewQueue } from './components/SRSReviewQueue';
-import { BadgeVault } from './components/BadgeVault';
+import MobileDashboard from './MobileDashboard';
+import { MobileFlashcardSwiper } from './MobileFlashcardSwiper';
+import dynamic from 'next/dynamic';
+
+const BadgeVault = dynamic(() => import('./components/BadgeVault').then(mod => mod.BadgeVault), {
+  ssr: false,
+});
+const DeploymentLogPanel = dynamic(() => import('./components/DeploymentLogPanel').then(mod => mod.DeploymentLogPanel), {
+  ssr: false,
+});
 
 // Premium spring physics for tactile interaction
 const magneticSpring = { type: 'spring', stiffness: 150, damping: 15, mass: 0.1 } as any;
@@ -55,14 +63,19 @@ export default function DashboardView() {
       {/* Subtle Grid Background for Texture */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(128,128,128,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(128,128,128,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
+      {/* ── MOBILE BENTO DASHBOARD (hidden on md+) ───────────────────── */}
+      <div className="md:hidden relative z-10 max-w-7xl mx-auto">
+        <MobileDashboard />
+      </div>
+
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="grid grid-cols-12 gap-8 relative z-10 max-w-7xl mx-auto"
       >
-        {/* ── Oversized Kinetic Typography Hero ────────────────────────── */}
-        <motion.div variants={itemVariants} className="col-span-12 mb-6">
+        {/* ── Oversized Kinetic Typography Hero — desktop only ─────────── */}
+        <motion.div variants={itemVariants} className="hidden md:block col-span-12 mb-6">
           <div className="overflow-hidden mb-4 flex items-center gap-5">
              <motion.div 
                 initial={{ rotate: -90, scale: 0 }} 
@@ -83,8 +96,8 @@ export default function DashboardView() {
           </motion.p>
         </motion.div>
 
-        {/* ── Magnetic Hero Stats Grid ─────────────────────────────────── */}
-        <motion.div variants={itemVariants} className="col-span-12 lg:col-span-8">
+        {/* ── Magnetic Hero Stats Grid — desktop only ──────────────────── */}
+        <motion.div variants={itemVariants} className="hidden md:block col-span-12 lg:col-span-8">
            <motion.div 
              whileHover={{ y: -5 }} 
              transition={magneticSpring}
@@ -135,16 +148,21 @@ export default function DashboardView() {
            </motion.div>
         </motion.div>
 
-        {/* ── DSA Progress Widget ──────────────────────────────────────── */}
-        <motion.div variants={itemVariants} className="col-span-12 lg:col-span-4">
+        {/* ── DSA Progress Widget — desktop only ───────────────────────── */}
+        <motion.div variants={itemVariants} className="hidden md:block col-span-12 lg:col-span-4">
           <motion.div whileHover={{ y: -5, scale: 1.01 }} transition={magneticSpring} className="h-full">
             <DSASheetProgressCard />
           </motion.div>
         </motion.div>
 
-        {/* ── SRS Review Queue ─────────────────────────────────────────── */}
-        <motion.div variants={itemVariants} className="col-span-12">
+        {/* ── SRS Review Queue — desktop only ──────────────────────────── */}
+        <motion.div variants={itemVariants} className="hidden md:block col-span-12">
           <SRSReviewQueue />
+        </motion.div>
+
+        {/* ── Mobile Swipeable Flashcards ───────────────────────────────── */}
+        <motion.div variants={itemVariants} className="md:hidden col-span-12">
+          <MobileFlashcardSwiper />
         </motion.div>
 
         {/* ── Deployment Log ────────────────────────────────────────────── */}
