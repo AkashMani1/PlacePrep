@@ -36,6 +36,14 @@ const TAB_LABELS: Record<TabId, { label: string; icon: React.ElementType }> = {
   admin: { label: 'Admin', icon: Settings },
 };
 
+const MOBILE_NAV_TABS: Array<{ id: TabId; mobileLabel?: string }> = [
+  { id: 'dashboard' },
+  { id: 'roadmap' },
+  { id: 'dsa' },
+  { id: 'dsaSheet', mobileLabel: 'Sheet' },
+  { id: 'notes' },
+];
+
 // Custom Premium Easing (Linear/Vercel style)
 const premiumEasing = [0.32, 0.72, 0, 1] as any;
 
@@ -179,9 +187,8 @@ export default function AppShell() {
             transition={{ type: 'spring', stiffness: 400, damping: 35 }}
             className="safe-bottom fixed inset-x-0 bottom-0 z-[45] flex border-t border-white/10 bg-black/70 px-3 pb-4 pt-3 shadow-[0_-14px_40px_rgba(0,0,0,0.42),0_-1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl supports-[backdrop-filter]:bg-black/55 md:hidden"
           >
-            {(Object.entries(TAB_LABELS) as [TabId, { label: string; icon: React.ElementType }][])
-              .filter(([id]) => ['dashboard', 'roadmap', 'dsa', 'mocks', 'notes'].includes(id))
-              .map(([id, { label, icon: Icon }]) => {
+            {MOBILE_NAV_TABS.map(({ id, mobileLabel }) => {
+              const { label, icon: Icon } = TAB_LABELS[id];
               const isActive = activeTab === id;
               return (
                 <button
@@ -197,7 +204,7 @@ export default function AppShell() {
                       <motion.div layoutId="mobilenav-dot" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]" />
                     )}
                   </div>
-                  <span className={`max-w-full truncate tracking-tight text-[10px] ${isActive ? 'font-black opacity-100' : 'font-medium opacity-70'}`}>{label.split(' ')[0]}</span>
+                  <span className={`max-w-full truncate tracking-tight text-[10px] ${isActive ? 'font-black opacity-100' : 'font-medium opacity-70'}`}>{mobileLabel ?? label.split(' ')[0]}</span>
                 </button>
               );
             })}
