@@ -254,55 +254,11 @@ export function InterviewRoom() {
   };
 
   // ── Camera/Mic Toggle ───────────────────────────────────────────────
-  const toggleVideo = useCallback(() => {
-    const stream = localStreamRef.current;
-    if (stream) {
-      stream.getVideoTracks().forEach(t => { t.enabled = !t.enabled; });
-    }
-    setIsVideoEnabled(v => !v);
-  }, []);
-
-  const toggleMic = useCallback(() => {
-    const stream = localStreamRef.current;
-    if (stream) {
-      stream.getAudioTracks().forEach(t => { t.enabled = !t.enabled; });
-    }
-    setIsMicEnabled(m => !m);
-  }, []);
+  const toggleVideo = useCallback(() => setIsVideoEnabled(v => !v), []);
+  const toggleMic = useCallback(() => setIsMicEnabled(m => !m), []);
 
   // ── Screen Sharing ──────────────────────────────────────────────────
-  const toggleScreenShare = useCallback(async () => {
-    if (isScreenSharing) {
-      // Stop sharing — restore camera
-      localStreamRef.current?.getTracks().forEach(t => t.stop());
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localStreamRef.current = stream;
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-        setIsScreenSharing(false);
-        setLocalStream(stream);
-      } catch {
-        setIsScreenSharing(false);
-      }
-    } else {
-      try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        localStreamRef.current?.getTracks().forEach(t => t.stop());
-        localStreamRef.current = screenStream;
-        if (localVideoRef.current) localVideoRef.current.srcObject = screenStream;
-        setIsScreenSharing(true);
-        setLocalStream(screenStream);
-
-        screenStream.getVideoTracks()[0].addEventListener('ended', () => {
-          setIsScreenSharing(false);
-          // Re-trigger camera when screen share ends
-          toggleScreenShare();
-        });
-      } catch {
-        toast.info('Screen sharing cancelled or not supported.');
-      }
-    }
-  }, [isScreenSharing]);
+  const toggleScreenShare = useCallback(() => setIsScreenSharing(s => !s), []);
 
   // ── Chat ────────────────────────────────────────────────────────────
   const sendMessage = useCallback(() => {
@@ -329,6 +285,31 @@ export function InterviewRoom() {
       toast.error('Write some code before submitting.');
       return;
     }
+    setCodeOutput('Code submitted successfully. In a live session, this would be evaluated against test cases.');
+    toast.success('Code submitted!');
+    chatChannelRef.current?.send({ 
+      type: 'broadcast', 
+      event: 'code_submit', 
+      payload: { code, senderName: user?.user_metadata?.full_name || 'You' } 
+    });
+  }, [user]);
+
+  // ── Leave & Cleanup ─────────────────────────────────────────────────
+  const handleLeave = useCallback(() => {
+    providerRef.current?.destroy();
+    docRef.current?.destroy();
+    leaveRoom();
+    router.push('/mockhub/arena');
+  }, [leaveRoom, router]);
+
+  if (!activeRoom || !isMounted) return null;
+
+  // Dynamically generate participants based on WebRTC state
+  const participants = [
+    { displayName: user?.user_metadata?.full_name || 'You', role: 'Participant', isOnline: true },
+    { displayName: peerName, role: 'Participant', isOnline: true }
+  ];
+
   return (
     <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-[#050505] to-[#050505] z-[9999] flex flex-col md:flex-row font-sans p-2 md:p-4 gap-2 md:gap-4 overflow-hidden">
       

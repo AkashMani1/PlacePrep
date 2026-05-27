@@ -110,7 +110,7 @@ export function MockWhiteboard({ roomId, isReadonly = false }: MockWhiteboardPro
           : 'Local mode (connecting...)'}
       </div>
 
-      <Tldraw store={store} isReadonly={isReadonly} />
+      <Tldraw store={store} hideUi={isReadonly} />
     </div>
   );
 }

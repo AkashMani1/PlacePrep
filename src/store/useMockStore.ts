@@ -22,6 +22,7 @@ interface MockRoom {
   participants: { userId: string; displayName: string; role: string; isOnline?: boolean }[];
   rating: number;
   status: string;
+  host_id?: string;
 }
 
 interface LeaderboardEntry {
