@@ -45,7 +45,7 @@ function LiveKitVideoSidebar() {
       )}
       {tracks.map((trackRef) => (
         <div key={trackRef.participant.identity + trackRef.source} className="relative aspect-video rounded-[16px] bg-[#050505] border border-white/10 overflow-hidden shadow-2xl ring-1 ring-white/5">
-          <ParticipantTile {...trackRef} className="w-full h-full object-cover" />
+          <ParticipantTile trackRef={trackRef} className="w-full h-full object-cover" />
           <div className="absolute bottom-2 left-2 flex items-center gap-2">
             <div className="px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 shadow-lg">
               <span className="text-[9px] font-black text-white uppercase tracking-wider">
