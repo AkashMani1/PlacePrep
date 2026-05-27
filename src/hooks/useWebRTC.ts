@@ -241,7 +241,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
       } else {
         // Not the initiator, let the other peer know we are here so they can send the offer
         setIsInitiator(false);
-        if (peerConnection.current.connectionState !== 'connected' && peerConnection.current.signalingState === 'stable') {
+        if (peerConnection.current.signalingState === 'stable') {
           channel.current?.send({
             type: 'broadcast',
             event: 'peer_ready',
