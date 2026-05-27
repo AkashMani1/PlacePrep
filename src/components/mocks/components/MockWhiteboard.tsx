@@ -8,49 +8,68 @@ import { supabase } from '@/lib/supabase';
 
 interface MockWhiteboardProps {
   roomId: string;
+  isReadonly?: boolean;
 }
 
-export function MockWhiteboard({ roomId }: MockWhiteboardProps) {
+export function MockWhiteboard({ roomId, isReadonly = false }: MockWhiteboardProps) {
+  const [store] = useState(() => createTLStore({ shapeUtils: defaultShapeUtils }));
   const [isConnected, setIsConnected] = useState(false);
-  const [peerCount, setPeerCount] = useState(0);
-  const storeRef = useRef<any>(null);
-  const docRef = useRef<any>(null);
-  const providerRef = useRef<any>(null);
+  const [peerCount, setPeerCount] = useState(1); // Self is 1
 
   useEffect(() => {
     if (!roomId || typeof window === 'undefined') return;
 
     let destroyed = false;
 
-    const initSync = async () => {
-      try {
-        const Y = await import('yjs');
-        const { SupabaseProvider } = await import('@/lib/y-supabase');
+    const channel = supabase.channel(`whiteboard:${roomId}`, {
+      config: { broadcast: { ack: false, self: false } }
+    });
 
-        docRef.current = new Y.Doc();
-        
-        const channel = supabase.channel(`whiteboard:${roomId}`, {
-          config: { broadcast: { ack: false, self: false } }
+    // Listen to local user changes and broadcast them
+    const unlisten = store.listen((update) => {
+      if (update.source === 'user' && !isReadonly) {
+        channel.send({ 
+          type: 'broadcast', 
+          event: 'tl_update', 
+          payload: { changes: update.changes } 
         });
-
-        providerRef.current = new SupabaseProvider(channel, docRef.current);
-        
-        // Assume connected once initialized since Supabase manages connection state
-        setIsConnected(true);
-      } catch (err) {
-        console.warn('[Whiteboard] Sync init failed (offline mode):', err);
-        setIsConnected(false);
       }
-    };
+    });
 
-    initSync();
+    // Listen to remote changes and apply them
+    channel.on('broadcast', { event: 'tl_update' }, ({ payload }) => {
+      if (destroyed) return;
+      try {
+        const { added, updated, removed } = payload.changes;
+        store.mergeRemoteChanges(() => {
+          if (added && Object.keys(added).length > 0) store.put(Object.values(added));
+          if (updated && Object.keys(updated).length > 0) store.put(Object.values(updated).map((u: any) => u[1]));
+          if (removed && Object.keys(removed).length > 0) store.remove(Object.values(removed).map((r: any) => r.id));
+        });
+      } catch (err) {
+        console.error('[Whiteboard] Sync error:', err);
+      }
+    });
+
+    // Simple presence
+    channel.on('broadcast', { event: 'tl_presence' }, () => {
+      if (!destroyed) setPeerCount(2); // In 1-on-1, assume 2 if presence received
+    });
+
+    channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        setIsConnected(true);
+        channel.send({ type: 'broadcast', event: 'tl_presence', payload: {} });
+      }
+      if (status === 'CHANNEL_ERROR') setIsConnected(false);
+    });
 
     return () => {
       destroyed = true;
-      providerRef.current?.destroy();
-      docRef.current?.destroy();
+      unlisten();
+      supabase.removeChannel(channel);
     };
-  }, [roomId]);
+  }, [roomId, store, isReadonly]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -91,7 +110,7 @@ export function MockWhiteboard({ roomId }: MockWhiteboardProps) {
           : 'Local mode (connecting...)'}
       </div>
 
-      <Tldraw persistenceKey={`tldraw-room-${roomId}`} />
+      <Tldraw store={store} isReadonly={isReadonly} />
     </div>
   );
 }

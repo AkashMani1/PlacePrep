@@ -51,6 +51,10 @@ export function InterviewRoom() {
   const sessionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const chatChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [peerName, setPeerName] = useState('Peer');
+  const [peerHasWriteAccess, setPeerHasWriteAccess] = useState(false);
+
+  const isHost = activeRoom?.host_id === user?.id;
+  const isReadonly = !isHost && !peerHasWriteAccess;
 
   useEffect(() => { setIsMounted(true); }, []);
 
@@ -153,12 +157,23 @@ export function InterviewRoom() {
       chatChannelRef.current?.send({ 
         type: 'broadcast', 
         event: 'peer_presence', 
-        payload: { displayName: user?.user_metadata?.full_name || 'Anonymous User' } 
+        payload: { 
+          displayName: user?.user_metadata?.full_name || 'Anonymous User',
+          writeAccess: peerHasWriteAccess 
+        } 
       });
     });
 
     chatChannelRef.current.on('broadcast', { event: 'peer_presence' }, ({ payload }) => {
       setPeerName(payload.displayName);
+      if (payload.writeAccess !== undefined) {
+        setPeerHasWriteAccess(payload.writeAccess);
+      }
+    });
+
+    chatChannelRef.current.on('broadcast', { event: 'write_access_change' }, ({ payload }) => {
+      setPeerHasWriteAccess(payload.granted);
+      toast.info(`The host has ${payload.granted ? 'granted' : 'revoked'} your write access.`);
     });
 
     chatChannelRef.current.subscribe(async (status) => {
@@ -182,13 +197,8 @@ export function InterviewRoom() {
 
   const handleEditorDidMount = (editor: any) => {
     if (!isMounted || !docRef.current || !providerRef.current) return;
-    editorRef.current = editor;
-    try {
-      const type = docRef.current.getText('monaco');
-      new MonacoBinding(type, editorRef.current.getModel(), new Set([editorRef.current]), providerRef.current.awareness);
-    } catch (err) {
-      console.warn('YJS binding failed:', err);
-    }
+    const type = docRef.current.getText('monaco');
+    const binding = new MonacoBinding(type, editor.getModel(), new Set([editor]), providerRef.current.awareness);
   };
 
   // ── Camera/Mic Toggle ───────────────────────────────────────────────
@@ -435,12 +445,33 @@ export function InterviewRoom() {
           </div>
 
           <div className="flex items-center gap-4 md:gap-6">
-            {/* Session Timer */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
-              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-black tabular-nums text-muted-foreground uppercase tracking-widest">
-                {String(Math.floor(sessionSeconds / 60)).padStart(2, '0')}:{String(sessionSeconds % 60).padStart(2, '0')}
-              </span>
+            <div className="flex items-center gap-3">
+              {isHost && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    const next = !peerHasWriteAccess;
+                    setPeerHasWriteAccess(next);
+                    chatChannelRef.current?.send({ 
+                      type: 'broadcast', 
+                      event: 'write_access_change', 
+                      payload: { granted: next } 
+                    });
+                    toast.success(`Peer write access ${next ? 'granted' : 'revoked'}`);
+                  }}
+                  className={`hidden sm:flex text-[10px] uppercase tracking-widest font-black border-white/20 transition-all ${peerHasWriteAccess ? 'bg-amber-500/20 text-amber-500 hover:bg-amber-500/30' : 'bg-primary/20 text-primary hover:bg-primary/30'}`}
+                >
+                  {peerHasWriteAccess ? 'Revoke Peer Write' : 'Allow Peer Write'}
+                </Button>
+              )}
+              {/* Session Timer */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-[10px] font-black tabular-nums text-muted-foreground uppercase tracking-widest">
+                  {String(Math.floor(sessionSeconds / 60)).padStart(2, '0')}:{String(sessionSeconds % 60).padStart(2, '0')}
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -453,38 +484,22 @@ export function InterviewRoom() {
           </div>
         </header>
 
-        <div className="flex-1 bg-[#1e1e1e] flex flex-col">
+        <div className="flex-1 w-full relative h-[calc(100vh-64px)] bg-[#1e1e1e]">
           {activeTab === 'editor' ? (
-            <>
-              <div className="flex-1">
-                <Editor
-                  height="100%"
-                  theme="vs-dark"
-                  language={language}
-                  defaultValue="// Start coding your solution here...\n"
-                  onMount={handleEditorDidMount}
-                  options={{
-                    fontSize: 14,
-                    minimap: { enabled: false },
-                    padding: { top: 20 },
-                    lineNumbers: 'on',
-                    scrollBeyondLastLine: false,
-                    fontFamily: 'JetBrains Mono, monospace',
-                    wordWrap: 'on',
-                  }}
-                />
-              </div>
-              {codeOutput && (
-                <div className="h-24 border-t border-white/10 bg-black/60 p-4 overflow-y-auto">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2">Output</p>
-                  <pre className="text-xs font-mono text-muted-foreground">{codeOutput}</pre>
-                </div>
-              )}
-            </>
+            <Editor
+              height="100%"
+              language={language}
+              theme="vs-dark"
+              options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                padding: { top: 24 },
+                readOnly: isReadonly,
+              }}
+              onMount={handleEditorDidMount}
+            />
           ) : (
-            <div className="w-full h-full bg-[#121212]">
-              <MockWhiteboard roomId={activeRoom.id} />
-            </div>
+            <MockWhiteboard roomId={activeRoom?.id || ''} isReadonly={isReadonly} />
           )}
         </div>
       </main>

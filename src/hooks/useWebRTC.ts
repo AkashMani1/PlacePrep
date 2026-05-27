@@ -91,7 +91,11 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
 
     pc.ontrack = (event) => {
       if (!isMounted.current) return;
-      setRemoteStream(event.streams[0] ?? new MediaStream([event.track]));
+      setRemoteStream(prev => {
+        const stream = prev || new MediaStream();
+        if (event.track) stream.addTrack(event.track);
+        return new MediaStream(stream.getTracks());
+      });
     };
 
     pc.onconnectionstatechange = () => {
