@@ -12,10 +12,12 @@ import { useMockStore } from '@/store/useMockStore';
 import { toast } from 'sonner';
 import { MonacoBinding } from 'y-monaco';
 import { useRouter } from 'next/navigation';
-import { useWebRTC } from '@/hooks/useWebRTC';
 import { MockWhiteboard } from './MockWhiteboard';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
+import { LiveKitRoom, useTracks, ParticipantTile, RoomAudioRenderer, useLocalParticipant } from '@livekit/components-react';
+import '@livekit/components-styles';
+import { Track } from 'livekit-client';
 
 
 interface ChatMessage {
@@ -23,6 +25,39 @@ interface ChatMessage {
   sender: string;
   text: string;
   timestamp: string;
+}
+
+function LiveKitVideoSidebar() {
+  const tracks = useTracks([
+    { source: Track.Source.Camera, withPlaceholder: true },
+    { source: Track.Source.ScreenShare, withPlaceholder: false },
+  ], { onlySubscribed: false });
+
+  return (
+    <div className="flex flex-col gap-4 w-full h-full overflow-y-auto hide-scrollbar">
+      {tracks.length === 0 && (
+        <div className="relative aspect-video rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+          <div className="animate-pulse flex flex-col items-center">
+            <Video className="w-8 h-8 text-white/20 mb-2" />
+            <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Connecting...</p>
+          </div>
+        </div>
+      )}
+      {tracks.map((trackRef) => (
+        <div key={trackRef.participant.identity + trackRef.source} className="relative aspect-video rounded-2xl md:rounded-3xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl">
+          <ParticipantTile {...trackRef} className="w-full h-full object-cover" />
+          <div className="absolute bottom-3 left-3 flex items-center gap-2">
+            <div className="px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10">
+              <span className="text-[10px] font-bold text-white uppercase tracking-widest">
+                {trackRef.participant.name || trackRef.participant.identity} {trackRef.source === Track.Source.ScreenShare ? '(Screen)' : ''}
+              </span>
+            </div>
+          </div>
+        </div>
+      ))}
+      <RoomAudioRenderer />
+    </div>
+  );
 }
 
 export function InterviewRoom() {
@@ -40,10 +75,9 @@ export function InterviewRoom() {
   const [language, setLanguage] = useState('javascript');
   const [sessionSeconds, setSessionSeconds] = useState(0);
 
-  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [lkToken, setLkToken] = useState('');
+  const [liveKitUrl] = useState(process.env.NEXT_PUBLIC_LIVEKIT_URL || '');
 
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
   const editorRef = useRef<any>(null);
   const providerRef = useRef<any>(null);
   const docRef = useRef<any>(null);
@@ -78,41 +112,30 @@ export function InterviewRoom() {
     return () => { document.body.style.overflow = ''; };
   }, [activeRoom]);
 
-  // ── Media Stream Setup ──────────────────────────────────────────────
+  // ── LiveKit Setup ──────────────────────────────────────────────
   useEffect(() => {
-    if (!activeRoom || !isMounted) return;
-
-    const initMedia = async () => {
+    if (!activeRoom || !user) return;
+    let mounted = true;
+    
+    (async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localStreamRef.current = stream;
-        setLocalStream(stream);
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
+        const resp = await fetch('/api/livekit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            room: activeRoom.id, 
+            username: user.user_metadata?.full_name || 'Anonymous' 
+          }),
+        });
+        const data = await resp.json();
+        if (mounted && data.token) setLkToken(data.token);
       } catch (err) {
-        console.warn('Camera/mic not available:', err);
-        toast.info('Camera or microphone not available. You can still use the editor.');
-        setIsVideoEnabled(false);
-        setIsMicEnabled(false);
+        console.error('Failed to fetch LiveKit token:', err);
       }
-    };
-
-    initMedia();
-
-    return () => {
-      localStreamRef.current?.getTracks().forEach(t => t.stop());
-      localStreamRef.current = null;
-    };
-  }, [activeRoom?.id, isMounted]);
-
-  const { remoteStream, peerConnectionState } = useWebRTC(activeRoom?.id || '', localStream);
-
-  useEffect(() => {
-    if (remoteVideoRef.current && remoteStream) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  }, [remoteStream]);
+    })();
+    
+    return () => { mounted = false; };
+  }, [activeRoom?.id, user]);
 
   // ── YJS Collaborative Setup ─────────────────────────────────────────
   useEffect(() => {
@@ -350,65 +373,20 @@ export function InterviewRoom() {
           </button>
         </div>
 
-        {/* Local Video */}
-        <div className="relative aspect-video rounded-2xl md:rounded-3xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl">
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            className={`w-full h-full object-cover ${!isVideoEnabled ? 'hidden' : ''}`}
-          />
-          {!isVideoEnabled && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <VideoOff className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground/20" />
-            </div>
-          )}
-          <div className="absolute bottom-3 left-3 flex items-center gap-2">
-            <div className="px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10">
-              <span className="text-[10px] font-bold text-white">You {isScreenSharing ? '(Screen)' : ''}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Remote Video Placeholder */}
-        <div className="relative aspect-video rounded-2xl md:rounded-3xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl">
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            playsInline
-            className={`w-full h-full object-cover ${(peerConnectionState !== 'connected' && !remoteStream) ? 'hidden' : ''}`}
-          />
-          {peerConnectionState !== 'connected' && !remoteStream && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <Video className="w-8 h-8 md:w-10 md:h-10 text-muted-foreground/20 mx-auto" />
-                <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest">
-                  {peerConnectionState === 'connecting' ? 'Connecting to peer...' : 'Waiting for peer...'}
-                </p>
-                {peerConnectionState !== 'connecting' && (
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(window.location.href);
-                      toast.success('Room link copied to clipboard!');
-                    }}
-                    className="mt-4 flex items-center justify-center gap-2 px-4 py-2 mx-auto rounded-lg bg-white/5 border border-white/10 hover:bg-primary/20 hover:border-primary/30 transition-all group/share"
-                  >
-                    <Link className="w-3.5 h-3.5 text-muted-foreground group-hover/share:text-primary transition-colors" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover/share:text-primary transition-colors">
-                      Share Link
-                    </span>
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-          {participants.length > 1 && (
-            <div className="absolute top-3 right-3">
-              <div className="px-3 py-1 rounded-full bg-primary text-white text-[8px] font-black uppercase tracking-widest">
-                {participants.find(p => p.role === 'interviewer')?.role === 'interviewer' ? 'Interviewer' : 'Peer'}
-              </div>
-            </div>
+        {/* LiveKit Video Grid */}
+        <div className="flex-1 w-full relative min-h-0">
+          {liveKitUrl && lkToken && (
+            <LiveKitRoom
+              video={isVideoEnabled}
+              audio={isMicEnabled}
+              screen={isScreenSharing}
+              token={lkToken}
+              serverUrl={liveKitUrl}
+              connect={true}
+              className="w-full h-full flex flex-col"
+            >
+              <LiveKitVideoSidebar />
+            </LiveKitRoom>
           )}
         </div>
 
