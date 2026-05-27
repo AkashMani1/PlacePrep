@@ -267,10 +267,10 @@ export const useMockStore = create<MockState>()(
 
       deleteRoom: async (roomId) => {
         if (_dbHealthy) {
-          const { error } = await supabase.from('mock_rooms').delete().eq('id', roomId);
+          const { data, error } = await supabase.from('mock_rooms').delete().eq('id', roomId).select();
           
-          if (error) {
-            console.warn('Standard deletion failed, attempting admin override:', error.message);
+          if (error || !data || data.length === 0) {
+            console.warn('Standard deletion failed or skipped by RLS, attempting admin override');
             try {
               const { data: { session } } = await supabase.auth.getSession();
               const token = session?.access_token;
