@@ -252,6 +252,7 @@ export const useMockStore = create<MockState>()(
             difficulty: newRoom.difficulty,
             company: newRoom.company,
             status: 'waiting',
+            host_id: newRoom.host_id,
           }]);
           if (error) {
             console.warn('Room creation DB error:', error.message);

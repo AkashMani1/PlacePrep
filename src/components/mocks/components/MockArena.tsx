@@ -53,6 +53,7 @@ export function MockArena() {
         type: createRoomForm.type,
         company: createRoomForm.company,
         difficulty: createRoomForm.difficulty,
+        host_id: user?.id,
       });
       const inviteLink = `${window.location.origin}/mockhub/interview/${roomId}`;
       await navigator.clipboard.writeText(`Join my mock interview room on PlacePrep: ${inviteLink}`);

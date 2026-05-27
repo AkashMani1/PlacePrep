@@ -422,6 +422,18 @@ export function InterviewRoom() {
                   {peerHasWriteAccess ? 'Revoke Peer Write' : 'Allow Peer Write'}
                 </button>
               )}
+              {/* Share Link */}
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success('Invite link copied!');
+                }}
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-white/80"
+              >
+                <Link className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Share</span>
+              </button>
+              
               {/* Timer */}
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/40 border border-white/5">
                 <Clock className="w-3 h-3 text-muted-foreground" />
