@@ -14,6 +14,8 @@ import { MonacoBinding } from 'y-monaco';
 import { useRouter } from 'next/navigation';
 import { useWebRTC } from '@/hooks/useWebRTC';
 import { MockWhiteboard } from './MockWhiteboard';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 
 
 interface ChatMessage {
@@ -25,6 +27,7 @@ interface ChatMessage {
 
 export function InterviewRoom() {
   const router = useRouter();
+  const { user } = useAuth();
   const { activeRoom, leaveRoom } = useMockStore();
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isMicEnabled, setIsMicEnabled] = useState(true);
@@ -46,6 +49,8 @@ export function InterviewRoom() {
   const docRef = useRef<any>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const sessionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const chatChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const [peerName, setPeerName] = useState('Peer');
 
   useEffect(() => { setIsMounted(true); }, []);
 
@@ -138,6 +143,56 @@ export function InterviewRoom() {
     };
   }, [activeRoom?.id, isMounted]);
 
+  // ── Chat & Sync Setup ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!activeRoom?.id || !isMounted) return;
+
+    chatChannelRef.current = supabase.channel(`chat:${activeRoom.id}`, {
+      config: { broadcast: { ack: false, self: false } }
+    });
+
+    chatChannelRef.current.on('broadcast', { event: 'new_message' }, ({ payload }) => {
+      setChatMessages(prev => [...prev, { ...payload.msg, sender: payload.senderName }]);
+    });
+
+    chatChannelRef.current.on('broadcast', { event: 'code_submit' }, ({ payload }) => {
+      setCodeOutput(`${payload.senderName} executed the code.`);
+      toast.info(`${payload.senderName} submitted their code.`);
+    });
+
+    chatChannelRef.current.on('broadcast', { event: 'peer_joined' }, ({ payload }) => {
+      setPeerName(payload.displayName);
+      toast.success(`${payload.displayName} is in the room.`);
+      // Send back our name so they know who we are
+      chatChannelRef.current?.send({ 
+        type: 'broadcast', 
+        event: 'peer_presence', 
+        payload: { displayName: user?.user_metadata?.full_name || 'Anonymous User' } 
+      });
+    });
+
+    chatChannelRef.current.on('broadcast', { event: 'peer_presence' }, ({ payload }) => {
+      setPeerName(payload.displayName);
+    });
+
+    chatChannelRef.current.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+         chatChannelRef.current?.send({ 
+           type: 'broadcast', 
+           event: 'peer_joined', 
+           payload: { displayName: user?.user_metadata?.full_name || 'Anonymous User' } 
+         });
+      }
+    });
+
+    return () => {
+      if (chatChannelRef.current) {
+        supabase.removeChannel(chatChannelRef.current);
+        chatChannelRef.current = null;
+      }
+    };
+  }, [activeRoom?.id, isMounted, user]);
+
 
   const handleEditorDidMount = (editor: any) => {
     if (!isMounted || !docRef.current || !providerRef.current) return;
@@ -177,6 +232,7 @@ export function InterviewRoom() {
         localStreamRef.current = stream;
         if (localVideoRef.current) localVideoRef.current.srcObject = stream;
         setIsScreenSharing(false);
+        setLocalStream(stream);
       } catch {
         setIsScreenSharing(false);
       }
@@ -187,9 +243,12 @@ export function InterviewRoom() {
         localStreamRef.current = screenStream;
         if (localVideoRef.current) localVideoRef.current.srcObject = screenStream;
         setIsScreenSharing(true);
+        setLocalStream(screenStream);
 
         screenStream.getVideoTracks()[0].addEventListener('ended', () => {
           setIsScreenSharing(false);
+          // Re-trigger camera when screen share ends
+          toggleScreenShare();
         });
       } catch {
         toast.info('Screen sharing cancelled or not supported.');
@@ -208,7 +267,12 @@ export function InterviewRoom() {
     };
     setChatMessages(prev => [...prev, msg]);
     setChatInput('');
-  }, [chatInput]);
+    chatChannelRef.current?.send({ 
+      type: 'broadcast', 
+      event: 'new_message', 
+      payload: { msg, senderName: user?.user_metadata?.full_name || 'You' } 
+    });
+  }, [chatInput, user]);
 
   // ── Code Submit ─────────────────────────────────────────────────────
   const handleCodeSubmit = useCallback(() => {
@@ -219,7 +283,12 @@ export function InterviewRoom() {
     }
     setCodeOutput('Code submitted successfully. In a live session, this would be evaluated against test cases.');
     toast.success('Code submitted!');
-  }, []);
+    chatChannelRef.current?.send({ 
+      type: 'broadcast', 
+      event: 'code_submit', 
+      payload: { code, senderName: user?.user_metadata?.full_name || 'You' } 
+    });
+  }, [user]);
 
   // ── Leave & Cleanup ─────────────────────────────────────────────────
   const handleLeave = useCallback(() => {
@@ -234,8 +303,8 @@ export function InterviewRoom() {
 
   // Dynamically generate participants based on WebRTC state
   const participants = [
-    { displayName: 'You', role: 'Participant', isOnline: true },
-    ...(remoteStream ? [{ displayName: 'Peer', role: 'Participant', isOnline: true }] : [])
+    { displayName: user?.user_metadata?.full_name || 'You', role: 'Participant', isOnline: true },
+    ...(remoteStream ? [{ displayName: peerName, role: 'Participant', isOnline: true }] : [])
   ];
 
   return (

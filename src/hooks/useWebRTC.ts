@@ -37,7 +37,13 @@ const RECONNECT_DELAYS = [1000, 2000, 4000, 8000, 16000]; // exponential backoff
 export function useWebRTC(roomId: string, localStream: MediaStream | null) {
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [peerConnectionState, setPeerConnectionState] = useState<RTCPeerConnectionState>('new');
-  const [isInitiator, setIsInitiator] = useState(false);
+  const [isInitiatorState, setIsInitiatorState] = useState(false);
+  const isInitiatorRef = useRef(false);
+
+  const setIsInitiator = useCallback((val: boolean) => {
+    isInitiatorRef.current = val;
+    setIsInitiatorState(val);
+  }, []);
 
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const channel = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -109,7 +115,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
     };
 
     pc.onnegotiationneeded = async () => {
-      if (isNegotiating.current || !isInitiator) return;
+      if (isNegotiating.current || !isInitiatorRef.current) return;
       isNegotiating.current = true;
       try {
         const offer = await pc.createOffer();
@@ -128,7 +134,7 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
     }
 
     return pc;
-  }, [localStream, sendSignal, isInitiator]);
+  }, [localStream, sendSignal, setIsInitiator]);
 
   // ── Schedule reconnect with exponential backoff ─────────────────────────
   const scheduleReconnect = useCallback(() => {
@@ -162,6 +168,10 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
 
       try {
         if (payload.type === 'offer') {
+          if (peerConnection.current.connectionState === 'connected') {
+            console.warn('[WebRTC] Ignored offer from a 3rd party. Room is full.');
+            return;
+          }
           if (peerConnection.current.signalingState !== 'stable' && !isNegotiating.current) return;
           await peerConnection.current.setRemoteDescription(new RTCSessionDescription(payload.offer));
           const answer = await peerConnection.current.createAnswer();
@@ -188,6 +198,19 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
           } else {
             pendingCandidates.push(payload.candidate);
           }
+        } else if (payload.type === 'request_offer') {
+          if (isInitiatorRef.current && peerConnection.current) {
+            isNegotiating.current = true;
+            try {
+              const offer = await peerConnection.current.createOffer();
+              await peerConnection.current.setLocalDescription(offer);
+              sendSignal({ type: 'offer', offer: peerConnection.current.localDescription });
+            } catch (err) {
+              console.error('[WebRTC] request_offer error:', err);
+            } finally {
+              isNegotiating.current = false;
+            }
+          }
         }
       } catch (err) {
         console.error('[WebRTC] Signal handling error:', err);
@@ -197,6 +220,10 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
     // Handle peer ready event — whoever has the "higher" peerId becomes the caller
     channel.current.on('broadcast', { event: 'peer_ready' }, async ({ payload }: any) => {
       if (!peerConnection.current || !isMounted.current) return;
+      if (peerConnection.current.connectionState === 'connected') {
+        console.warn('[WebRTC] Ignored peer_ready from 3rd party. Room is full.');
+        return;
+      }
       
       // Deterministic initiator selection to prevent glare
       if (myPeerId.current > payload.peerId) {
@@ -275,16 +302,20 @@ export function useWebRTC(roomId: string, localStream: MediaStream | null) {
 
     // If tracks were added dynamically, WebRTC requires renegotiation
     if (addedNewTrack && peerConnection.current.signalingState === 'stable') {
-      isNegotiating.current = true;
-      peerConnection.current.createOffer()
-        .then(offer => peerConnection.current?.setLocalDescription(offer))
-        .then(() => {
-          sendSignal({ type: 'offer', offer: peerConnection.current?.localDescription });
-        })
-        .catch(err => console.error('[WebRTC] Renegotiation error:', err))
-        .finally(() => { isNegotiating.current = false; });
+      if (isInitiatorRef.current) {
+        isNegotiating.current = true;
+        peerConnection.current.createOffer()
+          .then(offer => peerConnection.current?.setLocalDescription(offer))
+          .then(() => {
+            sendSignal({ type: 'offer', offer: peerConnection.current?.localDescription });
+          })
+          .catch(err => console.error('[WebRTC] Renegotiation error:', err))
+          .finally(() => { isNegotiating.current = false; });
+      } else {
+        sendSignal({ type: 'request_offer' });
+      }
     }
   }, [localStream, sendSignal]);
 
-  return { remoteStream, peerConnectionState, isInitiator };
+  return { remoteStream, peerConnectionState, isInitiator: isInitiatorState };
 }
