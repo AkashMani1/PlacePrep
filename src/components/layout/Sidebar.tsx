@@ -92,7 +92,7 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
             onClick={(e) => {
               onTabChange(id);
             }}
-            className={`w-full group relative flex items-center h-12 rounded-xl transition-all duration-300 text-left px-3 ${
+            className={`w-full group relative flex items-center h-12 rounded-xl transition-all duration-300 text-left px-3 ${id === 'dsaSheet' ? 'tour-dsa-sheet ' : ''}${
               activeTab === id
                 ? 'bg-primary/10 text-primary border border-primary/20'
                 : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
@@ -141,7 +141,7 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
         {/* Profile Control */}
         <button 
           onClick={onSettingsOpen}
-          className="w-full group relative flex items-center rounded-[18px] transition-all duration-300 text-left px-4 text-muted-foreground hover:text-foreground hover:bg-muted/20"
+          className="tour-settings-btn w-full group relative flex items-center rounded-[18px] transition-all duration-300 text-left px-4 text-muted-foreground hover:text-foreground hover:bg-muted/20"
         >
           <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
             <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-primary via-primary/80 to-secondary flex items-center justify-center text-white font-black text-[9px] overflow-hidden border border-border/20 shadow-sm">
@@ -167,7 +167,7 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
                 {!user && (
                    <span 
                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); signInWithGoogle(); }}
-                     className="text-[9px] font-black uppercase tracking-wider text-primary hover:underline underline-offset-2 w-fit mt-0.5 cursor-pointer"
+                     className="tour-connect-google text-[9px] font-black uppercase tracking-wider text-primary hover:underline underline-offset-2 w-fit mt-0.5 cursor-pointer"
                    >
                      Connect Account
                    </span>

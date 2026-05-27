@@ -130,7 +130,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 <option>Data Analyst</option>
               </select>
             </div>
-            <div>
+            <div className="tour-prep-dates">
               <label className="text-slate-500 text-[10px] font-bold mb-1.5 block">Prep Start Date</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
                 className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-indigo-500" />

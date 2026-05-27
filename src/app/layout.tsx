@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Toaster } from 'sonner';
 import { env } from '@/lib/env';
+import GuidedTour from '@/components/common/GuidedTour';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -91,6 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AppProvider>
               {/* mobile-viewport-shell applies ONLY on <768px via CSS — no-op on desktop */}
               <div className="mobile-viewport-shell">
+                <GuidedTour />
                 {children}
                 <Toaster richColors position="top-right" closeButton theme="dark" />
               </div>
@@ -101,3 +103,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
