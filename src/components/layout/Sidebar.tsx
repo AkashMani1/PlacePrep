@@ -5,6 +5,7 @@
 import { Target, LayoutDashboard, Compass, ListChecks, Code2, PlayCircle, Library, FlaskConical, Settings, Sun, Moon, Cloud, ChevronRight } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
+import { isAdminEmail } from '@/lib/admin';
 import { calcStreak, calcCurrentWeek, getStreakStatus } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -81,7 +82,7 @@ export default function Sidebar({ activeTab, onTabChange, onSettingsOpen, isMobi
       {/* Navigation */}
       <nav className="flex-1 py-8 space-y-1.5 overflow-y-auto custom-scrollbar px-3">
         {NAV_ITEMS.filter(item => {
-          if (item.adminOnly && user?.email !== 'akashmani9955@gmail.com') return false;
+          if (item.adminOnly && !isAdminEmail(user?.email)) return false;
           if (isMobile && item.id === 'dsaSheet') return false;
           return true;
         }).map(({ id, icon: Icon, label, badge }) => (

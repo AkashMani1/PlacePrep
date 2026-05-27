@@ -26,6 +26,9 @@ import {
   BrainCircuit,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
+import DsaSheetAdminPanel from '@/components/dsa-sheet/DsaSheetAdminPanel';
+import { isAdminEmail } from '@/lib/admin';
 import { DSASheetItem, Difficulty } from '@/lib/types';
 import { today, addDays, formatDisplayDate } from '@/lib/utils';
 import ModalPortal from '@/components/ui/ModalPortal';
@@ -460,8 +463,11 @@ function SheetEditor({
 }
 
 export default function DSASheetView() {
-  const { state, addDsaSheetItem, updateDsaSheetItem, deleteDsaSheetItem } = useApp();
+  const { state, addDsaSheetItem, updateDsaSheetItem, deleteDsaSheetItem, syncDsaSheetAdminItems } = useApp();
+  const { user, session } = useAuth();
   const items = (state.dsaSheetItems || []).filter((item) => !item.hidden);
+  const isAdmin = isAdminEmail(user?.email);
+  const adminItems = useMemo(() => items.filter((item) => item.source === 'admin'), [items]);
 
   const [search, setSearch] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'All'>('All');
@@ -472,6 +478,7 @@ export default function DSASheetView() {
   const [editingItem, setEditingItem] = useState<DSASheetItem | null>(null);
   const [noteItem, setNoteItem] = useState<DSASheetItem | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const deferredSearch = useDeferredValue(search);
 
   const sections = useMemo(() => {
@@ -590,6 +597,14 @@ export default function DSASheetView() {
   return (
     <div className="space-y-8">
       {showEditor && <SheetEditor item={editingItem || undefined} sections={sections} onSave={handleSave} onClose={closeEditor} />}
+      {showAdminPanel && isAdmin ? (
+        <DsaSheetAdminPanel
+          accessToken={session?.access_token}
+          items={adminItems}
+          onClose={() => setShowAdminPanel(false)}
+          onSync={syncDsaSheetAdminItems}
+        />
+      ) : null}
       {noteItem && (
         <NoteEditor
           item={noteItem}
@@ -673,6 +688,12 @@ export default function DSASheetView() {
                   <Plus className="w-5 h-5" />
                   <span>Add Question</span>
                </motion.button>
+               {isAdmin ? (
+                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowAdminPanel(true)} className="flex items-center gap-2.5 rounded-[24px] bg-card border border-border/30 px-7 py-5 text-sm font-black text-foreground shadow-lg hover:border-primary/30 transition-all">
+                    <Plus className="w-5 h-5 text-muted-foreground" />
+                    <span>Admin Add</span>
+                 </motion.button>
+               ) : null}
                <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href={SHEET_URL} target="_blank" rel="noreferrer" className="flex items-center gap-2.5 rounded-[24px] bg-card border border-border/30 px-7 py-5 text-sm font-black text-foreground shadow-lg hover:border-primary/30 transition-all">
                   <Link2 className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                   <span>Source Sheet</span>

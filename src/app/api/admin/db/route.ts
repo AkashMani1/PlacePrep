@@ -1,13 +1,31 @@
 import { NextResponse } from 'next/server';
+import { isAdminEmail } from '@/lib/admin';
 import { supabaseAdmin } from '@/lib/supabase';
+
+async function verifyAdmin(request: Request) {
+  const authHeader = request.headers.get('authorization');
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  if (!token) {
+    return { ok: false, status: 401, error: 'Missing authorization token.' };
+  }
+
+  const { data, error } = await supabaseAdmin.auth.getUser(token);
+  if (error || !data.user || !isAdminEmail(data.user.email)) {
+    return { ok: false, status: 403, error: 'You do not have permission to manage admin data.' };
+  }
+
+  return { ok: true };
+}
 
 export async function POST(req: Request) {
   try {
-    const { action, table, payload, match } = await req.json();
+    const auth = await verifyAdmin(req);
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
 
-    // Ideally, we should also verify the admin session here.
-    // For now, this is secured by the UI that doesn't render it, but for production,
-    // you would verify the JWT token email matches the admin email.
+    const { action, table, payload, match } = await req.json();
 
     if (!action || !table) {
       return NextResponse.json({ error: 'Missing action or table' }, { status: 400 });

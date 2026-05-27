@@ -7,6 +7,7 @@ import { BentoCard } from '@/components/ui/Bento';
 import { useMockStore } from '@/store/useMockStore';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
+import { isAdminEmail } from '@/lib/admin';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -133,7 +134,7 @@ export function MockArena() {
                     }`}>
                       {room.difficulty || 'Medium'}
                     </span>
-                    {(myCreatedRooms.includes(room.id) || user?.email === 'akashmani9955@gmail.com') && (
+                    {(myCreatedRooms.includes(room.id) || isAdminEmail(user?.email)) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

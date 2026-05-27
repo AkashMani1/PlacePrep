@@ -18,7 +18,8 @@ import {
   DEFAULT_HABIT_GROUPS,
 } from '@/lib/defaultData';
 import { KILL_LIST_PROBLEMS } from '@/lib/killListData';
-import { DEFAULT_DSA_SHEET_ITEMS, mergeDsaSheetItems } from '@/lib/dsaSheetSeed';
+import { DEFAULT_DSA_SHEET_ITEMS } from '@/lib/dsaSheetSeed';
+import { mapAdminRecordToSheetItem, mergeDsaSheetItems } from '@/lib/dsaSheetAdmin';
 import { today, generateId } from '@/lib/utils';
 
 const INITIAL_STATE: AppState = {
@@ -97,6 +98,7 @@ interface AppContextType {
   addDsaSheetItem: (item: Omit<DSASheetItem, 'id'>) => void;
   updateDsaSheetItem: (id: string, updates: Partial<DSASheetItem>) => void;
   deleteDsaSheetItem: (id: string) => void;
+  syncDsaSheetAdminItems: (items: DSASheetItem[]) => void;
 
   // Mocks
   addMock: (m: Omit<MockInterview, 'id'>) => void;
@@ -232,24 +234,68 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [initialized, setState]);
 
-  // DSA sheet refresh: merge local sheet items with the updated admin seed questions
+  // DSA sheet refresh: merge local sheet items with the latest admin-managed question bank.
   useEffect(() => {
     if (!initialized) return;
-    setState((prev) => {
-      const merged = mergeDsaSheetItems(prev.dsaSheetItems);
-      const same =
-        prev.dsaSheetItems &&
-        prev.dsaSheetItems.length === merged.length &&
-        prev.dsaSheetItems.every((item, idx) => 
-          item.id === merged[idx].id && 
-          item.section === merged[idx].section && 
-          item.subgroup === merged[idx].subgroup && 
-          item.title === merged[idx].title
-        );
+    let cancelled = false;
 
-      if (same) return prev;
-      return { ...prev, dsaSheetItems: merged };
-    });
+    const syncDsaSheet = async () => {
+      try {
+        const response = await fetch('/api/admin/dsa-sheet', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Failed to fetch admin DSA sheet data.');
+        }
+
+        const payload = await response.json();
+        const adminItems = Array.isArray(payload.data)
+          ? payload.data.map(mapAdminRecordToSheetItem)
+          : DEFAULT_DSA_SHEET_ITEMS;
+
+        if (cancelled) return;
+
+        setState((prev) => {
+          const merged = mergeDsaSheetItems(prev.dsaSheetItems, adminItems);
+          const same =
+            prev.dsaSheetItems &&
+            prev.dsaSheetItems.length === merged.length &&
+            prev.dsaSheetItems.every((item, idx) =>
+              item.id === merged[idx]?.id &&
+              item.section === merged[idx]?.section &&
+              item.subgroup === merged[idx]?.subgroup &&
+              item.title === merged[idx]?.title &&
+              item.hidden === merged[idx]?.hidden
+            );
+
+          if (same) return prev;
+          return { ...prev, dsaSheetItems: merged };
+        });
+      } catch (error) {
+        if (cancelled) return;
+
+        setState((prev) => {
+          const merged = mergeDsaSheetItems(prev.dsaSheetItems, DEFAULT_DSA_SHEET_ITEMS);
+          const same =
+            prev.dsaSheetItems &&
+            prev.dsaSheetItems.length === merged.length &&
+            prev.dsaSheetItems.every((item, idx) =>
+              item.id === merged[idx]?.id &&
+              item.section === merged[idx]?.section &&
+              item.subgroup === merged[idx]?.subgroup &&
+              item.title === merged[idx]?.title &&
+              item.hidden === merged[idx]?.hidden
+            );
+
+          if (same) return prev;
+          return { ...prev, dsaSheetItems: merged };
+        });
+      }
+    };
+
+    syncDsaSheet();
+
+    return () => {
+      cancelled = true;
+    };
   }, [initialized, setState]);
 
   // Global Site Content Sync
@@ -570,6 +616,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }));
   }, [mutate]);
 
+  const syncDsaSheetAdminItems = useCallback((items: DSASheetItem[]) => {
+    mutate((s) => ({
+      ...s,
+      dsaSheetItems: mergeDsaSheetItems(s.dsaSheetItems, items),
+    }));
+  }, [mutate]);
+
   // ── Mocks ──────────────────────────────────────────────────────────────────
   const addMock = useCallback((m: Omit<MockInterview, 'id'>) => {
     mutate((s) => ({ ...s, mocks: [{ ...m, id: generateId() }, ...s.mocks] }));
@@ -710,6 +763,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addDsaSheetItem,
     updateDsaSheetItem,
     deleteDsaSheetItem,
+    syncDsaSheetAdminItems,
     addMock,
     updateMock,
     deleteMock,

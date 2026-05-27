@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { isAdminEmail } from '@/lib/admin';
 import { Lock, Plus, Edit2, Trash2, Save, X, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ModalPortal from '@/components/ui/ModalPortal';
 
 // --- Generic DB API Caller ---
-async function dbCall(action: string, table: string, payload?: any, match?: any) {
+async function dbCall(token: string | undefined, action: string, table: string, payload?: any, match?: any) {
   const res = await fetch('/api/admin/db', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify({ action, table, payload, match }),
   });
   if (!res.ok) {
@@ -19,7 +23,8 @@ async function dbCall(action: string, table: string, payload?: any, match?: any)
 }
 
 export default function AdminPanelView() {
-  const { user } = useAuth();
+  const { user, session, isLoading: authLoading } = useAuth();
+  const accessToken = session?.access_token;
   
   const [activeTab, setActiveTab] = useState<'assessments' | 'questions' | 'global'>('assessments');
   const [assessments, setAssessments] = useState<any[]>([]);
@@ -42,7 +47,16 @@ export default function AdminPanelView() {
   };
 
   // Extra security check
-  if (user?.email !== 'akashmani9955@gmail.com') {
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">
+        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+        Checking admin access...
+      </div>
+    );
+  }
+
+  if (!isAdminEmail(user?.email)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6">
@@ -59,7 +73,7 @@ export default function AdminPanelView() {
   const loadAssessments = async () => {
     setLoading(true);
     try {
-      const data = await dbCall('SELECT', 'assessments');
+      const data = await dbCall(accessToken, 'SELECT', 'assessments');
       setAssessments(data || []);
     } catch (err: any) {
       setError(err.message);
@@ -71,7 +85,7 @@ export default function AdminPanelView() {
   const loadQuestions = async (assessmentId: string) => {
     setLoading(true);
     try {
-      const data = await dbCall('SELECT', 'questions', undefined, { assessment_id: assessmentId });
+      const data = await dbCall(accessToken, 'SELECT', 'questions', undefined, { assessment_id: assessmentId });
       setQuestions(data || []);
     } catch (err: any) {
       setError(err.message);
@@ -81,8 +95,9 @@ export default function AdminPanelView() {
   };
 
   useEffect(() => {
+    if (!accessToken || !isAdminEmail(user?.email)) return;
     loadAssessments();
-  }, []);
+  }, [accessToken, user?.email]);
 
   useEffect(() => {
     if (activeTab === 'questions' && selectedAssessmentId) {
@@ -95,7 +110,7 @@ export default function AdminPanelView() {
   const loadGlobalQuestions = async () => {
     setLoading(true);
     try {
-      const data = await dbCall('SELECT', 'questions', undefined, { assessment_id: GLOBAL_IDS[activeGlobalTab] });
+      const data = await dbCall(accessToken, 'SELECT', 'questions', undefined, { assessment_id: GLOBAL_IDS[activeGlobalTab] });
       setGlobalQuestions(data || []);
     } catch (err: any) {
       setError(err.message);
@@ -110,9 +125,9 @@ export default function AdminPanelView() {
     try {
       if (editingAssessment.isNew) {
         const { isNew, ...payload } = editingAssessment;
-        await dbCall('INSERT', 'assessments', [payload]);
+        await dbCall(accessToken, 'INSERT', 'assessments', [payload]);
       } else {
-        await dbCall('UPDATE', 'assessments', editingAssessment, { id: editingAssessment.id });
+        await dbCall(accessToken, 'UPDATE', 'assessments', editingAssessment, { id: editingAssessment.id });
       }
       setEditingAssessment(null);
       loadAssessments();
@@ -124,7 +139,7 @@ export default function AdminPanelView() {
   const handleDeleteAssessment = async (id: string) => {
     if (!confirm('Are you sure you want to delete this assessment? All associated questions will be affected.')) return;
     try {
-      await dbCall('DELETE', 'assessments', undefined, { id });
+      await dbCall(accessToken, 'DELETE', 'assessments', undefined, { id });
       loadAssessments();
     } catch (err: any) {
       alert(err.message);
@@ -142,9 +157,9 @@ export default function AdminPanelView() {
       const payload = { ...editingQuestion, options: optionsArray };
       if (payload.isNew) {
         delete payload.isNew;
-        await dbCall('INSERT', 'questions', [payload]);
+        await dbCall(accessToken, 'INSERT', 'questions', [payload]);
       } else {
-        await dbCall('UPDATE', 'questions', payload, { id: editingQuestion.id });
+        await dbCall(accessToken, 'UPDATE', 'questions', payload, { id: editingQuestion.id });
       }
       setEditingQuestion(null);
       if (activeTab === 'global') loadGlobalQuestions();
@@ -157,7 +172,7 @@ export default function AdminPanelView() {
   const handleDeleteQuestion = async (id: string) => {
     if (!confirm('Are you sure you want to delete this?')) return;
     try {
-      await dbCall('DELETE', 'questions', undefined, { id });
+      await dbCall(accessToken, 'DELETE', 'questions', undefined, { id });
       if (activeTab === 'global') loadGlobalQuestions();
       else loadQuestions(selectedAssessmentId);
     } catch (err: any) {
