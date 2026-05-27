@@ -256,7 +256,7 @@ export default function DsaSheetAdminPanel({
   const totalSections = sections.length;
 
   return (
-    <ModalPortal onClose={onClose}>
+    <ModalPortal onClose={onClose} maxWidth="1280px" maxHeight="92dvh">
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}

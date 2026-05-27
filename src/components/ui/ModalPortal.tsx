@@ -23,9 +23,19 @@ interface ModalPortalProps {
   onClose?: () => void;
   /** extra class on the centering wrapper */
   className?: string;
+  /** optional max width for modal content */
+  maxWidth?: string;
+  /** optional max height for modal content */
+  maxHeight?: string;
 }
 
-export default function ModalPortal({ children, onClose, className = '' }: ModalPortalProps) {
+export default function ModalPortal({
+  children,
+  onClose,
+  className = '',
+  maxWidth = '560px',
+  maxHeight = '90dvh',
+}: ModalPortalProps) {
   const portalRoot = typeof document !== 'undefined' ? document.body : null;
 
   // ── Scroll lock ───────────────────────────────────────────────────────────
@@ -85,8 +95,8 @@ export default function ModalPortal({ children, onClose, className = '' }: Modal
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: '560px',
-          maxHeight: '90dvh',
+          maxWidth,
+          maxHeight,
           overflowY: 'auto',
           // Ensure no fixed children are trapped
           transform: 'none',
