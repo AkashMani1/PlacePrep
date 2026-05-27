@@ -3,7 +3,7 @@
 /* Developed by Akash Mani - PlacePrep Mobile Top Bar */
 
 import { motion } from 'framer-motion';
-import { Target, Flame } from 'lucide-react';
+import { Target, Flame, Sun, Moon } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { calcStreak } from '@/lib/utils';
@@ -13,7 +13,7 @@ interface MobileTopBarProps {
 }
 
 export default function MobileTopBar({ onSettingsOpen }: MobileTopBarProps) {
-  const { state } = useApp();
+  const { state, toggleTheme } = useApp();
   const { user } = useAuth();
 
   const streak = calcStreak(state.dailyLogs);
@@ -74,6 +74,20 @@ export default function MobileTopBar({ onSettingsOpen }: MobileTopBarProps) {
               </span>
             </motion.div>
           )}
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] active:scale-95 transition-transform touch-manipulation shadow-[0_8px_20px_rgba(0,0,0,0.18)]"
+            style={{ minWidth: 36, minHeight: 36 }}
+            aria-label="Toggle theme"
+          >
+            {state.theme === 'dark' ? (
+              <Sun className="w-[18px] h-[18px] text-amber-400" />
+            ) : (
+              <Moon className="w-[18px] h-[18px] text-slate-400" />
+            )}
+          </button>
 
           {/* Avatar → Settings */}
           <button
