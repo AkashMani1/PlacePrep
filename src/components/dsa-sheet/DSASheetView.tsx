@@ -127,9 +127,11 @@ function NoteEditor({
 function NoteButton({
   item,
   onClick,
+  className = '',
 }: {
   item: DSASheetItem;
   onClick: () => void;
+  className?: string;
 }) {
   const hasNote = Boolean(item.notes?.trim());
 
@@ -137,11 +139,11 @@ function NoteButton({
     <button
       onClick={onClick}
       title={hasNote ? 'View or edit note' : 'Add note'}
-      className={`relative w-12 h-12 rounded-full border flex items-center justify-center transition-colors ${
+      className={`relative flex items-center justify-center rounded-full border transition-colors ${
         hasNote
           ? 'border-[#ff7a59]/40 bg-[#ff7a59]/10 text-[#ff7a59]'
           : 'border-border/30 bg-muted/20 text-muted-foreground hover:border-[#ff7a59]/30 hover:text-foreground'
-      }`}
+      } ${className || 'w-12 h-12'}`}
     >
       <BookMarked className="w-4 h-4" />
       {hasNote ? <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-card" /> : null}
@@ -785,180 +787,311 @@ export default function DSASheetView() {
                             <div className="border-t border-border/30" />
                           ) : null}
                           {subgroupItems.map((item) => {
-                          return (
-                            <div key={item.id} className="grid grid-cols-1 lg:grid-cols-[44px_minmax(160px,2fr)_72px_72px_72px_110px_115px_56px_56px] gap-3 items-center px-4 py-3.5 border-t border-border/20 bg-muted/5 hover:bg-muted/10 transition-colors">
-                          <button 
-                            onClick={() => {
+                            const toggleComplete = () => {
                               const isCompleting = !item.completed;
                               const subDate = isCompleting ? today() : '';
                               let revDate = item.revisionDate || '';
                               let revPhase = item.revisionPhase || 0;
-                              
+
                               if (isCompleting && !item.revisionDate) {
                                 revPhase = 0;
                                 revDate = addDays(subDate, SRS_INTERVALS[item.difficulty][0]);
                               } else if (isCompleting && item.revisionDate && item.revisionDate.split('T')[0] <= today()) {
-                                // Background SRS Trigger on toggle
                                 revPhase = Math.min(revPhase + 1, SRS_INTERVALS[item.difficulty].length - 1);
                                 revDate = addDays(subDate, SRS_INTERVALS[item.difficulty][revPhase]);
                               }
-                              
-                              updateDsaSheetItem(item.id, { 
-                                completed: isCompleting, 
-                                submissionDate: subDate, 
+
+                              updateDsaSheetItem(item.id, {
+                                completed: isCompleting,
+                                submissionDate: subDate,
                                 revisionDate: revDate,
-                                revisionPhase: revPhase
+                                revisionPhase: revPhase,
                               });
-                            }} 
-                            className="w-10 h-10 rounded-full border border-border/30 flex items-center justify-center text-muted-foreground hover:text-foreground"
-                          >
-                            {item.completed ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <Circle className="w-5 h-5" />}
-                          </button>
+                            };
 
-                          <div>
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <p className={`text-[14px] md:text-[15px] font-semibold leading-[1.45] tracking-[-0.01em] ${item.completed ? 'text-muted-foreground line-through' : 'text-foreground'}`}>{item.title}</p>
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.04em] ${item.source === 'admin' ? 'bg-muted/40 text-muted-foreground' : 'bg-primary/10 text-primary'}`}>
-                                {item.source === 'admin' ? 'Suggested' : 'Custom'}
-                              </span>
-                            </div>
-                            <div className="mt-2.5 flex gap-2">
-                              <button onClick={() => openEdit(item)} className="rounded-xl border border-border/30 p-2 text-muted-foreground hover:text-foreground">
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                              <button onClick={() => deleteDsaSheetItem(item.id)} className="rounded-xl border border-border/30 p-2 text-muted-foreground hover:text-rose-500">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
+                            const updateSubmissionDate = (newSubDate: string) => {
+                              let revPhase = item.revisionPhase || 0;
+                              let revDate = item.revisionDate || '';
 
-                          <div className="flex lg:justify-center">
-                            {item.videoUrl ? (
-                              <a
-                                href={item.videoUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                title="Open video link"
-                                className="w-10 h-10 rounded-full border border-red-500/30 bg-red-500/12 text-red-500 dark:text-red-300 hover:bg-red-500/18 flex items-center justify-center transition-colors"
-                              >
-                                <PlayCircle className="w-5 h-5" />
-                              </a>
-                            ) : (
-                              <button onClick={() => openEdit(item)} className="w-10 h-10 rounded-full border border-dashed border-border/30 flex items-center justify-center text-muted-foreground hover:bg-muted/10">
-                                <Plus className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
+                              if (item.completed && newSubDate && revDate && revDate.split('T')[0] <= today()) {
+                                revPhase = Math.min(revPhase + 1, SRS_INTERVALS[item.difficulty].length - 1);
+                                revDate = addDays(newSubDate, SRS_INTERVALS[item.difficulty][revPhase]);
+                              }
 
-                          <div className="flex lg:justify-center">
-                            {item.practiceLinks[0] ? (
-                              <a href={item.practiceLinks[0]} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-border/30 flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors group/link overflow-hidden shadow-sm">
-                                {(() => {
-                                  const logoUrl = getPlatformLogoUrl(item.practiceLinks[0]);
-                                  if (logoUrl) {
-                                    return (
-                                      <img 
-                                        src={logoUrl} 
-                                        alt="Platform" 
-                                        className="w-5 h-5 object-contain group-hover/link:scale-110 transition-transform" 
-                                        onError={(e) => {
-                                          e.currentTarget.style.display = 'none';
-                                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                                          if (fallback) fallback.style.display = 'block';
-                                        }}
-                                      />
-                                    );
-                                  }
-                                  return <Code2 className="w-5 h-5 text-muted-foreground group-hover/link:text-foreground" />;
-                                })()}
-                                <Code2 className="w-5 h-5 text-muted-foreground group-hover/link:text-foreground hidden" />
-                              </a>
-                            ) : (
-                              <button onClick={() => openEdit(item)} className="w-10 h-10 rounded-full border border-dashed border-border/30 flex items-center justify-center text-muted-foreground">
-                                <ExternalLink className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
+                              updateDsaSheetItem(item.id, {
+                                submissionDate: newSubDate,
+                                revisionPhase: revPhase,
+                                revisionDate: revDate,
+                              });
+                            };
 
-                          <div>
-                            <span className={`inline-flex rounded-full px-2.5 py-1.5 text-[11px] font-bold ${DIFFICULTY_STYLE[item.difficulty]}`}>{item.difficulty}</span>
-                          </div>
+                            const compactActionClass = 'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border/25 bg-background/40 text-muted-foreground transition-colors hover:border-border/45 hover:bg-muted/10 hover:text-foreground';
 
-                          <div className="flex items-center gap-2">
-                             <div className="relative group px-3 py-1.5 rounded-xl border border-emerald-500/10 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer flex items-center gap-2 min-w-[110px]">
-                               <History className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 pointer-events-none shrink-0" />
-                               <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 pointer-events-none whitespace-nowrap">
-                                 {formatDisplayDate(item.submissionDate) || 'Pending'}
-                               </span>
-                               <input 
-                                 type="date" 
-                                 value={item.submissionDate?.split('T')[0] || ''} 
-                                 onChange={(e) => {
-                                   const newSubDate = e.target.value;
-                                   let revPhase = item.revisionPhase || 0;
-                                   let revDate = item.revisionDate || '';
-                                   
-                                   // Background SRS Engine
-                                   if (item.completed && newSubDate && revDate && revDate.split('T')[0] <= today()) {
-                                     revPhase = Math.min(revPhase + 1, SRS_INTERVALS[item.difficulty].length - 1);
-                                     revDate = addDays(newSubDate, SRS_INTERVALS[item.difficulty][revPhase]);
-                                   }
-                                   
-                                   updateDsaSheetItem(item.id, { 
-                                     submissionDate: newSubDate,
-                                     revisionPhase: revPhase,
-                                     revisionDate: revDate
-                                   });
-                                 }}
-                                 onClick={(e) => {
-                                   try {
-                                     (e.currentTarget as any).showPicker();
-                                   } catch (err) {}
-                                 }}
-                                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-                               />
-                             </div>
-                          </div>
+                            return (
+                              <div key={item.id} className="border-t border-border/20 bg-muted/5 px-4 py-3.5 transition-colors hover:bg-muted/10">
+                                <div className="md:hidden flex items-start gap-3">
+                                  <button
+                                    onClick={toggleComplete}
+                                    className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border/30 text-muted-foreground hover:text-foreground"
+                                  >
+                                    {item.completed ? <CheckCircle2 className="h-5 w-5 text-emerald-500" /> : <Circle className="h-5 w-5" />}
+                                  </button>
 
-                          <div className="flex flex-col gap-1.5 min-w-[110px]">
-                               <div className="relative group px-3 py-1.5 rounded-xl border border-primary/10 bg-primary/5 hover:bg-primary/10 transition-all cursor-pointer flex items-center justify-between gap-2">
-                                 <div className="flex items-center gap-1.5 hidden lg:flex">
-                                   <Calendar className="w-3 h-3 text-primary pointer-events-none shrink-0" />
-                                   <span className="text-[10px] font-bold text-primary pointer-events-none whitespace-nowrap">
-                                     {formatDisplayDate(item.revisionDate) || '---'}
-                                   </span>
-                                 </div>
-                                 {(item.revisionPhase ?? 0) > 0 && (
-                                    <span className="text-[8.5px] font-black uppercase bg-primary/20 text-primary px-1.5 py-0.5 rounded-[4px] pointer-events-none shrink-0" title={`Mastery Level ${item.revisionPhase}`}>
-                                       LVL {item.revisionPhase}
-                                    </span>
-                                 )}
-                                 <input 
-                                   type="date" 
-                                   value={item.revisionDate?.split('T')[0] || ''} 
-                                   onChange={(e) => updateDsaSheetItem(item.id, { revisionDate: e.target.value })}
-                                   onClick={(e) => {
-                                     try {
-                                       (e.currentTarget as any).showPicker();
-                                     } catch (err) {}
-                                   }}
-                                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-                                 />
-                               </div>
-                          </div>
+                                  <div className="min-w-0 flex-1 space-y-3">
+                                    <div className="flex min-w-0 items-start justify-between gap-2">
+                                      <p className={`min-w-0 flex-1 break-words text-[15px] font-semibold leading-[1.35] tracking-[-0.01em] [overflow-wrap:anywhere] ${item.completed ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                                        {item.title}
+                                      </p>
+                                      <span className={`shrink-0 rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[0.08em] ${item.source === 'admin' ? 'bg-muted/40 text-muted-foreground' : 'bg-primary/10 text-primary'}`}>
+                                        {item.source === 'admin' ? 'Suggested' : 'Custom'}
+                                      </span>
+                                    </div>
 
-                          <div className="flex lg:justify-center">
-                            <NoteButton item={item} onClick={() => setNoteItem(item)} />
-                          </div>
+                                    <div className="hide-scrollbar flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
+                                      <button onClick={() => openEdit(item)} className={compactActionClass} title="Edit question">
+                                        <Pencil className="h-4 w-4" />
+                                      </button>
+                                      <button onClick={() => deleteDsaSheetItem(item.id)} className={compactActionClass} title="Delete question">
+                                        <Trash2 className="h-4 w-4 hover:text-rose-500" />
+                                      </button>
 
-                          <div>
-                            <button onClick={() => updateDsaSheetItem(item.id, { saved: !item.saved })} className="w-10 h-10 rounded-xl border border-border/30 flex items-center justify-center text-muted-foreground hover:text-foreground">
-                              {item.saved ? <BookmarkCheck className="w-5 h-5 text-primary" /> : <Bookmark className="w-5 h-5" />}
-                            </button>
-                          </div>
-                        </div>
-                          );
-                        })}
+                                      {item.videoUrl ? (
+                                        <a
+                                          href={item.videoUrl}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          title="Open video link"
+                                          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/12 text-red-500 transition-colors hover:bg-red-500/18 dark:text-red-300"
+                                        >
+                                          <PlayCircle className="h-5 w-5" />
+                                        </a>
+                                      ) : (
+                                        <button onClick={() => openEdit(item)} className={`${compactActionClass} border-dashed`} title="Add video link">
+                                          <Plus className="h-4 w-4" />
+                                        </button>
+                                      )}
+
+                                      {item.practiceLinks[0] ? (
+                                        <a
+                                          href={item.practiceLinks[0]}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          title="Open practice link"
+                                          className="group/link relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/25 bg-white/5 shadow-sm transition-colors hover:bg-white/10"
+                                        >
+                                          {(() => {
+                                            const logoUrl = getPlatformLogoUrl(item.practiceLinks[0]);
+                                            if (logoUrl) {
+                                              return (
+                                                <img
+                                                  src={logoUrl}
+                                                  alt="Platform"
+                                                  className="h-5 w-5 object-contain transition-transform group-hover/link:scale-110"
+                                                  onError={(e) => {
+                                                    e.currentTarget.style.display = 'none';
+                                                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                                    if (fallback) fallback.style.display = 'block';
+                                                  }}
+                                                />
+                                              );
+                                            }
+                                            return <Code2 className="h-5 w-5 text-muted-foreground group-hover/link:text-foreground" />;
+                                          })()}
+                                          <Code2 className="hidden h-5 w-5 text-muted-foreground group-hover/link:text-foreground" />
+                                        </a>
+                                      ) : (
+                                        <button onClick={() => openEdit(item)} className={`${compactActionClass} border-dashed`} title="Add practice link">
+                                          <ExternalLink className="h-4 w-4" />
+                                        </button>
+                                      )}
+
+                                      <div className="shrink-0">
+                                        <NoteButton item={item} onClick={() => setNoteItem(item)} className="h-10 w-10" />
+                                      </div>
+
+                                      <button
+                                        onClick={() => updateDsaSheetItem(item.id, { saved: !item.saved })}
+                                        className={compactActionClass}
+                                        title={item.saved ? 'Remove bookmark' : 'Bookmark question'}
+                                      >
+                                        {item.saved ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
+                                      </button>
+
+                                      <div className={`${compactActionClass} border-emerald-500/20 bg-emerald-500/8 text-emerald-500 dark:text-emerald-400`} title="Submission date">
+                                        <History className="h-4 w-4 pointer-events-none" />
+                                        <input
+                                          type="date"
+                                          value={item.submissionDate?.split('T')[0] || ''}
+                                          onChange={(e) => updateSubmissionDate(e.target.value)}
+                                          onClick={(e) => {
+                                            try {
+                                              (e.currentTarget as any).showPicker();
+                                            } catch (err) {}
+                                          }}
+                                          className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                                        />
+                                      </div>
+
+                                      <div className={`${compactActionClass} border-primary/20 bg-primary/8 text-primary`} title="Revision date">
+                                        <Calendar className="h-4 w-4 pointer-events-none" />
+                                        {(item.revisionPhase ?? 0) > 0 ? (
+                                          <span className="pointer-events-none absolute -right-1 -top-1 rounded-full bg-primary px-1.5 py-[2px] text-[8px] font-black leading-none text-white">
+                                            {item.revisionPhase}
+                                          </span>
+                                        ) : null}
+                                        <input
+                                          type="date"
+                                          value={item.revisionDate?.split('T')[0] || ''}
+                                          onChange={(e) => updateDsaSheetItem(item.id, { revisionDate: e.target.value })}
+                                          onClick={(e) => {
+                                            try {
+                                              (e.currentTarget as any).showPicker();
+                                            } catch (err) {}
+                                          }}
+                                          className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="hidden md:grid md:grid-cols-[44px_minmax(160px,2fr)_72px_72px_72px_110px_115px_56px_56px] md:items-center md:gap-3">
+                                  <button 
+                                    onClick={toggleComplete}
+                                    className="w-10 h-10 rounded-full border border-border/30 flex items-center justify-center text-muted-foreground hover:text-foreground"
+                                  >
+                                    {item.completed ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <Circle className="w-5 h-5" />}
+                                  </button>
+
+                                  <div>
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                      <p className={`text-[14px] md:text-[15px] font-semibold leading-[1.45] tracking-[-0.01em] ${item.completed ? 'text-muted-foreground line-through' : 'text-foreground'}`}>{item.title}</p>
+                                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.04em] ${item.source === 'admin' ? 'bg-muted/40 text-muted-foreground' : 'bg-primary/10 text-primary'}`}>
+                                        {item.source === 'admin' ? 'Suggested' : 'Custom'}
+                                      </span>
+                                    </div>
+                                    <div className="mt-2.5 flex gap-2">
+                                      <button onClick={() => openEdit(item)} className="rounded-xl border border-border/30 p-2 text-muted-foreground hover:text-foreground">
+                                        <Pencil className="w-4 h-4" />
+                                      </button>
+                                      <button onClick={() => deleteDsaSheetItem(item.id)} className="rounded-xl border border-border/30 p-2 text-muted-foreground hover:text-rose-500">
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex lg:justify-center">
+                                    {item.videoUrl ? (
+                                      <a
+                                        href={item.videoUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        title="Open video link"
+                                        className="w-10 h-10 rounded-full border border-red-500/30 bg-red-500/12 text-red-500 dark:text-red-300 hover:bg-red-500/18 flex items-center justify-center transition-colors"
+                                      >
+                                        <PlayCircle className="w-5 h-5" />
+                                      </a>
+                                    ) : (
+                                      <button onClick={() => openEdit(item)} className="w-10 h-10 rounded-full border border-dashed border-border/30 flex items-center justify-center text-muted-foreground hover:bg-muted/10">
+                                        <Plus className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                  </div>
+
+                                  <div className="flex lg:justify-center">
+                                    {item.practiceLinks[0] ? (
+                                      <a href={item.practiceLinks[0]} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full border border-border/30 flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors group/link overflow-hidden shadow-sm">
+                                        {(() => {
+                                          const logoUrl = getPlatformLogoUrl(item.practiceLinks[0]);
+                                          if (logoUrl) {
+                                            return (
+                                              <img 
+                                                src={logoUrl} 
+                                                alt="Platform" 
+                                                className="w-5 h-5 object-contain group-hover/link:scale-110 transition-transform" 
+                                                onError={(e) => {
+                                                  e.currentTarget.style.display = 'none';
+                                                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                                  if (fallback) fallback.style.display = 'block';
+                                                }}
+                                              />
+                                            );
+                                          }
+                                          return <Code2 className="w-5 h-5 text-muted-foreground group-hover/link:text-foreground" />;
+                                        })()}
+                                        <Code2 className="w-5 h-5 text-muted-foreground group-hover/link:text-foreground hidden" />
+                                      </a>
+                                    ) : (
+                                      <button onClick={() => openEdit(item)} className="w-10 h-10 rounded-full border border-dashed border-border/30 flex items-center justify-center text-muted-foreground">
+                                        <ExternalLink className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                  </div>
+
+                                  <div>
+                                    <span className={`inline-flex rounded-full px-2.5 py-1.5 text-[11px] font-bold ${DIFFICULTY_STYLE[item.difficulty]}`}>{item.difficulty}</span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                     <div className="relative group px-3 py-1.5 rounded-xl border border-emerald-500/10 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer flex items-center gap-2 min-w-[110px]">
+                                       <History className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 pointer-events-none shrink-0" />
+                                       <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 pointer-events-none whitespace-nowrap">
+                                         {formatDisplayDate(item.submissionDate) || 'Pending'}
+                                       </span>
+                                       <input 
+                                         type="date" 
+                                         value={item.submissionDate?.split('T')[0] || ''} 
+                                         onChange={(e) => updateSubmissionDate(e.target.value)}
+                                         onClick={(e) => {
+                                           try {
+                                             (e.currentTarget as any).showPicker();
+                                           } catch (err) {}
+                                         }}
+                                         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                                       />
+                                     </div>
+                                  </div>
+
+                                  <div className="flex flex-col gap-1.5 min-w-[110px]">
+                                       <div className="relative group px-3 py-1.5 rounded-xl border border-primary/10 bg-primary/5 hover:bg-primary/10 transition-all cursor-pointer flex items-center justify-between gap-2">
+                                         <div className="flex items-center gap-1.5 hidden lg:flex">
+                                           <Calendar className="w-3 h-3 text-primary pointer-events-none shrink-0" />
+                                           <span className="text-[10px] font-bold text-primary pointer-events-none whitespace-nowrap">
+                                             {formatDisplayDate(item.revisionDate) || '---'}
+                                           </span>
+                                         </div>
+                                         {(item.revisionPhase ?? 0) > 0 && (
+                                            <span className="text-[8.5px] font-black uppercase bg-primary/20 text-primary px-1.5 py-0.5 rounded-[4px] pointer-events-none shrink-0" title={`Mastery Level ${item.revisionPhase}`}>
+                                               LVL {item.revisionPhase}
+                                            </span>
+                                         )}
+                                         <input 
+                                           type="date" 
+                                           value={item.revisionDate?.split('T')[0] || ''} 
+                                           onChange={(e) => updateDsaSheetItem(item.id, { revisionDate: e.target.value })}
+                                           onClick={(e) => {
+                                             try {
+                                               (e.currentTarget as any).showPicker();
+                                             } catch (err) {}
+                                           }}
+                                           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                                         />
+                                       </div>
+                                  </div>
+
+                                  <div className="flex lg:justify-center">
+                                    <NoteButton item={item} onClick={() => setNoteItem(item)} />
+                                  </div>
+
+                                  <div>
+                                    <button onClick={() => updateDsaSheetItem(item.id, { saved: !item.saved })} className="w-10 h-10 rounded-xl border border-border/30 flex items-center justify-center text-muted-foreground hover:text-foreground">
+                                      {item.saved ? <BookmarkCheck className="w-5 h-5 text-primary" /> : <Bookmark className="w-5 h-5" />}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                       </div>
                     ));
                     })()}
