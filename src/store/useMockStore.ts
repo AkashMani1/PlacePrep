@@ -272,9 +272,15 @@ export const useMockStore = create<MockState>()(
           if (error) {
             console.warn('Standard deletion failed, attempting admin override:', error.message);
             try {
+              const { data: { session } } = await supabase.auth.getSession();
+              const token = session?.access_token;
+              
               const res = await fetch('/api/admin/db', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                  'Content-Type': 'application/json',
+                  ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify({ action: 'DELETE', table: 'mock_rooms', match: { id: roomId } })
               });
               if (!res.ok) {
@@ -533,16 +539,18 @@ export const useMockStore = create<MockState>()(
           if (reason) toast.error(reason);
         };
 
-        const { error } = await supabase.from('matchmaking_queue').upsert([{
-          user_id: userId === 'anon' ? crypto.randomUUID() : userId,
-          display_name: displayName,
-          role: 'interviewee',
-          company: 'General',
-          difficulty: 'Medium',
-        }], { onConflict: 'user_id' });
+        const finalUserId = userId === 'anon' ? crypto.randomUUID() : userId;
+
+        const { data: newRoomId, error } = await supabase.rpc('match_peer', {
+          p_user_id: finalUserId,
+          p_display_name: displayName,
+          p_company: 'General',
+          p_difficulty: 'Medium',
+          p_type: 'Technical (DSA)'
+        });
 
         if (error) {
-          console.warn('[Matchmaking] Queue insert failed:', error.code, error.message);
+          console.warn('[Matchmaking] RPC failed:', error.code, error.message);
           setDbHealth(false);
           await cleanupAndReset();
           toast.error(
@@ -550,6 +558,41 @@ export const useMockStore = create<MockState>()(
               ? 'Database not ready — run schema migrations first.'
               : `Matchmaking unavailable: ${error.message}`
           );
+          return;
+        }
+
+        if (newRoomId) {
+          // A match was found instantly
+          if (timeoutId) clearTimeout(timeoutId);
+          set({ isMatchmaking: false, matchmakingStatus: '' });
+          // Fetch the room data to set it as active
+          const { data: roomData } = await supabase
+            .from('mock_rooms')
+            .select('*, room_participants(*)')
+            .eq('id', newRoomId)
+            .single();
+
+          if (roomData) {
+            set({
+              activeRoom: {
+                id: roomData.id,
+                title: roomData.title,
+                type: roomData.type,
+                company: roomData.company || 'General',
+                difficulty: roomData.difficulty,
+                duration: roomData.duration || '45m',
+                participants: (roomData.room_participants || []).map((p: any) => ({
+                  userId: p.user_id,
+                  displayName: p.display_name || 'Anonymous',
+                  role: p.role,
+                  isOnline: p.is_online ?? true,
+                })),
+                rating: 0,
+                status: roomData.status,
+              } as MockRoom,
+            });
+            toast.success('Match found! Entering interview room...');
+          }
           return;
         }
 
