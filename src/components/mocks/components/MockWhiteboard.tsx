@@ -4,15 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Tldraw, createTLStore, defaultShapeUtils } from 'tldraw';
 import 'tldraw/tldraw.css';
 
-// ── Production Yjs signaling servers (ordered by priority) ────────────────
-// The first responsive server wins. Public servers are fallbacks only.
-const SIGNALING_SERVERS = [
-  // Add your dedicated Hocuspocus/y-webrtc server here when deployed:
-  // process.env.NEXT_PUBLIC_YJS_SERVER ? `wss://${process.env.NEXT_PUBLIC_YJS_SERVER}` : null,
-  // Public fallbacks (use until dedicated server is deployed):
-  'wss://signaling.yjs.dev',
-  'wss://y-webrtc-signaling-eu.onrender.com',
-].filter(Boolean) as string[];
+import { supabase } from '@/lib/supabase';
 
 interface MockWhiteboardProps {
   roomId: string;
@@ -33,30 +25,17 @@ export function MockWhiteboard({ roomId }: MockWhiteboardProps) {
     const initSync = async () => {
       try {
         const Y = await import('yjs');
-        const { WebrtcProvider } = await import('y-webrtc');
+        const { SupabaseProvider } = await import('@/lib/y-supabase');
 
         docRef.current = new Y.Doc();
-
-        providerRef.current = new WebrtcProvider(
-          `placeprep-whiteboard-${roomId}`,
-          docRef.current,
-          {
-            signaling: SIGNALING_SERVERS,
-            password: roomId, // Room-scoped password for basic isolation
-          }
-        );
-
-        providerRef.current.on('synced', ({ synced }: { synced: boolean }) => {
-          if (!destroyed) setIsConnected(synced);
+        
+        const channel = supabase.channel(`whiteboard:${roomId}`, {
+          config: { broadcast: { ack: false, self: false } }
         });
 
-        providerRef.current.awareness.on('change', () => {
-          if (!destroyed) {
-            const states = providerRef.current.awareness.getStates();
-            setPeerCount(states.size);
-          }
-        });
-
+        providerRef.current = new SupabaseProvider(channel, docRef.current);
+        
+        // Assume connected once initialized since Supabase manages connection state
         setIsConnected(true);
       } catch (err) {
         console.warn('[Whiteboard] Sync init failed (offline mode):', err);

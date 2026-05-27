@@ -114,27 +114,13 @@ export function InterviewRoom() {
   useEffect(() => {
     if (!activeRoom || !isMounted) return;
 
-    // Production-ready signaling servers (ordered by priority)
-    const signalingServers = [
-      // Custom server (set NEXT_PUBLIC_YJS_SERVER for enterprise deployment)
-      ...(process.env.NEXT_PUBLIC_YJS_SERVER ? [`wss://${process.env.NEXT_PUBLIC_YJS_SERVER}`] : []),
-      // Hosted fallbacks
-      'wss://signaling.yjs.dev',
-      'wss://y-webrtc-signaling-eu.onrender.com',
-    ];
-
-    import('yjs').then(Y => {
+    import('yjs').then(async (Y) => {
       docRef.current = new Y.Doc();
-      import('y-webrtc').then(({ WebrtcProvider }) => {
-        providerRef.current = new WebrtcProvider(
-          `placeprep-editor-${activeRoom.id}`,
-          docRef.current,
-          {
-            signaling: signalingServers,
-            password: activeRoom.id,
-          }
-        );
-      }).catch(e => console.warn('[YJS] WebRTC provider init failed:', e));
+      const { SupabaseProvider } = await import('@/lib/y-supabase');
+      const channel = supabase.channel(`editor:${activeRoom.id}`, {
+        config: { broadcast: { ack: false, self: false } }
+      });
+      providerRef.current = new SupabaseProvider(channel, docRef.current);
     });
 
     return () => {
