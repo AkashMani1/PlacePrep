@@ -60,13 +60,55 @@ function LiveKitVideoSidebar() {
   );
 }
 
+function CustomLiveKitControls({ onLeave }: { onLeave: () => void }) {
+  const { localParticipant, isCameraEnabled, isMicrophoneEnabled, isScreenShareEnabled } = useLocalParticipant();
+
+  const toggleMic = useCallback(() => {
+    localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled);
+  }, [localParticipant, isMicrophoneEnabled]);
+
+  const toggleVideo = useCallback(() => {
+    localParticipant.setCameraEnabled(!isCameraEnabled);
+  }, [localParticipant, isCameraEnabled]);
+
+  const toggleScreenShare = useCallback(() => {
+    localParticipant.setScreenShareEnabled(!isScreenShareEnabled);
+  }, [localParticipant, isScreenShareEnabled]);
+
+  return (
+    <div className="mt-auto flex items-center justify-between bg-white/5 p-2 rounded-[20px] border border-white/10 shrink-0 backdrop-blur-xl">
+      <button
+        onClick={toggleMic}
+        className={`flex-1 aspect-[4/3] rounded-[14px] flex items-center justify-center transition-all duration-300 mx-0.5 ${isMicrophoneEnabled ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
+      >
+        {isMicrophoneEnabled ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+      </button>
+      <button
+        onClick={toggleVideo}
+        className={`flex-1 aspect-[4/3] rounded-[14px] flex items-center justify-center transition-all duration-300 mx-0.5 ${isCameraEnabled ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
+      >
+        {isCameraEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+      </button>
+      <button
+        onClick={toggleScreenShare}
+        className={`flex-1 aspect-[4/3] rounded-[14px] flex items-center justify-center transition-all duration-300 mx-0.5 ${isScreenShareEnabled ? 'bg-primary/20 text-primary hover:bg-primary/30' : 'bg-white/10 text-white hover:bg-white/15'}`}
+      >
+        {isScreenShareEnabled ? <ScreenShareOff className="w-4 h-4" /> : <ScreenShare className="w-4 h-4" />}
+      </button>
+      <button
+        onClick={onLeave}
+        className="flex-1 aspect-[4/3] rounded-[14px] bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-all duration-300 mx-0.5 shadow-lg shadow-rose-500/20"
+      >
+        <X className="w-5 h-5" />
+      </button>
+    </div>
+  );
+}
+
 export function InterviewRoom() {
   const router = useRouter();
   const { user } = useAuth();
   const { activeRoom, leaveRoom } = useMockStore();
-  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
-  const [isMicEnabled, setIsMicEnabled] = useState(true);
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [activeTab, setActiveTab] = useState<'editor' | 'whiteboard'>('editor');
   const [isMounted, setIsMounted] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -253,13 +295,6 @@ export function InterviewRoom() {
     const binding = new MonacoBinding(type, editor.getModel(), new Set([editor]), providerRef.current.awareness);
   };
 
-  // ── Camera/Mic Toggle ───────────────────────────────────────────────
-  const toggleVideo = useCallback(() => setIsVideoEnabled(v => !v), []);
-  const toggleMic = useCallback(() => setIsMicEnabled(m => !m), []);
-
-  // ── Screen Sharing ──────────────────────────────────────────────────
-  const toggleScreenShare = useCallback(() => setIsScreenSharing(s => !s), []);
-
   // ── Chat ────────────────────────────────────────────────────────────
   const sendMessage = useCallback(() => {
     if (!chatInput.trim()) return;
@@ -330,48 +365,21 @@ export function InterviewRoom() {
         </div>
 
         {/* LiveKit Video Grid */}
-        <div className="flex-1 w-full relative min-h-0 rounded-[20px] overflow-hidden">
+        <div className="flex-1 w-full relative min-h-0 flex flex-col gap-2">
           {liveKitUrl && lkToken && (
             <LiveKitRoom
-              video={isVideoEnabled}
-              audio={isMicEnabled}
-              screen={isScreenSharing}
+              video={true}
+              audio={true}
+              screen={false}
               token={lkToken}
               serverUrl={liveKitUrl}
               connect={true}
-              className="w-full h-full flex flex-col"
+              className="w-full h-full flex flex-col gap-2"
             >
               <LiveKitVideoSidebar />
+              <CustomLiveKitControls onLeave={handleLeave} />
             </LiveKitRoom>
           )}
-        </div>
-
-        {/* Floating Dock Controls */}
-        <div className="mt-auto flex items-center justify-between bg-white/5 p-2 rounded-[20px] border border-white/10 shrink-0 backdrop-blur-xl">
-          <button
-            onClick={toggleMic}
-            className={`flex-1 aspect-[4/3] rounded-[14px] flex items-center justify-center transition-all duration-300 mx-0.5 ${isMicEnabled ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
-          >
-            {isMicEnabled ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-          </button>
-          <button
-            onClick={toggleVideo}
-            className={`flex-1 aspect-[4/3] rounded-[14px] flex items-center justify-center transition-all duration-300 mx-0.5 ${isVideoEnabled ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
-          >
-            {isVideoEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
-          </button>
-          <button
-            onClick={toggleScreenShare}
-            className={`flex-1 aspect-[4/3] rounded-[14px] flex items-center justify-center transition-all duration-300 mx-0.5 ${isScreenSharing ? 'bg-primary/20 text-primary hover:bg-primary/30' : 'bg-white/10 text-white hover:bg-white/15'}`}
-          >
-            {isScreenSharing ? <ScreenShareOff className="w-4 h-4" /> : <ScreenShare className="w-4 h-4" />}
-          </button>
-          <button
-            onClick={handleLeave}
-            className="flex-1 aspect-[4/3] rounded-[14px] bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-all duration-300 mx-0.5 shadow-lg shadow-rose-500/20"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
       </aside>
 
