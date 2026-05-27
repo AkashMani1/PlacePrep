@@ -34,21 +34,21 @@ function LiveKitVideoSidebar() {
   ], { onlySubscribed: false });
 
   return (
-    <div className="flex flex-col gap-4 w-full h-full overflow-y-auto hide-scrollbar">
+    <div className="flex flex-col gap-4 w-full h-full overflow-y-auto custom-scrollbar p-1">
       {tracks.length === 0 && (
-        <div className="relative aspect-video rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+        <div className="relative aspect-video rounded-[16px] bg-white/5 border border-white/5 flex items-center justify-center backdrop-blur-md">
           <div className="animate-pulse flex flex-col items-center">
-            <Video className="w-8 h-8 text-white/20 mb-2" />
-            <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Connecting...</p>
+            <Video className="w-6 h-6 text-white/20 mb-2" />
+            <p className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-bold">Connecting...</p>
           </div>
         </div>
       )}
       {tracks.map((trackRef) => (
-        <div key={trackRef.participant.identity + trackRef.source} className="relative aspect-video rounded-2xl md:rounded-3xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl">
+        <div key={trackRef.participant.identity + trackRef.source} className="relative aspect-video rounded-[16px] bg-[#050505] border border-white/10 overflow-hidden shadow-2xl ring-1 ring-white/5">
           <ParticipantTile {...trackRef} className="w-full h-full object-cover" />
-          <div className="absolute bottom-3 left-3 flex items-center gap-2">
-            <div className="px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10">
-              <span className="text-[10px] font-bold text-white uppercase tracking-widest">
+          <div className="absolute bottom-2 left-2 flex items-center gap-2">
+            <div className="px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 shadow-lg">
+              <span className="text-[9px] font-black text-white uppercase tracking-wider">
                 {trackRef.participant.name || trackRef.participant.identity} {trackRef.source === Track.Source.ScreenShare ? '(Screen)' : ''}
               </span>
             </div>
@@ -329,44 +329,19 @@ export function InterviewRoom() {
       toast.error('Write some code before submitting.');
       return;
     }
-    setCodeOutput('Code submitted successfully. In a live session, this would be evaluated against test cases.');
-    toast.success('Code submitted!');
-    chatChannelRef.current?.send({ 
-      type: 'broadcast', 
-      event: 'code_submit', 
-      payload: { code, senderName: user?.user_metadata?.full_name || 'You' } 
-    });
-  }, [user]);
-
-  // ── Leave & Cleanup ─────────────────────────────────────────────────
-  const handleLeave = useCallback(() => {
-    localStreamRef.current?.getTracks().forEach(t => t.stop());
-    providerRef.current?.destroy();
-    docRef.current?.destroy();
-    leaveRoom();
-    router.push('/mockhub/arena');
-  }, [leaveRoom, router]);
-
-  if (!activeRoom || !isMounted) return null;
-
-  // Dynamically generate participants based on WebRTC state
-  const participants = [
-    { displayName: user?.user_metadata?.full_name || 'You', role: 'Participant', isOnline: true },
-    ...(remoteStream ? [{ displayName: peerName, role: 'Participant', isOnline: true }] : [])
-  ];
-
   return (
-    <div className="fixed inset-0 bg-[#050505] z-[9999] flex flex-col md:flex-row overflow-hidden font-sans mobile-app-window md:mobile-app-window-none">
-      {/* Top/Left: Video Feeds */}
-      <aside className="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/5 bg-black/40 backdrop-blur-3xl flex flex-col p-4 md:p-6 gap-4 md:gap-6 flex-shrink-0 md:h-full overflow-y-auto max-h-[40vh] md:max-h-none hide-scrollbar">
-        <div className="flex items-center justify-between mb-2 md:mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-white">Live Session</span>
+    <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-[#050505] to-[#050505] z-[9999] flex flex-col md:flex-row font-sans p-2 md:p-4 gap-2 md:gap-4 overflow-hidden">
+      
+      {/* Left Sidebar: Video & Controls */}
+      <aside className="w-full md:w-[320px] rounded-[24px] md:rounded-[32px] border border-white/10 bg-black/40 backdrop-blur-3xl flex flex-col p-4 md:p-5 gap-4 shadow-2xl flex-shrink-0 md:h-full overflow-hidden">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/90">Live Session</span>
           </div>
           <button
             onClick={handleLeave}
-            className="p-2 rounded-lg bg-white/5 text-muted-foreground hover:text-white hover:bg-rose-500/20 transition-all"
+            className="p-2 rounded-xl bg-white/5 border border-white/5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/20 transition-all"
             aria-label="Leave room"
           >
             <X className="w-4 h-4" />
@@ -374,7 +349,7 @@ export function InterviewRoom() {
         </div>
 
         {/* LiveKit Video Grid */}
-        <div className="flex-1 w-full relative min-h-0">
+        <div className="flex-1 w-full relative min-h-0 rounded-[20px] overflow-hidden">
           {liveKitUrl && lkToken && (
             <LiveKitRoom
               video={isVideoEnabled}
@@ -390,59 +365,58 @@ export function InterviewRoom() {
           )}
         </div>
 
-        {/* Controls */}
-        <div className="mt-auto grid grid-cols-4 gap-2 md:gap-3 bg-white/5 p-2 md:p-4 rounded-[16px] md:rounded-[32px] border border-white/10 shrink-0">
+        {/* Floating Dock Controls */}
+        <div className="mt-auto flex items-center justify-between bg-white/5 p-2 rounded-[20px] border border-white/10 shrink-0 backdrop-blur-xl">
           <button
             onClick={toggleMic}
-            className={`aspect-square rounded-xl md:rounded-2xl flex items-center justify-center transition-all ${isMicEnabled ? 'bg-white/10 text-white' : 'bg-rose-500 text-white'}`}
-            aria-label={isMicEnabled ? 'Mute microphone' : 'Unmute microphone'}
+            className={`flex-1 aspect-[4/3] rounded-[14px] flex items-center justify-center transition-all duration-300 mx-0.5 ${isMicEnabled ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
           >
-            {isMicEnabled ? <Mic className="w-4 h-4 md:w-5 md:h-5" /> : <MicOff className="w-4 h-4 md:w-5 md:h-5" />}
+            {isMicEnabled ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
           </button>
           <button
             onClick={toggleVideo}
-            className={`aspect-square rounded-xl md:rounded-2xl flex items-center justify-center transition-all ${isVideoEnabled ? 'bg-white/10 text-white' : 'bg-rose-500 text-white'}`}
-            aria-label={isVideoEnabled ? 'Disable camera' : 'Enable camera'}
+            className={`flex-1 aspect-[4/3] rounded-[14px] flex items-center justify-center transition-all duration-300 mx-0.5 ${isVideoEnabled ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30'}`}
           >
-            {isVideoEnabled ? <Video className="w-4 h-4 md:w-5 md:h-5" /> : <VideoOff className="w-4 h-4 md:w-5 md:h-5" />}
+            {isVideoEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
           </button>
           <button
             onClick={toggleScreenShare}
-            className={`aspect-square rounded-xl md:rounded-2xl flex items-center justify-center transition-all ${isScreenSharing ? 'bg-primary text-white' : 'bg-white/10 text-white'}`}
-            aria-label={isScreenSharing ? 'Stop screen sharing' : 'Start screen sharing'}
+            className={`flex-1 aspect-[4/3] rounded-[14px] flex items-center justify-center transition-all duration-300 mx-0.5 ${isScreenSharing ? 'bg-primary/20 text-primary hover:bg-primary/30' : 'bg-white/10 text-white hover:bg-white/15'}`}
           >
-            {isScreenSharing ? <ScreenShareOff className="w-4 h-4 md:w-5 md:h-5" /> : <ScreenShare className="w-4 h-4 md:w-5 md:h-5" />}
+            {isScreenSharing ? <ScreenShareOff className="w-4 h-4" /> : <ScreenShare className="w-4 h-4" />}
           </button>
           <button
             onClick={handleLeave}
-            className="aspect-square rounded-xl md:rounded-2xl bg-rose-500/20 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"
-            aria-label="End call"
+            className="flex-1 aspect-[4/3] rounded-[14px] bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-all duration-300 mx-0.5 shadow-lg shadow-rose-500/20"
           >
-            <X className="w-4 h-4 md:w-5 md:h-5" />
+            <X className="w-5 h-5" />
           </button>
         </div>
       </aside>
 
-      {/* Center/Bottom: Workspace */}
-      <main className="flex-1 flex flex-col relative min-h-[50vh]">
-        <header className="h-12 md:h-16 border-b border-white/5 flex items-center justify-between px-2 md:px-8 bg-black/20 shrink-0 overflow-x-auto hide-scrollbar">
-          <div className="flex items-center gap-3 md:gap-4">
-            <button
-              onClick={() => setActiveTab('editor')}
-              className={`flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'editor' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-white'}`}
-            >
-              <Code2 className="w-4 h-4" /> Code
-            </button>
-            <button
-              onClick={() => setActiveTab('whiteboard')}
-              className={`flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'whiteboard' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-white'}`}
-            >
-              <PenTool className="w-4 h-4" /> Board
-            </button>
+      {/* Center Workspace */}
+      <main className="flex-1 flex flex-col relative rounded-[24px] md:rounded-[32px] border border-white/10 bg-[#0A0A0A]/80 backdrop-blur-2xl shadow-2xl overflow-hidden min-h-[50vh]">
+        <header className="h-14 md:h-16 border-b border-white/5 flex items-center justify-between px-3 md:px-6 bg-white/5 shrink-0">
+          <div className="flex items-center gap-3">
+            {/* Pill-shaped Tabs */}
+            <div className="flex items-center p-1 bg-black/40 rounded-xl border border-white/5">
+              <button
+                onClick={() => setActiveTab('editor')}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'editor' ? 'bg-white/10 text-white shadow-sm' : 'text-muted-foreground hover:text-white'}`}
+              >
+                <Code2 className="w-3.5 h-3.5" /> Code
+              </button>
+              <button
+                onClick={() => setActiveTab('whiteboard')}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'whiteboard' ? 'bg-white/10 text-white shadow-sm' : 'text-muted-foreground hover:text-white'}`}
+              >
+                <PenTool className="w-3.5 h-3.5" /> Board
+              </button>
+            </div>
             <select
               value={language}
               onChange={e => setLanguage(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold text-white focus:outline-none"
+              className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 text-[10px] font-bold text-white focus:outline-none focus:border-white/20 transition-all appearance-none cursor-pointer"
             >
               <option value="javascript">JavaScript</option>
               <option value="python">Python</option>
@@ -451,129 +425,118 @@ export function InterviewRoom() {
             </select>
           </div>
 
-          <div className="flex items-center gap-4 md:gap-6">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="flex items-center gap-2">
               {isHost && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <button 
                   onClick={() => {
                     const next = !peerHasWriteAccess;
                     setPeerHasWriteAccess(next);
-                    chatChannelRef.current?.send({ 
-                      type: 'broadcast', 
-                      event: 'write_access_change', 
-                      payload: { granted: next } 
-                    });
+                    chatChannelRef.current?.send({ type: 'broadcast', event: 'write_access_change', payload: { granted: next } });
                     toast.success(`Peer write access ${next ? 'granted' : 'revoked'}`);
                   }}
-                  className={`hidden sm:flex text-[10px] uppercase tracking-widest font-black border-white/20 transition-all ${peerHasWriteAccess ? 'bg-amber-500/20 text-amber-500 hover:bg-amber-500/30' : 'bg-primary/20 text-primary hover:bg-primary/30'}`}
+                  className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[9px] uppercase tracking-widest font-black transition-all duration-300 ${peerHasWriteAccess ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20' : 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20'}`}
                 >
+                  <div className={`w-1.5 h-1.5 rounded-full ${peerHasWriteAccess ? 'bg-amber-500' : 'bg-primary'} animate-pulse`} />
                   {peerHasWriteAccess ? 'Revoke Peer Write' : 'Allow Peer Write'}
-                </Button>
+                </button>
               )}
-              {/* Session Timer */}
-              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
-                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="text-[10px] font-black tabular-nums text-muted-foreground uppercase tracking-widest">
+              {/* Timer */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/40 border border-white/5">
+                <Clock className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-black tabular-nums text-white/80 uppercase tracking-widest">
                   {String(Math.floor(sessionSeconds / 60)).padStart(2, '0')}:{String(sessionSeconds % 60).padStart(2, '0')}
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-
-              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500 hidden md:inline">Connected</span>
-            </div>
-            <Button onClick={handleCodeSubmit} size="sm" className="bg-emerald-600 text-[10px]">
-              <Play className="w-3 h-3 mr-1" /> Run
-            </Button>
+            
+            <button onClick={handleCodeSubmit} className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20">
+              <Play className="w-3 h-3" /> Run
+            </button>
           </div>
         </header>
 
-        <div className="flex-1 w-full relative h-[calc(100vh-64px)] bg-[#1e1e1e]">
+        <div className="flex-1 w-full relative">
           {activeTab === 'editor' ? (
-            <Editor
-              height="100%"
-              language={language}
-              theme="vs-dark"
-              options={{
-                minimap: { enabled: false },
-                fontSize: 14,
-                padding: { top: 24 },
-                readOnly: isReadonly,
-              }}
-              onMount={handleEditorDidMount}
-            />
+            <div className="absolute inset-0 pt-4">
+              <Editor
+                height="100%"
+                language={language}
+                theme="vs-dark"
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  padding: { top: 0 },
+                  readOnly: isReadonly,
+                  scrollBeyondLastLine: false,
+                  smoothScrolling: true,
+                  cursorBlinking: "smooth",
+                }}
+                onMount={handleEditorDidMount}
+              />
+            </div>
           ) : (
             <MockWhiteboard roomId={activeRoom?.id || ''} isReadonly={isReadonly} />
           )}
         </div>
       </main>
 
-      {/* Right: Question & Chat */}
-      <aside className="hidden lg:flex w-80 xl:w-96 border-l border-white/5 bg-black/40 backdrop-blur-3xl flex-col">
-        <div className="p-6 xl:p-8 space-y-6 xl:space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+      {/* Right Sidebar: Chat & Metadata */}
+      <aside className="hidden lg:flex w-[320px] rounded-[32px] border border-white/10 bg-black/40 backdrop-blur-3xl flex-col overflow-hidden shadow-2xl">
+        <div className="p-6 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
           <div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-4">Interview Problem</h3>
-            <h2 className="text-lg xl:text-xl font-bold text-white leading-tight mb-4">{activeRoom.title || 'Mock Interview Session'}</h2>
+            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40 mb-3">Problem Statement</h3>
+            <h2 className="text-lg font-bold text-white leading-tight mb-4">{activeRoom.title || 'Mock Interview Session'}</h2>
             
-            {/* Room Metadata */}
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                {activeRoom.company || 'General'}
-              </span>
-              <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                {activeRoom.type || 'Technical'}
-              </span>
-              <span className={`px-2.5 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest ${
+            <div className="flex flex-wrap items-center gap-2 mb-5">
+              <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-[9px] font-black text-white/60 uppercase tracking-widest">{activeRoom.company || 'General'}</span>
+              <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-[9px] font-black text-white/60 uppercase tracking-widest">{activeRoom.type || 'Technical'}</span>
+              <span className={`px-2.5 py-1 rounded-lg border text-[9px] font-black uppercase tracking-widest ${
                 activeRoom.difficulty === 'Hard' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
                 activeRoom.difficulty === 'Medium' ? 'bg-primary/10 text-primary border-primary/20' :
                 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-              }`}>
-                {activeRoom.difficulty || 'Medium'}
-              </span>
+              }`}>{activeRoom.difficulty || 'Medium'}</span>
             </div>
 
-            <div className="p-4 xl:p-6 rounded-2xl xl:rounded-3xl bg-white/5 border border-white/10 text-sm font-medium text-muted-foreground leading-relaxed">
-              Discuss the problem with your partner using the code editor. Use the chat below for text communication.
+            <div className="p-4 rounded-[20px] bg-white/5 border border-white/5 text-xs font-medium text-white/60 leading-relaxed">
+              Collaborate on this problem in real-time. Use the editor to code and the board to diagram.
             </div>
           </div>
 
           <div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-4">Participants</h3>
-            <div className="space-y-3">
+            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40 mb-3">Participants</h3>
+            <div className="space-y-2">
               {participants.map((p, i) => (
-                <div key={i} className="flex items-center justify-between p-3 xl:p-4 rounded-xl xl:rounded-2xl bg-white/5 border border-white/10">
+                <div key={i} className="flex items-center justify-between p-3 rounded-[16px] bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center shadow-inner">
                       <span className="text-[10px] font-bold text-primary">{p.displayName[0]}</span>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">{p.displayName}</p>
-                      <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{p.role}</p>
+                      <p className="text-[11px] font-bold text-white/90">{p.displayName}</p>
+                      <p className="text-[8px] font-black uppercase tracking-widest text-white/40">{p.role}</p>
                     </div>
                   </div>
-                  <div className={`w-2 h-2 rounded-full ${p.isOnline ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                  <div className={`w-1.5 h-1.5 rounded-full ${p.isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}`} />
                 </div>
               ))}
             </div>
           </div>
 
           {/* Chat Messages */}
-          <div className="space-y-3">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Chat</h3>
-            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+          <div className="space-y-3 flex-1 flex flex-col">
+            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40">Live Chat</h3>
+            <div className="flex-1 min-h-[150px] space-y-2 overflow-y-auto custom-scrollbar pb-2">
               {chatMessages.length === 0 ? (
-                <p className="text-[10px] font-medium text-muted-foreground/40 text-center py-4">No messages yet</p>
+                <p className="text-[10px] font-medium text-white/30 text-center py-8">It's quiet here...</p>
               ) : (
                 chatMessages.map(msg => (
-                  <div key={msg.id} className="p-3 rounded-xl bg-white/5 border border-white/5">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] font-black text-primary uppercase">{msg.sender}</span>
-                      <span className="text-[8px] font-medium text-muted-foreground">{msg.timestamp}</span>
+                  <div key={msg.id} className="p-3 rounded-[16px] bg-white/5 border border-white/5">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[9px] font-black text-primary uppercase tracking-wider">{msg.sender}</span>
+                      <span className="text-[8px] font-medium text-white/30">{msg.timestamp}</span>
                     </div>
-                    <p className="text-xs font-medium text-white">{msg.text}</p>
+                    <p className="text-[11px] font-medium text-white/80 leading-relaxed">{msg.text}</p>
                   </div>
                 ))
               )}
@@ -581,19 +544,20 @@ export function InterviewRoom() {
           </div>
         </div>
 
-        <div className="p-4 xl:p-6 border-t border-white/5 bg-black/20">
-          <div className="relative">
+        {/* Chat Input */}
+        <div className="p-4 bg-white/5 backdrop-blur-xl border-t border-white/5 shrink-0">
+          <div className="relative group">
             <input
               type="text"
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
-              placeholder="Send a message..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl xl:rounded-2xl px-4 xl:px-6 py-3 xl:py-4 text-xs font-medium text-white focus:outline-none focus:border-primary transition-all pr-12"
+              placeholder="Message..."
+              className="w-full bg-black/40 border border-white/10 rounded-[16px] px-4 py-3 text-[11px] font-medium text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all pr-12 placeholder:text-white/20"
             />
             <button
               onClick={sendMessage}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-white transition-colors p-1"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-xl bg-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300"
               aria-label="Send message"
             >
               <Send className="w-4 h-4" />
