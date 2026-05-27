@@ -115,7 +115,7 @@ export function MockArena() {
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-black tracking-tight text-foreground">{room.type || room.title}</h3>
+                        <h3 className="text-lg font-black tracking-tight text-foreground">{room.title || room.type}</h3>
                         <span className="px-2 py-0.5 rounded-md bg-black/40 text-[9px] font-black text-muted-foreground uppercase tracking-widest border border-white/5">
                           {room.company || 'General'}
                         </span>
