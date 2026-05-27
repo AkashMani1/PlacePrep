@@ -290,6 +290,7 @@ export function InterviewRoom() {
 
 
   const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor; // ← store ref so getValue() works in submit
     if (!isMounted || !docRef.current || !providerRef.current) return;
     const type = docRef.current.getText('monaco');
     const binding = new MonacoBinding(type, editor.getModel(), new Set([editor]), providerRef.current.awareness);
@@ -315,7 +316,8 @@ export function InterviewRoom() {
 
   // ── Code Submit ─────────────────────────────────────────────────────
   const handleCodeSubmit = useCallback(() => {
-    const code = editorRef.current?.getValue() || '';
+    // Primary: read from Monaco editor; Fallback: read from Yjs doc
+    const code = editorRef.current?.getValue?.() || docRef.current?.getText('monaco')?.toString() || '';
     if (!code.trim()) {
       toast.error('Write some code before submitting.');
       return;
