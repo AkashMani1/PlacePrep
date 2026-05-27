@@ -129,7 +129,7 @@ export function InterviewRoom() {
   const [peerName, setPeerName] = useState('Peer');
   const [peerHasWriteAccess, setPeerHasWriteAccess] = useState(false);
 
-  const isHost = activeRoom?.host_id === user?.id;
+  const isHost = activeRoom?.created_by === user?.id || activeRoom?.host_id === user?.id;
   const isReadonly = !isHost && !peerHasWriteAccess;
 
   useEffect(() => { setIsMounted(true); }, []);
