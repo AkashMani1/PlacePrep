@@ -37,6 +37,9 @@ async function ensureSeedData() {
   const seedRecords = buildSeedAdminRecords();
   const insertResult = await supabaseAdmin.from(TABLE_NAME).insert(seedRecords);
   if (insertResult.error) {
+    if (insertResult.error.message?.toLowerCase().includes('duplicate key value')) {
+      return;
+    }
     throw insertResult.error;
   }
 }
