@@ -218,7 +218,7 @@ export const useMockStore = create<MockState>()(
             .select('*, room_participants(*)')
             .eq('status', 'waiting')
             .order('created_at', { ascending: false })
-            .limit(20);
+            .limit(50);
 
           setDbHealth(!error);
           set({ availableRooms: (data as any) ?? [], isLoadingRooms: false });

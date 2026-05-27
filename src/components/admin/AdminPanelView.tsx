@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { isAdminEmail } from '@/lib/admin';
-import { Lock, Plus, Edit2, Trash2, Save, X, RefreshCw } from 'lucide-react';
+import { Lock, Plus, Edit2, Trash2, Save, X, RefreshCw, ChevronLeft, Building2, Folder, FileQuestion } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ModalPortal from '@/components/ui/ModalPortal';
 
@@ -26,7 +26,14 @@ export default function AdminPanelView() {
   const { user, session, isLoading: authLoading } = useAuth();
   const accessToken = session?.access_token;
   
-  const [activeTab, setActiveTab] = useState<'assessments' | 'questions' | 'global'>('assessments');
+  // Top Level Tabs
+  const [activeTab, setActiveTab] = useState<'hub' | 'global'>('hub');
+  
+  // Mock Hub Hierarchical State (Company -> Assignment -> Question)
+  const [hubView, setHubView] = useState<'companies' | 'assignments' | 'questions'>('companies');
+  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null);
+
   const [assessments, setAssessments] = useState<any[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,7 +42,6 @@ export default function AdminPanelView() {
   // Edit/Add State
   const [editingAssessment, setEditingAssessment] = useState<any | null>(null);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
-  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>('');
   
   // Global Content State
   const [activeGlobalTab, setActiveGlobalTab] = useState<'dsa' | 'aptitude' | 'kb'>('dsa');
@@ -100,12 +106,12 @@ export default function AdminPanelView() {
   }, [accessToken, user?.email]);
 
   useEffect(() => {
-    if (activeTab === 'questions' && selectedAssessmentId) {
+    if (activeTab === 'hub' && hubView === 'questions' && selectedAssessmentId) {
       loadQuestions(selectedAssessmentId);
     } else if (activeTab === 'global') {
       loadGlobalQuestions();
     }
-  }, [activeTab, selectedAssessmentId, activeGlobalTab]);
+  }, [activeTab, hubView, selectedAssessmentId, activeGlobalTab]);
 
   const loadGlobalQuestions = async () => {
     setLoading(true);
@@ -141,6 +147,7 @@ export default function AdminPanelView() {
     try {
       await dbCall(accessToken, 'DELETE', 'assessments', undefined, { id });
       loadAssessments();
+      // If we deleted the only assessment in a company, we might want to navigate back. Handled naturally by empty list.
     } catch (err: any) {
       alert(err.message);
     }
@@ -163,7 +170,7 @@ export default function AdminPanelView() {
       }
       setEditingQuestion(null);
       if (activeTab === 'global') loadGlobalQuestions();
-      else loadQuestions(selectedAssessmentId);
+      else loadQuestions(selectedAssessmentId!);
     } catch (err: any) {
       alert(err.message);
     }
@@ -174,11 +181,28 @@ export default function AdminPanelView() {
     try {
       await dbCall(accessToken, 'DELETE', 'questions', undefined, { id });
       if (activeTab === 'global') loadGlobalQuestions();
-      else loadQuestions(selectedAssessmentId);
+      else loadQuestions(selectedAssessmentId!);
     } catch (err: any) {
       alert(err.message);
     }
   };
+
+  const handleCreateCompany = () => {
+    const newCompanyName = prompt('Enter new company name:');
+    if (newCompanyName && newCompanyName.trim()) {
+      setSelectedCompany(newCompanyName.trim());
+      setHubView('assignments');
+    }
+  };
+
+  // Derive unique companies from assessments
+  const companies = Array.from(new Set(
+    assessments.flatMap(a => Array.isArray(a.company_tags) ? a.company_tags : [])
+  )).sort();
+
+  const companyAssessments = assessments.filter(a => 
+    Array.isArray(a.company_tags) && a.company_tags.includes(selectedCompany)
+  );
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -189,143 +213,225 @@ export default function AdminPanelView() {
 
       {error && <div className="bg-red-500/10 text-red-500 p-4 rounded-xl text-sm font-bold">{error}</div>}
 
-      {/* Tabs */}
+      {/* Main Tabs */}
       <div className="flex gap-2 border-b border-border/30 pb-4 overflow-x-auto">
         <button
-          onClick={() => setActiveTab('assessments')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'assessments' ? 'bg-primary text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
+          onClick={() => setActiveTab('hub')}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'hub' ? 'bg-primary text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
         >
-          Mock Hub Assessments
+          Mock Hub (Companies & Assignments)
         </button>
         <button
-          onClick={() => setActiveTab('questions')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'questions' ? 'bg-primary text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
-        >
-          Mock Hub Questions
-        </button>
-        <button
-          onClick={() => setActiveTab('global' as any)}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'global' as any ? 'bg-amber-500 text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
+          onClick={() => setActiveTab('global')}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'global' ? 'bg-amber-500 text-white shadow-lg' : 'hover:bg-muted/30 text-muted-foreground'}`}
         >
           Global Site Content (DSA / Aptitude / KB)
         </button>
       </div>
 
-      {/* ASSESSMENTS TAB */}
-      {activeTab === 'assessments' && (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold">Assessments / Assignments</h2>
-            <button
-              onClick={() => setEditingAssessment({ isNew: true, id: `test-${Date.now()}`, title: '', difficulty: 'Medium', is_active: true })}
-              className="flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/20"
-            >
-              <Plus className="w-4 h-4" /> Add Assessment
-            </button>
-          </div>
+      {/* MOCK HUB TAB (HIERARCHICAL) */}
+      {activeTab === 'hub' && (
+        <AnimatePresence mode="wait">
+          {/* LEVEL 1: COMPANIES */}
+          {hubView === 'companies' && (
+            <motion.div key="companies" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-primary" />
+                  <h2 className="text-xl font-bold">Companies</h2>
+                </div>
+                <button
+                  onClick={handleCreateCompany}
+                  className="flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/20"
+                >
+                  <Plus className="w-4 h-4" /> Add Company
+                </button>
+              </div>
 
-          {loading ? <div className="flex items-center gap-2 text-muted-foreground"><RefreshCw className="w-4 h-4 animate-spin" /> Loading...</div> : (
-            <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-              {assessments.map(a => (
-                <div key={a.id} className="glass p-5 rounded-2xl border border-border/20 flex flex-col gap-2 relative group">
-                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => setEditingAssessment(a)} className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20"><Edit2 className="w-4 h-4" /></button>
-                    <button onClick={() => handleDeleteAssessment(a.id)} className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20"><Trash2 className="w-4 h-4" /></button>
+              {loading ? <div className="flex items-center gap-2 text-muted-foreground"><RefreshCw className="w-4 h-4 animate-spin" /> Loading...</div> : (
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  {companies.map(company => {
+                    const count = assessments.filter(a => Array.isArray(a.company_tags) && a.company_tags.includes(company)).length;
+                    return (
+                      <div 
+                        key={company} 
+                        onClick={() => { setSelectedCompany(company); setHubView('assignments'); }}
+                        className="glass p-5 rounded-2xl border border-border/20 flex flex-col gap-2 cursor-pointer hover:border-primary/50 transition-colors group"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                          <Building2 className="w-5 h-5 text-primary" />
+                        </div>
+                        <h3 className="font-bold text-lg">{company}</h3>
+                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">{count} Assignments</p>
+                      </div>
+                    );
+                  })}
+                  {companies.length === 0 && (
+                    <div className="col-span-full py-10 text-center text-muted-foreground italic border border-dashed border-border/20 rounded-2xl">
+                      No companies found. Create one to get started.
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* LEVEL 2: ASSIGNMENTS */}
+          {hubView === 'assignments' && (
+            <motion.div key="assignments" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setHubView('companies')} 
+                  className="p-2 hover:bg-muted/20 rounded-xl transition-colors flex items-center gap-2 text-sm font-bold text-muted-foreground"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back to Companies
+                </button>
+              </div>
+              
+              <div className="flex justify-between items-center bg-muted/10 p-4 rounded-2xl border border-border/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-primary" />
                   </div>
-                  <h3 className="font-bold text-lg pr-20">{a.title} <span className="text-xs font-normal text-muted-foreground ml-2">({a.id})</span></h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{a.description}</p>
-                  <div className="flex gap-2 mt-auto pt-2 flex-wrap">
-                    <span className={`text-[10px] px-2 py-1 rounded-md uppercase font-bold ${a.is_active ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                      {a.is_active ? 'Active' : 'Draft'}
-                    </span>
-                    <span className="text-[10px] bg-muted/40 px-2 py-1 rounded-md uppercase font-bold">{a.difficulty}</span>
-                    <span className="text-[10px] bg-muted/40 px-2 py-1 rounded-md uppercase font-bold">{a.duration_minutes} Mins</span>
-                    <span className="text-[10px] bg-muted/40 px-2 py-1 rounded-md uppercase font-bold">{a.total_questions || 0} Qs</span>
-                    {a.category && <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-md uppercase font-bold">{a.category}</span>}
-                    {(a.company_tags || []).map((tag: string, idx: number) => (
-                      <span key={idx} className="text-[10px] bg-secondary/10 text-secondary px-2 py-1 rounded-md uppercase font-bold">{tag}</span>
-                    ))}
+                  <div>
+                    <h2 className="text-xl font-bold">{selectedCompany}</h2>
+                    <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Assignments Management</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* QUESTIONS TAB */}
-      {activeTab === 'questions' && (
-        <div className="space-y-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex flex-col gap-1 w-full max-w-sm">
-              <label className="text-sm font-bold text-muted-foreground">Select Assessment to view questions</label>
-              <select 
-                className="bg-muted/20 border border-border/30 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-primary/50 text-foreground w-full"
-                value={selectedAssessmentId}
-                onChange={e => setSelectedAssessmentId(e.target.value)}
-              >
-                <option value="">-- Choose Assessment --</option>
-                {assessments.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
-              </select>
-            </div>
-            
-            {selectedAssessmentId && (
-              <button
-                onClick={() => setEditingQuestion({ isNew: true, id: `q-${Date.now()}`, assessment_id: selectedAssessmentId, title: '', content: '', options: '', correct_answer: 0, difficulty: 'Medium' })}
-                className="flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/20 shrink-0"
-              >
-                <Plus className="w-4 h-4" /> Add Question
-              </button>
-            )}
-          </div>
-
-          {selectedAssessmentId && (
-            loading ? <div className="flex items-center gap-2 text-muted-foreground"><RefreshCw className="w-4 h-4 animate-spin" /> Loading...</div> : (
-              <div className="space-y-4">
-                {questions.length === 0 && <p className="text-muted-foreground text-sm italic">No questions found for this assessment.</p>}
-                {questions.map((q, idx) => (
-                  <div key={q.id} className="glass p-5 rounded-2xl border border-border/20 flex flex-col gap-3 relative group">
-                    <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => setEditingQuestion({ ...q, options: Array.isArray(q.options) ? q.options.join(', ') : q.options })} className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20"><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => handleDeleteQuestion(q.id)} className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="font-black text-muted-foreground">Q{idx + 1}.</span>
-                      <div>
-                        <h3 className="font-bold text-foreground">{q.title}</h3>
-                        <p className="text-sm text-foreground/80 mt-1 whitespace-pre-wrap">{q.content}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2 mt-2">
-                      <span className="text-[10px] bg-muted/40 px-2 py-1 rounded-md uppercase font-bold">{q.type}</span>
-                      {q.topic && <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-md uppercase font-bold">{q.topic}</span>}
-                      {q.company && <span className="text-[10px] bg-secondary/10 text-secondary px-2 py-1 rounded-md uppercase font-bold">{q.company}</span>}
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 pl-7">
-                      {(Array.isArray(q.options) ? q.options : []).map((opt: string, i: number) => (
-                        <div key={i} className={`text-sm p-2 rounded-lg border ${q.correct_answer === i ? 'bg-green-500/10 border-green-500/30 text-green-400 font-bold' : 'bg-muted/10 border-border/10 text-muted-foreground'}`}>
-                          {String.fromCharCode(65 + i)}. {opt}
-                          {q.correct_answer === i && <span className="ml-2 text-xs uppercase bg-green-500 text-white px-1.5 py-0.5 rounded">Answer</span>}
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {q.solution_explanation && (
-                      <div className="pl-7 mt-2">
-                        <p className="text-xs text-muted-foreground"><span className="font-bold text-primary">Explanation:</span> {q.solution_explanation}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                <button
+                  onClick={() => setEditingAssessment({ isNew: true, id: `test-${Date.now()}`, title: '', difficulty: 'Medium', is_active: true, company_tags: [selectedCompany] })}
+                  className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Add Assignment
+                </button>
               </div>
-            )
+
+              {loading ? <div className="flex items-center gap-2 text-muted-foreground"><RefreshCw className="w-4 h-4 animate-spin" /> Loading...</div> : (
+                <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 mt-4">
+                  {companyAssessments.map((a, idx) => (
+                    <div key={a.id} className="glass p-5 rounded-2xl border border-border/20 flex flex-col gap-2 relative group">
+                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => setEditingAssessment(a)} className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDeleteAssessment(a.id)} className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 h-8 rounded-lg bg-foreground/5 flex items-center justify-center">
+                          <Folder className="w-4 h-4 text-foreground/50" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-lg pr-20">Assignment {idx + 1}</h3>
+                          <p className="text-xs text-muted-foreground font-medium">{a.title}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2 mt-2 mb-4 flex-wrap">
+                        <span className={`text-[10px] px-2 py-1 rounded-md uppercase font-bold ${a.is_active ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                          {a.is_active ? 'Active' : 'Draft'}
+                        </span>
+                        <span className="text-[10px] bg-muted/40 px-2 py-1 rounded-md uppercase font-bold">{a.difficulty}</span>
+                        <span className="text-[10px] bg-muted/40 px-2 py-1 rounded-md uppercase font-bold">{a.duration_minutes} Mins</span>
+                        <span className="text-[10px] bg-muted/40 px-2 py-1 rounded-md uppercase font-bold">{a.total_questions || 0} Qs</span>
+                      </div>
+
+                      <button 
+                        onClick={() => { setSelectedAssessmentId(a.id); setHubView('questions'); }}
+                        className="mt-auto w-full py-2.5 rounded-xl bg-primary/10 text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors"
+                      >
+                        <FileQuestion className="w-4 h-4" /> Manage Questions
+                      </button>
+                    </div>
+                  ))}
+                  {companyAssessments.length === 0 && (
+                    <div className="col-span-full py-10 text-center text-muted-foreground italic border border-dashed border-border/20 rounded-2xl">
+                      No assignments found in {selectedCompany}. Create one!
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
           )}
-        </div>
+
+          {/* LEVEL 3: QUESTIONS */}
+          {hubView === 'questions' && (
+            <motion.div key="questions" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4">
+               <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setHubView('assignments')} 
+                  className="p-2 hover:bg-muted/20 rounded-xl transition-colors flex items-center gap-2 text-sm font-bold text-muted-foreground"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back to Assignments
+                </button>
+              </div>
+
+              <div className="flex justify-between items-center bg-muted/10 p-4 rounded-2xl border border-border/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                    <FileQuestion className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Questions Editor</h2>
+                    <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">
+                      {assessments.find(a => a.id === selectedAssessmentId)?.title || 'Unknown Assignment'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditingQuestion({ isNew: true, id: `q-${Date.now()}`, assessment_id: selectedAssessmentId, title: '', content: '', options: '', correct_answer: 0, difficulty: 'Medium', company: selectedCompany })}
+                  className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Add Question
+                </button>
+              </div>
+
+              {loading ? <div className="flex items-center gap-2 text-muted-foreground"><RefreshCw className="w-4 h-4 animate-spin" /> Loading...</div> : (
+                <div className="space-y-4 mt-4">
+                  {questions.length === 0 && <p className="text-muted-foreground text-sm italic py-10 text-center border border-dashed border-border/20 rounded-2xl">No questions found for this assignment.</p>}
+                  {questions.map((q, idx) => (
+                    <div key={q.id} className="glass p-5 rounded-2xl border border-border/20 flex flex-col gap-3 relative group">
+                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => setEditingQuestion({ ...q, options: Array.isArray(q.options) ? q.options.join(', ') : q.options })} className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDeleteQuestion(q.id)} className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                      <div className="flex gap-3">
+                        <span className="font-black text-muted-foreground">Q{idx + 1}.</span>
+                        <div>
+                          <h3 className="font-bold text-foreground">{q.title}</h3>
+                          <p className="text-sm text-foreground/80 mt-1 whitespace-pre-wrap font-mono bg-muted/10 p-3 rounded-lg border border-border/10">{q.content}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2 mt-2">
+                        <span className="text-[10px] bg-muted/40 px-2 py-1 rounded-md uppercase font-bold">{q.type}</span>
+                        {q.topic && <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-md uppercase font-bold">{q.topic}</span>}
+                        {q.company && <span className="text-[10px] bg-secondary/10 text-secondary px-2 py-1 rounded-md uppercase font-bold">{q.company}</span>}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 pl-7">
+                        {(Array.isArray(q.options) ? q.options : []).map((opt: string, i: number) => (
+                          <div key={i} className={`text-sm p-2 rounded-lg border flex items-start gap-2 ${q.correct_answer === i ? 'bg-green-500/10 border-green-500/30 text-green-400 font-bold' : 'bg-muted/10 border-border/10 text-muted-foreground'}`}>
+                            <span className="opacity-50">{String.fromCharCode(65 + i)}.</span>
+                            <span>{opt}</span>
+                            {q.correct_answer === i && <span className="ml-auto text-[10px] uppercase bg-green-500/20 text-green-500 px-1.5 py-0.5 rounded font-black">Correct</span>}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {q.solution_explanation && (
+                        <div className="pl-7 mt-2">
+                          <p className="text-xs text-muted-foreground"><span className="font-bold text-primary">Explanation:</span> {q.solution_explanation}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
 
       {/* GLOBAL CONTENT TAB */}
-      {activeTab === 'global' as any && (
+      {activeTab === 'global' && (
         <div className="space-y-4">
           <div className="flex gap-2 mb-4">
             <button onClick={() => setActiveGlobalTab('dsa')} className={`px-4 py-2 rounded-lg text-xs font-bold ${activeGlobalTab === 'dsa' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground'}`}>DSA Tracker</button>
@@ -342,7 +448,7 @@ export default function AdminPanelView() {
 
           {loading ? <div className="flex items-center gap-2 text-muted-foreground"><RefreshCw className="w-4 h-4 animate-spin" /> Loading...</div> : (
             <div className="space-y-4">
-              {globalQuestions.length === 0 && <p className="text-muted-foreground text-sm italic">No items found.</p>}
+              {globalQuestions.length === 0 && <p className="text-muted-foreground text-sm italic py-10 text-center border border-dashed border-border/20 rounded-2xl">No items found.</p>}
               {globalQuestions.map((q, idx) => (
                 <div key={q.id} className="glass p-5 rounded-2xl border border-border/20 flex flex-col gap-3 relative group">
                   <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -374,7 +480,7 @@ export default function AdminPanelView() {
         <ModalPortal onClose={() => setEditingAssessment(null)}>
           <div className="glass w-full rounded-[24px] border border-border/20 p-6 flex flex-col overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">{editingAssessment.isNew ? 'Create Assessment' : 'Edit Assessment'}</h3>
+              <h3 className="text-xl font-bold">{editingAssessment.isNew ? 'Create Assignment' : 'Edit Assignment'}</h3>
               <button onClick={() => setEditingAssessment(null)} className="p-2 hover:bg-muted/20 rounded-full"><X className="w-5 h-5" /></button>
             </div>
             
@@ -424,7 +530,7 @@ export default function AdminPanelView() {
               </div>
               
               <button type="submit" className="mt-4 w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary/90 flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
-                <Save className="w-5 h-5" /> Save Assessment
+                <Save className="w-5 h-5" /> Save Assignment
               </button>
             </form>
           </div>
@@ -433,7 +539,7 @@ export default function AdminPanelView() {
 
       {editingQuestion && (
         <ModalPortal onClose={() => setEditingQuestion(null)}>
-          <div className="glass w-full rounded-[24px] border border-border/20 p-6 flex flex-col overflow-y-auto">
+          <div className="glass w-full rounded-[24px] border border-border/20 p-6 flex flex-col overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold">{editingQuestion.isNew ? 'Add Question' : 'Edit Question'}</h3>
               <button onClick={() => setEditingQuestion(null)} className="p-2 hover:bg-muted/20 rounded-full"><X className="w-5 h-5" /></button>
