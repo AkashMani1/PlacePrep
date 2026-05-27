@@ -138,7 +138,10 @@ export function InterviewRoom() {
     if (!activeRoom?.id || !isMounted) return;
 
     chatChannelRef.current = supabase.channel(`chat:${activeRoom.id}`, {
-      config: { broadcast: { ack: false, self: false } }
+      config: { 
+        broadcast: { ack: false, self: false },
+        presence: { key: user?.id || `anon-${Math.random()}` }
+      }
     });
 
     chatChannelRef.current.on('broadcast', { event: 'new_message' }, ({ payload }) => {
@@ -150,38 +153,64 @@ export function InterviewRoom() {
       toast.info(`${payload.senderName} submitted their code.`);
     });
 
-    chatChannelRef.current.on('broadcast', { event: 'peer_joined' }, ({ payload }) => {
-      setPeerName(payload.displayName);
-      toast.success(`${payload.displayName} is in the room.`);
-      // Send back our name so they know who we are
-      chatChannelRef.current?.send({ 
-        type: 'broadcast', 
-        event: 'peer_presence', 
-        payload: { 
-          displayName: user?.user_metadata?.full_name || 'Anonymous User',
-          writeAccess: peerHasWriteAccess 
-        } 
-      });
-    });
-
-    chatChannelRef.current.on('broadcast', { event: 'peer_presence' }, ({ payload }) => {
-      setPeerName(payload.displayName);
-      if (payload.writeAccess !== undefined) {
-        setPeerHasWriteAccess(payload.writeAccess);
-      }
-    });
-
     chatChannelRef.current.on('broadcast', { event: 'write_access_change' }, ({ payload }) => {
       setPeerHasWriteAccess(payload.granted);
       toast.info(`The host has ${payload.granted ? 'granted' : 'revoked'} your write access.`);
     });
 
+    chatChannelRef.current.on('presence', { event: 'sync' }, () => {
+      const state = chatChannelRef.current?.presenceState();
+      if (!state) return;
+
+      const userIds = Object.keys(state);
+      
+      // Strict 2-Peer Limit Enforcement
+      // If we are NOT the host, and we are not among the first 2 connected users...
+      if (!isHost && userIds.length > 2 && !userIds.slice(0, 2).includes(user?.id || '')) {
+        toast.error('This room is full. Maximum 2 peers allowed.');
+        router.push('/mockhub');
+        return;
+      }
+
+      // Sync peer name based on who else is in the room
+      const peerKeys = userIds.filter(id => id !== user?.id);
+      if (peerKeys.length > 0) {
+        const peerPresence = state[peerKeys[0]]?.[0] as any;
+        if (peerPresence) setPeerName(peerPresence.displayName);
+      } else {
+        setPeerName('Peer');
+      }
+    });
+
+    chatChannelRef.current.on('presence', { event: 'join' }, ({ newPresences }) => {
+      for (const p of newPresences) {
+        if (p.displayName && p.userId !== user?.id) {
+          toast.success(`${p.displayName} joined the room.`);
+          // If we are the host, send the current write access state to the newly joined peer
+          if (isHost) {
+            chatChannelRef.current?.send({ 
+              type: 'broadcast', 
+              event: 'write_access_change', 
+              payload: { granted: peerHasWriteAccess } 
+            });
+          }
+        }
+      }
+    });
+
+    chatChannelRef.current.on('presence', { event: 'leave' }, ({ leftPresences }) => {
+      for (const p of leftPresences) {
+        if (p.displayName && p.userId !== user?.id) {
+          toast.info(`${p.displayName} left the room.`);
+        }
+      }
+    });
+
     chatChannelRef.current.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
-         chatChannelRef.current?.send({ 
-           type: 'broadcast', 
-           event: 'peer_joined', 
-           payload: { displayName: user?.user_metadata?.full_name || 'Anonymous User' } 
+         await chatChannelRef.current?.track({
+           userId: user?.id,
+           displayName: user?.user_metadata?.full_name || 'Anonymous User'
          });
       }
     });
