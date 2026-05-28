@@ -89,12 +89,23 @@ export interface MockRoom {
   duration: string;
   maxParticipants: number;
   status: 'open' | 'ongoing' | 'completed';
+  /** true = password-protected; false = public (anyone with link can join) */
   isPrivate: boolean;
+  /** Client-safe derived boolean — true when a passcode hash exists. Never exposes the hash. */
+  hasPasscode: boolean;
   roomCode?: string;
   rating: number;
   participants: RoomParticipant[];
   createdAt: string;
 }
+
+// ── Room access errors ─────────────────────────────────────────────────────
+export type RoomJoinError =
+  | 'ROOM_NOT_FOUND'
+  | 'ROOM_REQUIRES_PASSCODE'
+  | 'WRONG_PASSCODE'
+  | 'ROOM_FULL'
+  | 'UNKNOWN_ERROR';
 
 export interface RoomParticipant {
   userId: string;

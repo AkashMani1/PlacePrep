@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Calendar, Plus, ChevronRight, Play, Clock, Star, Globe, Search, X, Trash2 } from 'lucide-react';
+import { Users, Calendar, Plus, ChevronRight, Play, Clock, Star, Globe, Search, X, Trash2, Lock, Unlock, Eye, EyeOff } from 'lucide-react';
 import { BentoCard } from '@/components/ui/Bento';
 import { useMockStore } from '@/store/useMockStore';
 import { Button } from '@/components/ui/Button';
@@ -52,7 +52,10 @@ export function MockArena() {
     type: 'Technical (DSA)',
     company: 'General',
     difficulty: 'Medium',
+    isPrivate: false,
+    passcode: '',
   });
+  const [showPasscodeInput, setShowPasscodeInput] = useState(false);
 
   const handleSchedule = () => {
     if (!scheduleForm.partnerName || !scheduleForm.date) {
@@ -69,19 +72,61 @@ export function MockArena() {
       toast.error('Please provide a room title.');
       return;
     }
-    toast.loading('Creating private room...', { id: 'create-room' });
+    if (createRoomForm.isPrivate && createRoomForm.passcode.trim().length < 4) {
+      toast.error('Passcode must be at least 4 characters for private rooms.');
+      return;
+    }
+    toast.loading('Creating room...', { id: 'create-room' });
     try {
       const roomId = await createRoom({
         title: createRoomForm.title,
         type: createRoomForm.type,
         company: createRoomForm.company,
         difficulty: createRoomForm.difficulty,
+        is_private: createRoomForm.isPrivate,
         host_id: user?.id,
-      });
-      const inviteLink = `${window.location.origin}/mockhub/interview/${roomId}`;
-      await navigator.clipboard.writeText(`Join my mock interview room on PlacePrep: ${inviteLink}`);
-      toast.success('Room created! Invite link copied to clipboard.', { id: 'create-room' });
+        ...(createRoomForm.isPrivate ? { passcode: createRoomForm.passcode.trim() } : {}),
+      } as any);
+
+      const baseLink = `${window.location.origin}/mockhub/interview/${roomId}`;
+      let shareText  = `Join my mock interview on PlacePrep: ${baseLink}`;
+
+      if (createRoomForm.isPrivate) {
+        // Generate a signed invite token so the link bypasses the passcode gate
+        try {
+          const { data: { session } } = await (await import('@/lib/supabase')).supabase.auth.getSession();
+          const token = session?.access_token;
+          const res = await fetch('/api/rooms/generate-invite-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ roomId }),
+          });
+          const json = await res.json();
+          if (json.token) {
+            const inviteLink = `${baseLink}?invite=${encodeURIComponent(json.token)}`;
+            shareText = `Join my private mock interview on PlacePrep:\n${inviteLink}\n\nFallback passcode (if link expires): ${createRoomForm.passcode.trim()}`;
+          } else {
+            // Fallback: include passcode directly
+            shareText = `Join my private mock interview on PlacePrep: ${baseLink}\nPasscode: ${createRoomForm.passcode.trim()}`;
+          }
+        } catch {
+          shareText = `Join my private mock interview on PlacePrep: ${baseLink}\nPasscode: ${createRoomForm.passcode.trim()}`;
+        }
+      }
+
+      await navigator.clipboard.writeText(shareText);
+      toast.success(
+        createRoomForm.isPrivate
+          ? 'Private room created! Invite link copied (no passcode needed for recipients).'
+          : 'Room created! Invite link copied to clipboard.',
+        { id: 'create-room' }
+      );
       setShowCreateRoomModal(false);
+      setCreateRoomForm({ title: 'Mock Interview Session', type: 'Technical (DSA)', company: 'General', difficulty: 'Medium', isPrivate: false, passcode: '' });
+      setShowPasscodeInput(false);
       router.push(`/mockhub/interview/${roomId}`);
     } catch (err) {
       toast.error('Failed to create room', { id: 'create-room' });
@@ -123,18 +168,32 @@ export function MockArena() {
             </div>
           ) : (
             <AnimatePresence>
-              {availableRooms.map((room) => (
+              {availableRooms.map((room) => {
+                const isLocked = (room as any).is_private && (room as any).has_passcode;
+                return (
                 <motion.div
                   key={room.id}
-                  whileHover={{ x: 8, backgroundColor: 'rgba(255, 255, 255, 0.04)' }}
+                  whileHover={{ x: 8, backgroundColor: isLocked ? 'rgba(245,158,11,0.04)' : 'rgba(255, 255, 255, 0.04)' }}
                   onClick={() => router.push(`/mockhub/interview/${room.id}`)}
-                  className="group relative flex items-center justify-between p-5 rounded-[28px] bg-card/40 border border-white/5 backdrop-blur-xl transition-all cursor-pointer overflow-hidden shadow-xl"
+                  className={`group relative flex items-center justify-between p-5 rounded-[28px] backdrop-blur-xl transition-all cursor-pointer overflow-hidden shadow-xl border ${
+                    isLocked
+                      ? 'bg-amber-500/[0.03] border-amber-500/15 hover:border-amber-500/30'
+                      : 'bg-card/40 border-white/5'
+                  }`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {/* Gradient overlay */}
+                  <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r ${
+                    isLocked ? 'from-amber-500/5 to-transparent' : 'from-primary/5 to-transparent'
+                  }`} />
 
                   <div className="flex items-center gap-6 relative z-10">
-                    <div className="w-14 h-14 rounded-[20px] bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                      <Play className="w-5 h-5 text-primary fill-primary" />
+                    <div className={`w-14 h-14 rounded-[20px] border flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ${
+                      isLocked ? 'bg-amber-500/10 border-amber-500/20' : 'bg-white/5 border-white/10'
+                    }`}>
+                      {isLocked
+                        ? <Lock className="w-5 h-5 text-amber-500" />
+                        : <Play className="w-5 h-5 text-primary fill-primary" />
+                      }
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-1">
@@ -142,10 +201,25 @@ export function MockArena() {
                         <span className="px-2 py-0.5 rounded-md bg-black/40 text-[9px] font-black text-muted-foreground uppercase tracking-widest border border-white/5">
                           {room.company || 'General'}
                         </span>
+                        {/* Privacy badge */}
+                        {isLocked ? (
+                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[9px] font-black text-amber-500 uppercase tracking-widest">
+                            <Lock className="w-2.5 h-2.5" /> Private
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-500 uppercase tracking-widest">
+                            <Unlock className="w-2.5 h-2.5" /> Public
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
                         <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {room.duration || '45m'}</span>
                         <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {room.participants?.length || 0} Joined</span>
+                        {isLocked && (
+                          <span className="text-[9px] font-black text-amber-500/70 uppercase tracking-widest">
+                            Passcode Required
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -170,12 +244,21 @@ export function MockArena() {
                         <Trash2 className="w-4 h-4 text-rose-500 group-hover/delete:text-white" />
                       </button>
                     )}
-                    <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-300">
-                      <ChevronRight className="w-5 h-5 text-white" />
+                    <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300 ${
+                      isLocked
+                        ? 'bg-amber-500/10 border-amber-500/20 group-hover:bg-amber-500 group-hover:border-amber-500'
+                        : 'bg-white/5 border-white/10 group-hover:bg-primary group-hover:border-primary'
+                    }`}>
+                      {isLocked
+                        ? <Lock className="w-4 h-4 text-amber-500 group-hover:text-white transition-colors" />
+                        : <ChevronRight className="w-5 h-5 text-white" />
+                      }
                     </div>
                   </div>
                 </motion.div>
-              ))}
+                );
+              })}
+
             </AnimatePresence>
           )}
         </div>
@@ -403,6 +486,81 @@ export function MockArena() {
                     className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-foreground text-sm font-medium focus:outline-none focus:border-primary transition-all"
                   />
                 </div>
+
+                {/* Privacy Toggle */}
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-3 block">Access Mode</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setCreateRoomForm(f => ({ ...f, isPrivate: false, passcode: '' }))}
+                      className={`flex items-center justify-center gap-2.5 p-4 rounded-2xl border text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
+                        !createRoomForm.isPrivate
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
+                          : 'bg-white/3 border-white/8 text-muted-foreground hover:bg-white/6'
+                      }`}
+                    >
+                      <Unlock className="w-4 h-4" />
+                      Public
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCreateRoomForm(f => ({ ...f, isPrivate: true }))}
+                      className={`flex items-center justify-center gap-2.5 p-4 rounded-2xl border text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
+                        createRoomForm.isPrivate
+                          ? 'bg-amber-500/10 border-amber-500/30 text-amber-500'
+                          : 'bg-white/3 border-white/8 text-muted-foreground hover:bg-white/6'
+                      }`}
+                    >
+                      <Lock className="w-4 h-4" />
+                      Private
+                    </button>
+                  </div>
+                  <p className="mt-2 text-[9px] font-medium text-muted-foreground/60 leading-relaxed">
+                    {createRoomForm.isPrivate
+                      ? 'Only people with the link AND the passcode can join.'
+                      : 'Anyone can join by browsing or with the direct link.'}
+                  </p>
+                </div>
+
+                {/* Passcode — shown only for private rooms */}
+                <AnimatePresence>
+                  {createRoomForm.isPrivate && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                        Room Passcode <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPasscodeInput ? 'text' : 'password'}
+                          value={createRoomForm.passcode}
+                          onChange={e => setCreateRoomForm(f => ({ ...f, passcode: e.target.value.slice(0, 20) }))}
+                          placeholder="Min 4 characters"
+                          maxLength={20}
+                          className="w-full bg-black/40 border border-amber-500/20 rounded-2xl px-6 py-4 text-foreground text-sm font-mono font-bold tracking-widest focus:outline-none focus:border-amber-500/50 transition-all pr-14"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPasscodeInput(v => !v)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={showPasscodeInput ? 'Hide passcode' : 'Show passcode'}
+                        >
+                          {showPasscodeInput ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <p className="mt-1.5 text-[9px] font-medium text-amber-500/60">
+                        Share this passcode only with people you want to invite.
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-3 block">Type</label>

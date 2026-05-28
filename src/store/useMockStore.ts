@@ -24,6 +24,10 @@ interface MockRoom {
   status: string;
   host_id?: string;
   created_by?: string;
+  /** Public room (false) or password-protected (true) */
+  is_private?: boolean;
+  /** Derived — true when a passcode hash exists in the DB. Hash is NEVER sent to client. */
+  has_passcode?: boolean;
 }
 
 interface LeaderboardEntry {
@@ -114,9 +118,10 @@ interface MockState {
 
   // Actions
   fetchRooms: () => Promise<void>;
-  createRoom: (room: Partial<MockRoom>) => Promise<string>;
+  createRoom: (room: Partial<MockRoom> & { passcode?: string }) => Promise<string>;
   deleteRoom: (roomId: string) => Promise<void>;
-  joinRoom: (roomId: string) => Promise<void>;
+  /** passcode: manual entry from gate UI. inviteToken: from ?invite= URL param (bypasses gate). */
+  joinRoom: (roomId: string, passcode?: string, inviteToken?: string) => Promise<void>;
   leaveRoom: () => void;
 
   fetchAssessments: () => Promise<void>;
@@ -215,9 +220,12 @@ export const useMockStore = create<MockState>()(
       fetchRooms: async () => {
         set({ isLoadingRooms: true });
         try {
+          // Explicitly exclude passcode_hash — never send it to the client
           const { data, error } = await supabase
             .from('mock_rooms')
-            .select('*, room_participants(*)')
+            .select(
+              'id, title, type, difficulty, company, duration, status, is_private, has_passcode, created_by, created_at, room_participants(*)'
+            )
             .eq('status', 'waiting')
             .order('created_at', { ascending: false })
             .limit(50);
@@ -231,7 +239,10 @@ export const useMockStore = create<MockState>()(
       },
 
       createRoom: async (roomData) => {
-        const roomId = crypto.randomUUID();
+        const roomId = (crypto.randomUUID() as string) as `${string}-${string}-${string}-${string}-${string}`;
+        const isPrivate = roomData.is_private ?? false;
+        const passcode: string | undefined = (roomData as any).passcode;
+
         const newRoom: MockRoom = {
           id: roomId,
           title: roomData.title || 'New Session',
@@ -242,22 +253,43 @@ export const useMockStore = create<MockState>()(
           participants: [],
           rating: 0,
           status: 'waiting',
+          is_private: isPrivate,
+          has_passcode: isPrivate && !!passcode,
           ...roomData,
         } as MockRoom;
 
         if (_dbHealthy) {
-          const { error } = await supabase.from('mock_rooms').insert([{
-            id: roomId,
-            title: newRoom.title,
-            type: newRoom.type,
-            difficulty: newRoom.difficulty,
-            company: newRoom.company,
-            status: 'waiting',
-            created_by: newRoom.host_id,
-          }]);
-          if (error) {
-            console.warn('Room creation DB error:', error.message);
-            toast.warning('Room created locally — DB sync failed. Check connection.');
+          if (isPrivate && passcode) {
+            // Use the DB-side RPC that hashes the passcode with pgcrypto
+            const { error } = await supabase.rpc('create_room_with_passcode', {
+              p_id: roomId,
+              p_title: newRoom.title,
+              p_type: newRoom.type,
+              p_difficulty: newRoom.difficulty,
+              p_company: newRoom.company,
+              p_is_private: true,
+              p_passcode: passcode,
+            });
+            if (error) {
+              console.warn('Private room creation DB error:', error.message);
+              toast.warning('Room created locally — DB sync failed.');
+            }
+          } else {
+            // Public room — plain insert
+            const { error } = await supabase.from('mock_rooms').insert([{
+              id: roomId,
+              title: newRoom.title,
+              type: newRoom.type,
+              difficulty: newRoom.difficulty,
+              company: newRoom.company,
+              status: 'waiting',
+              is_private: false,
+              created_by: newRoom.host_id,
+            }]);
+            if (error) {
+              console.warn('Room creation DB error:', error.message);
+              toast.warning('Room created locally — DB sync failed. Check connection.');
+            }
           }
         }
 
@@ -305,24 +337,81 @@ export const useMockStore = create<MockState>()(
         toast.success('Room permanently deleted for everyone.');
       },
 
-      joinRoom: async (roomId) => {
+      joinRoom: async (roomId, passcode?, inviteToken?) => {
         let rooms = get().availableRooms;
         let room = rooms.find(r => r.id === roomId);
 
+        // Fetch from DB if not in local list (private rooms won't be in availableRooms)
         if (!room && _dbHealthy) {
-          const { data, error } = await supabase.from('mock_rooms').select('*').eq('id', roomId).single();
+          const { data, error } = await supabase
+            .from('mock_rooms')
+            // Explicit safe column list — never select passcode_hash
+            .select('id, title, type, company, difficulty, duration, status, is_private, has_passcode, created_by')
+            .eq('id', roomId)
+            .single();
           if (data && !error) {
             room = data as any;
           }
         }
 
-        if (room) {
-          set({ activeRoom: room });
-          toast.success('Joined room');
-        } else {
+        if (!room) {
           toast.error('Room not found or no longer active.');
           throw new Error('ROOM_NOT_FOUND');
         }
+
+        // ── Access control gate ────────────────────────────────────────────
+        const roomIsPrivate  = (room as any).is_private  ?? false;
+        const roomHasPasscode = (room as any).has_passcode ?? !!(room as any).passcode_hash;
+
+        if (roomIsPrivate && roomHasPasscode) {
+
+          // ── Path 1: Invite token (transparent bypass) ──────────────────
+          if (inviteToken) {
+            try {
+              const res  = await fetch('/api/rooms/verify-invite-token', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ roomId, token: inviteToken }),
+              });
+              const json = await res.json();
+              if (json.valid) {
+                // Token accepted — fall through to join below
+                set({ activeRoom: room });
+                toast.success('Joined room via invite link');
+                return;
+              }
+              // Token invalid/expired — fall through to passcode path
+              // (don't throw, just ignore the bad token gracefully)
+            } catch { /* network error — fall through to passcode */ }
+          }
+
+          // ── Path 2: Manual passcode ────────────────────────────────────
+          if (!passcode) {
+            throw new Error('ROOM_REQUIRES_PASSCODE');
+          }
+
+          try {
+            const res  = await fetch('/api/rooms/verify-passcode', {
+              method:  'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body:    JSON.stringify({ roomId, passcode }),
+            });
+            const json = await res.json();
+
+            if (res.status === 429) throw new Error('RATE_LIMITED');
+            if (!json.valid)        throw new Error('WRONG_PASSCODE');
+          } catch (err: any) {
+            if (
+              err.message === 'WRONG_PASSCODE' ||
+              err.message === 'RATE_LIMITED'
+            ) throw err;
+            throw new Error('UNKNOWN_ERROR');
+          }
+        }
+
+        // ── Public room OR access verified — join ─────────────────────────
+        set({ activeRoom: room });
+        toast.success('Joined room');
       },
 
       leaveRoom: () => {
