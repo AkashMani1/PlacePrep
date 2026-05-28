@@ -149,7 +149,7 @@ export function MockArena() {
             <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Live Mock Arena</h2>
           </div>
           <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary uppercase tracking-widest">
-            {availableRooms.length} Active Rooms
+            {availableRooms.length} {availableRooms.length === 1 ? 'Active Room' : 'Active Rooms'}
           </span>
         </div>
 
@@ -192,8 +192,8 @@ export function MockArena() {
                     isLocked ? 'from-amber-500/5 to-transparent' : 'from-primary/5 to-transparent'
                   }`} />
 
-                  <div className="flex items-center gap-6 relative z-10">
-                    <div className={`w-14 h-14 rounded-[20px] border flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ${
+                  <div className="flex items-center gap-4 relative z-10 flex-1 min-w-0">
+                    <div className={`shrink-0 w-14 h-14 rounded-[20px] border flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ${
                       isLocked ? 'bg-amber-500/10 border-amber-500/20' : 'bg-white/5 border-white/10'
                     }`}>
                       {isLocked
@@ -201,10 +201,10 @@ export function MockArena() {
                         : <Play className="w-5 h-5 text-primary fill-primary" />
                       }
                     </div>
-                    <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-black tracking-tight text-foreground">{room.title || room.type}</h3>
-                        <span className="px-2 py-0.5 rounded-md bg-black/40 text-[9px] font-black text-muted-foreground uppercase tracking-widest border border-white/5">
+                    <div className="flex-1 min-w-0 pr-4">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <h3 className="text-lg font-black tracking-tight text-foreground truncate mr-2">{room.title || room.type}</h3>
+                        <span className="shrink-0 px-2 py-0.5 rounded-md bg-black/40 text-[9px] font-black text-muted-foreground uppercase tracking-widest border border-white/5">
                           {room.company || 'General'}
                         </span>
                         {/* Privacy badge */}
@@ -230,7 +230,7 @@ export function MockArena() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 relative z-10">
+                  <div className="flex items-center gap-2.5 relative z-10 shrink-0">
                     <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
                       room.difficulty === 'Hard' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
                       room.difficulty === 'Medium' ? 'bg-primary/10 text-primary border-primary/20' :
@@ -291,9 +291,6 @@ export function MockArena() {
           <div className="p-8 space-y-6">
             {/* Create Room */}
             <div className="bg-primary/10 p-5 rounded-[28px] border border-primary/20 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform">
-                <Users className="w-16 h-16 text-primary" />
-              </div>
               <h3 className="text-base font-black text-primary tracking-tight mb-2 uppercase">Create a Session</h3>
               <p className="text-[10px] font-semibold text-primary/70 mb-5 leading-relaxed">
                 Create a new mock interview room and share the link with your peers to practice together.
