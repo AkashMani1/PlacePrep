@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Calendar, Plus, ChevronRight, Play, Clock, Star, Globe, Search, X, Trash2 } from 'lucide-react';
 import { BentoCard } from '@/components/ui/Bento';
@@ -10,15 +10,38 @@ import { useAuth } from '@/context/AuthContext';
 import { isAdminEmail } from '@/lib/admin';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 export function MockArena() {
   const router = useRouter();
   const {
-    availableRooms, isLoadingRooms, joinRoom, createRoom, deleteRoom, myCreatedRooms,
+    availableRooms, isLoadingRooms, fetchRooms, joinRoom, createRoom, deleteRoom, myCreatedRooms,
     scheduledSessions, addScheduledSession, cancelSession,
     isMatchmaking, matchmakingStatus, startMatchmaking, cancelMatchmaking,
   } = useMockStore();
   const { user } = useAuth();
+
+  // Fetch rooms on mount + realtime subscription so rooms persist across refreshes
+  useEffect(() => {
+    fetchRooms();
+
+    const channel = supabase
+      .channel('arena-rooms-live')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mock_rooms' }, () => {
+        fetchRooms();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'mock_rooms' }, () => {
+        fetchRooms();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mock_rooms' }, () => {
+        fetchRooms();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchRooms]);
 
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleForm, setScheduleForm] = useState({ partnerName: '', type: 'Technical (DSA)', date: '', time: '14:00' });
