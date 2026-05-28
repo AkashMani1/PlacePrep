@@ -109,7 +109,7 @@ export function InterviewRoom() {
   const router = useRouter();
   const { user } = useAuth();
   const { activeRoom, leaveRoom } = useMockStore();
-  const [activeTab, setActiveTab] = useState<'editor' | 'whiteboard'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'whiteboard'>('whiteboard');
   const [isMounted, setIsMounted] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
@@ -120,7 +120,12 @@ export function InterviewRoom() {
   const [lkToken, setLkToken] = useState('');
   const [liveKitUrl] = useState(process.env.NEXT_PUBLIC_LIVEKIT_URL || '');
 
+  const [codeStderr, setCodeStderr] = useState('');
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [isConsoleExpanded, setIsConsoleExpanded] = useState(true);
+
   const editorRef = useRef<any>(null);
+  const monacoRef = useRef<any>(null);
   const providerRef = useRef<any>(null);
   const docRef = useRef<any>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -289,8 +294,9 @@ export function InterviewRoom() {
   }, [activeRoom?.id, isMounted, user]);
 
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor; // ← store ref so getValue() works in submit
+    monacoRef.current = monaco;
     if (!isMounted || !docRef.current || !providerRef.current) return;
     const type = docRef.current.getText('monaco');
     const binding = new MonacoBinding(type, editor.getModel(), new Set([editor]), providerRef.current.awareness);
@@ -315,21 +321,80 @@ export function InterviewRoom() {
   }, [chatInput, user]);
 
   // ── Code Submit ─────────────────────────────────────────────────────
-  const handleCodeSubmit = useCallback(() => {
-    // Primary: read from Monaco editor; Fallback: read from Yjs doc
+  const handleCodeSubmit = useCallback(async () => {
     const code = editorRef.current?.getValue?.() || docRef.current?.getText('monaco')?.toString() || '';
     if (!code.trim()) {
       toast.error('Write some code before submitting.');
       return;
     }
-    setCodeOutput('Code submitted successfully. In a live session, this would be evaluated against test cases.');
-    toast.success('Code submitted!');
-    chatChannelRef.current?.send({ 
-      type: 'broadcast', 
-      event: 'code_submit', 
-      payload: { code, senderName: user?.user_metadata?.full_name || 'You' } 
-    });
-  }, [user]);
+    
+    setIsExecuting(true);
+    setCodeOutput('');
+    setCodeStderr('');
+
+    // Clear previous markers
+    if (monacoRef.current && editorRef.current) {
+        monacoRef.current.editor.setModelMarkers(editorRef.current.getModel(), 'compiler', []);
+    }
+
+    try {
+      const res = await fetch('/api/run-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, language })
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        toast.error(data.error || 'Execution failed');
+        setCodeStderr(data.error || 'Execution failed');
+      } else {
+        setCodeOutput(data.stdout || '');
+        setCodeStderr(data.stderr || '');
+        
+        // Basic parser to find error line numbers and highlight in Monaco
+        if (data.stderr && monacoRef.current && editorRef.current) {
+           const lines = data.stderr.split('\n');
+           const markers: any[] = [];
+           const lineRegex = /line\s+(\d+)|:(\d+):\d*:?\s*(error|SyntaxError|Warning|Exception)/i;
+           const fallbackRegex = /:(\d+):/;
+
+           for (let i = 0; i < lines.length; i++) {
+             const line = lines[i];
+             let match = line.match(lineRegex) || line.match(fallbackRegex);
+             if (match) {
+                const lineNum = parseInt(match[1] || match[2] || "0", 10);
+                if (lineNum > 0) {
+                    markers.push({
+                      startLineNumber: lineNum,
+                      startColumn: 1,
+                      endLineNumber: lineNum,
+                      endColumn: 1000,
+                      message: line.trim(),
+                      severity: monacoRef.current.MarkerSeverity.Error
+                    });
+                    break; // Just capture the first prominent error line
+                }
+             }
+           }
+           if (markers.length > 0) {
+              monacoRef.current.editor.setModelMarkers(editorRef.current.getModel(), 'compiler', markers);
+           }
+        }
+        
+        chatChannelRef.current?.send({ 
+          type: 'broadcast', 
+          event: 'code_submit', 
+          payload: { senderName: user?.user_metadata?.full_name || 'You' } 
+        });
+      }
+    } catch (err) {
+      setCodeStderr('Network error occurred while running code.');
+    } finally {
+      setIsExecuting(false);
+      setIsConsoleExpanded(true); // Auto expand console on run
+    }
+  }, [user, language]);
 
   // ── Leave & Cleanup ─────────────────────────────────────────────────
   const handleLeave = useCallback(() => {
@@ -453,33 +518,96 @@ export function InterviewRoom() {
               </div>
             </div>
             
-            <button onClick={handleCodeSubmit} className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20">
-              <Play className="w-3 h-3" /> Run
+            <button 
+              onClick={handleCodeSubmit} 
+              disabled={isExecuting}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-lg ${isExecuting ? 'bg-emerald-500/50 cursor-not-allowed shadow-none' : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20'}`}
+            >
+              <Play className="w-3 h-3" /> {isExecuting ? 'Running...' : 'Run'}
             </button>
           </div>
         </header>
 
-        <div className="flex-1 w-full relative">
+        <div className="flex-1 w-full relative flex flex-col">
           {activeTab === 'editor' ? (
-            <div className="absolute inset-0 pt-4">
-              <Editor
-                height="100%"
-                language={language}
-                theme="vs-dark"
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 14,
-                  padding: { top: 0 },
-                  readOnly: isReadonly,
-                  scrollBeyondLastLine: false,
-                  smoothScrolling: true,
-                  cursorBlinking: "smooth",
-                }}
-                onMount={handleEditorDidMount}
-              />
+            <div className="flex-1 flex flex-col h-full min-h-0">
+              <div className="flex-1 relative pt-4 min-h-0">
+                <Editor
+                  height="100%"
+                  language={language}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    padding: { top: 0 },
+                    readOnly: isReadonly,
+                    scrollBeyondLastLine: false,
+                    smoothScrolling: true,
+                    cursorBlinking: "smooth",
+                  }}
+                  onMount={handleEditorDidMount}
+                />
+              </div>
+              
+              {/* Output Terminal */}
+              <div className={`${isConsoleExpanded ? 'h-48' : 'h-10'} shrink-0 bg-[#050505] border-t border-white/10 flex flex-col font-mono text-xs z-10 shadow-[0_-10px_20px_rgba(0,0,0,0.3)] transition-all duration-300`}>
+                <div className="px-4 py-2 border-b border-white/5 bg-white/5 flex items-center justify-between text-white/50 cursor-pointer hover:bg-white/10 transition-colors" onClick={() => setIsConsoleExpanded(!isConsoleExpanded)}>
+                   <div className="flex items-center gap-2">
+                     <span className="font-bold uppercase tracking-widest text-[9px] text-white">Console Output</span>
+                     {isExecuting && <span className="animate-pulse text-emerald-500 font-bold tracking-widest text-[9px] uppercase">Executing...</span>}
+                     {(!isExecuting && (codeOutput || codeStderr)) && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>}
+                   </div>
+                   <div className="flex items-center gap-3">
+                     {isConsoleExpanded && (
+                       <div className="flex items-center gap-3 mr-2" onClick={(e) => e.stopPropagation()}>
+                         <button 
+                           onClick={() => {
+                             navigator.clipboard.writeText((codeOutput + '\n' + codeStderr).trim());
+                             toast.success('Output copied');
+                           }}
+                           className="text-[9px] uppercase tracking-widest font-black hover:text-white transition-colors disabled:opacity-50"
+                           disabled={!codeOutput && !codeStderr}
+                         >
+                           Copy
+                         </button>
+                         <button 
+                           onClick={() => { setCodeOutput(''); setCodeStderr(''); }}
+                           className="text-[9px] uppercase tracking-widest font-black hover:text-white transition-colors disabled:opacity-50"
+                           disabled={!codeOutput && !codeStderr && !isExecuting}
+                         >
+                           Clear
+                         </button>
+                       </div>
+                     )}
+                     <span className="text-[10px] transform transition-transform" style={{ rotate: isConsoleExpanded ? '180deg' : '0deg' }}>▼</span>
+                   </div>
+                </div>
+                
+                {isConsoleExpanded && (
+                  <div className="flex-1 overflow-auto p-4 custom-scrollbar relative">
+                     {isExecuting && (
+                       <div className="absolute inset-0 flex items-center justify-center bg-[#050505]/50 backdrop-blur-sm z-10">
+                         <div className="flex flex-col items-center gap-2 text-emerald-500">
+                           <div className="w-4 h-4 rounded-full border-2 border-emerald-500/30 border-t-emerald-500 animate-spin" />
+                           <span className="text-[9px] uppercase tracking-widest font-black animate-pulse">Running Code...</span>
+                         </div>
+                       </div>
+                     )}
+                     {codeOutput && <pre className="text-emerald-400/90 whitespace-pre-wrap leading-relaxed font-[Consolas,Monaco,monospace]">{codeOutput}</pre>}
+                     {codeStderr && <pre className="text-rose-400/90 whitespace-pre-wrap leading-relaxed mt-2 font-[Consolas,Monaco,monospace]">{codeStderr}</pre>}
+                     {!codeOutput && !codeStderr && !isExecuting && (
+                       <div className="h-full flex items-center justify-center">
+                         <span className="text-white/20 italic font-mono">Run your code to see the output here...</span>
+                       </div>
+                     )}
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
-            <MockWhiteboard roomId={activeRoom?.id || ''} isReadonly={isReadonly} />
+            <div className="absolute inset-0">
+              <MockWhiteboard roomId={activeRoom?.id || ''} isReadonly={isReadonly} />
+            </div>
           )}
         </div>
       </main>
