@@ -35,6 +35,21 @@ function getLogoUrl(company: string) {
   return LOGO_PATHS[company] || null;
 }
 
+function getCompanyHex(company: string) {
+  return COMPANY_BRAND[company]?.hex || '#6366f1';
+}
+
+function getCompanyColor(company: string) {
+  return COMPANY_BRAND[company]?.gradient || 'from-primary to-indigo-600';
+}
+
+function getColor(tags: string[]) {
+  for (const tag of tags) {
+    if (COMPANY_BRAND[tag]) return COMPANY_BRAND[tag].gradient;
+  }
+  return 'from-primary to-indigo-600';
+}
+
 function CompanyLogoImg({ company }: { company: string }) {
   const logo = getLogoUrl(company);
   const brand = COMPANY_BRAND[company];
