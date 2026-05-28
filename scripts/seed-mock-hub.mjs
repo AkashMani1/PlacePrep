@@ -518,62 +518,47 @@ function generateCompanyQuestions(company, assignIdx, diff) {
   return list;
 }
 
-const ASSESSMENTS_RAW = [
-  // TCS
+const diffsList = ['Medium', 'Easy', 'Medium', 'Hard', 'Medium', 'Easy', 'Medium', 'Hard', 'Medium', 'Easy'];
+
+const tcsAssessments = [
   { id: 'tcs-nqt-2026', title: 'TCS NQT Simulator', category: 'Campus Drive', description: 'Complete simulation of TCS NQT: Quant, Verbal, Logical & Coding.', durationMinutes: 190, totalQuestions: 82, difficulty: 'Medium', companyTags: ['TCS'] },
   { id: 'tcs-nqt-ninja-2026', title: 'TCS NQT Ninja Prep Mock', category: 'Campus Drive', description: 'Foundation and Advanced sections targeted for TCS Ninja placement (approx. 3.6 LPA). Duration 190 mins.', durationMinutes: 190, totalQuestions: 82, difficulty: 'Easy', companyTags: ['TCS'] },
   { id: 'tcs-nqt-digital-2026', title: 'TCS NQT Digital Prep Mock', category: 'Campus Drive', description: 'Foundation and Advanced sections targeted for TCS Digital placement (approx. 7.0 LPA). Duration 190 mins.', durationMinutes: 190, totalQuestions: 82, difficulty: 'Medium', companyTags: ['TCS'] },
   { id: 'tcs-nqt-prime-2026', title: 'TCS NQT Prime Prep Mock', category: 'Campus Drive', description: 'Foundation and Advanced sections targeted for TCS Prime placement (approx. 9.0-11.5 LPA). Duration 190 mins.', durationMinutes: 190, totalQuestions: 82, difficulty: 'Hard', companyTags: ['TCS'] },
   { id: 'tcs-nqt-grand-2026', title: 'TCS NQT Grand Simulation Mock', category: 'Campus Drive', description: 'Ultimate simulated TCS NQT mixed exam with mixed difficulty covering all Ninja, Digital, and Prime roles.', durationMinutes: 190, totalQuestions: 82, difficulty: 'Medium', companyTags: ['TCS'] },
+  { id: 'tcs-nqt-adv-2026', title: 'TCS NQT Advanced Practice', category: 'Campus Drive', description: 'Advanced section focus for TCS Prime/Digital roles. Duration 190 mins.', durationMinutes: 190, totalQuestions: 82, difficulty: 'Easy', companyTags: ['TCS'] },
+  { id: 'tcs-nqt-ninja-v2', title: 'TCS NQT Ninja Simulator v2', category: 'Campus Drive', description: 'High-fidelity simulation matching current TCS Ninja recruitment guidelines.', durationMinutes: 190, totalQuestions: 82, difficulty: 'Medium', companyTags: ['TCS'] },
+  { id: 'tcs-nqt-digital-v2', title: 'TCS NQT Digital Simulator v2', category: 'Campus Drive', description: 'Advanced system and coding challenges matching TCS Digital hiring standards.', durationMinutes: 190, totalQuestions: 82, difficulty: 'Hard', companyTags: ['TCS'] },
+  { id: 'tcs-nqt-prime-v2', title: 'TCS NQT Prime Simulator v2', category: 'Campus Drive', description: 'Elite competitive programming and logic questions for TCS Prime roles (9-11 LPA).', durationMinutes: 190, totalQuestions: 82, difficulty: 'Medium', companyTags: ['TCS'] },
+  { id: 'tcs-nqt-grand-v2', title: 'TCS NQT Grand Simulator v2', category: 'Campus Drive', description: 'Full-length mixed difficulty national qualifier simulation covering all sections.', durationMinutes: 190, totalQuestions: 82, difficulty: 'Easy', companyTags: ['TCS'] },
+];
 
-  // Amazon
-  { id: 'amz-a1', title: 'Amazon OA Simulator 1', category: 'FAANG OA', description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.', durationMinutes: 90, totalQuestions: 17, difficulty: 'Medium', companyTags: ['Amazon'] },
-  { id: 'amz-a2', title: 'Amazon OA Simulator 2', category: 'FAANG OA', description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.', durationMinutes: 90, totalQuestions: 17, difficulty: 'Medium', companyTags: ['Amazon'] },
-  { id: 'amz-a3', title: 'Amazon OA Simulator 3', category: 'FAANG OA', description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.', durationMinutes: 90, totalQuestions: 17, difficulty: 'Hard', companyTags: ['Amazon'] },
-  { id: 'amz-a4', title: 'Amazon OA Simulator 4', category: 'FAANG OA', description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.', durationMinutes: 90, totalQuestions: 17, difficulty: 'Hard', companyTags: ['Amazon'] },
-  { id: 'amz-a5', title: 'Amazon OA Simulator 5', category: 'FAANG OA', description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.', durationMinutes: 90, totalQuestions: 17, difficulty: 'Hard', companyTags: ['Amazon'] },
+const otherCompanies = [
+  { tag: 'Amazon', prefix: 'amz', title: 'Amazon OA Simulator', duration: 90, qs: 17, cat: 'FAANG OA', desc: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.' },
+  { tag: 'Accenture', prefix: 'acc', title: 'Accenture Cognitive Prep', duration: 90, qs: 90, cat: 'Campus Drive', desc: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).' },
+  { tag: 'Cognizant', prefix: 'cog', title: 'Cognizant GenC Mock', duration: 120, qs: 50, cat: 'Campus Drive', desc: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.' },
+  { tag: 'Infosys', prefix: 'inf', title: 'Infosys OA Engine', duration: 100, qs: 54, cat: 'Campus Drive', desc: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.' },
+  { tag: 'Wipro', prefix: 'wip', title: 'Wipro NLTH Mock', duration: 115, qs: 50, cat: 'Campus Drive', desc: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.' },
+  { tag: 'Capgemini', prefix: 'cap', title: 'Capgemini Exceller', duration: 84, qs: 48, cat: 'Campus Drive', desc: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.' },
+  { tag: 'Deloitte', prefix: 'del', title: 'Deloitte Assessment', duration: 75, qs: 75, cat: 'Campus Drive', desc: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.' },
+];
 
-  // Accenture
-  { id: 'acc-a1', title: 'Accenture Cognitive Prep 1', category: 'Campus Drive', description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).', durationMinutes: 90, totalQuestions: 90, difficulty: 'Easy', companyTags: ['Accenture'] },
-  { id: 'acc-a2', title: 'Accenture Cognitive Prep 2', category: 'Campus Drive', description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).', durationMinutes: 90, totalQuestions: 90, difficulty: 'Easy', companyTags: ['Accenture'] },
-  { id: 'acc-a3', title: 'Accenture Cognitive Prep 3', category: 'Campus Drive', description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).', durationMinutes: 90, totalQuestions: 90, difficulty: 'Medium', companyTags: ['Accenture'] },
-  { id: 'acc-a4', title: 'Accenture Cognitive Prep 4', category: 'Campus Drive', description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).', durationMinutes: 90, totalQuestions: 90, difficulty: 'Medium', companyTags: ['Accenture'] },
-  { id: 'acc-a5', title: 'Accenture Cognitive Prep 5', category: 'Campus Drive', description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).', durationMinutes: 90, totalQuestions: 90, difficulty: 'Medium', companyTags: ['Accenture'] },
+const generatedAssessments = otherCompanies.flatMap(c => 
+  Array.from({ length: 10 }, (_, i) => ({
+    id: `${c.prefix}-a${i + 1}`,
+    title: `${c.title} ${i + 1}`,
+    category: c.cat,
+    description: c.desc,
+    durationMinutes: c.duration,
+    totalQuestions: c.qs,
+    difficulty: diffsList[i],
+    companyTags: [c.tag],
+  }))
+);
 
-  // Cognizant
-  { id: 'cog-a1', title: 'Cognizant GenC Mock 1', category: 'Campus Drive', description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.', durationMinutes: 120, totalQuestions: 50, difficulty: 'Easy', companyTags: ['Cognizant'] },
-  { id: 'cog-a2', title: 'Cognizant GenC Mock 2', category: 'Campus Drive', description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.', durationMinutes: 120, totalQuestions: 50, difficulty: 'Medium', companyTags: ['Cognizant'] },
-  { id: 'cog-a3', title: 'Cognizant GenC Mock 3', category: 'Campus Drive', description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.', durationMinutes: 120, totalQuestions: 50, difficulty: 'Medium', companyTags: ['Cognizant'] },
-  { id: 'cog-a4', title: 'Cognizant GenC Mock 4', category: 'Campus Drive', description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.', durationMinutes: 120, totalQuestions: 50, difficulty: 'Hard', companyTags: ['Cognizant'] },
-  { id: 'cog-a5', title: 'Cognizant GenC Mock 5', category: 'Campus Drive', description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.', durationMinutes: 120, totalQuestions: 50, difficulty: 'Medium', companyTags: ['Cognizant'] },
-
-  // Infosys
-  { id: 'inf-a1', title: 'Infosys OA Engine 1', category: 'Campus Drive', description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.', durationMinutes: 100, totalQuestions: 54, difficulty: 'Medium', companyTags: ['Infosys'] },
-  { id: 'inf-a2', title: 'Infosys OA Engine 2', category: 'Campus Drive', description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.', durationMinutes: 100, totalQuestions: 54, difficulty: 'Medium', companyTags: ['Infosys'] },
-  { id: 'inf-a3', title: 'Infosys OA Engine 3', category: 'Campus Drive', description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.', durationMinutes: 100, totalQuestions: 54, difficulty: 'Medium', companyTags: ['Infosys'] },
-  { id: 'inf-a4', title: 'Infosys OA Engine 4', category: 'Campus Drive', description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.', durationMinutes: 100, totalQuestions: 54, difficulty: 'Hard', companyTags: ['Infosys'] },
-  { id: 'inf-a5', title: 'Infosys OA Engine 5', category: 'Campus Drive', description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.', durationMinutes: 100, totalQuestions: 54, difficulty: 'Medium', companyTags: ['Infosys'] },
-
-  // Wipro
-  { id: 'wip-a1', title: 'Wipro NLTH Mock 1', category: 'Campus Drive', description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.', durationMinutes: 115, totalQuestions: 50, difficulty: 'Easy', companyTags: ['Wipro'] },
-  { id: 'wip-a2', title: 'Wipro NLTH Mock 2', category: 'Campus Drive', description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.', durationMinutes: 115, totalQuestions: 50, difficulty: 'Easy', companyTags: ['Wipro'] },
-  { id: 'wip-a3', title: 'Wipro NLTH Mock 3', category: 'Campus Drive', description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.', durationMinutes: 115, totalQuestions: 50, difficulty: 'Medium', companyTags: ['Wipro'] },
-  { id: 'wip-a4', title: 'Wipro NLTH Mock 4', category: 'Campus Drive', description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.', durationMinutes: 115, totalQuestions: 50, difficulty: 'Medium', companyTags: ['Wipro'] },
-  { id: 'wip-a5', title: 'Wipro NLTH Mock 5', category: 'Campus Drive', description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.', durationMinutes: 115, totalQuestions: 50, difficulty: 'Medium', companyTags: ['Wipro'] },
-
-  // Capgemini
-  { id: 'cap-a1', title: 'Capgemini Exceller 1', category: 'Campus Drive', description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.', durationMinutes: 84, totalQuestions: 48, difficulty: 'Easy', companyTags: ['Capgemini'] },
-  { id: 'cap-a2', title: 'Capgemini Exceller 2', category: 'Campus Drive', description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.', durationMinutes: 84, totalQuestions: 48, difficulty: 'Medium', companyTags: ['Capgemini'] },
-  { id: 'cap-a3', title: 'Capgemini Exceller 3', category: 'Campus Drive', description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.', durationMinutes: 84, totalQuestions: 48, difficulty: 'Medium', companyTags: ['Capgemini'] },
-  { id: 'cap-a4', title: 'Capgemini Exceller 4', category: 'Campus Drive', description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.', durationMinutes: 84, totalQuestions: 48, difficulty: 'Medium', companyTags: ['Capgemini'] },
-  { id: 'cap-a5', title: 'Capgemini Exceller 5', category: 'Campus Drive', description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.', durationMinutes: 84, totalQuestions: 48, difficulty: 'Medium', companyTags: ['Capgemini'] },
-
-  // Deloitte
-  { id: 'del-a1', title: 'Deloitte Assessment 1', category: 'Campus Drive', description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.', durationMinutes: 75, totalQuestions: 75, difficulty: 'Easy', companyTags: ['Deloitte'] },
-  { id: 'del-a2', title: 'Deloitte Assessment 2', category: 'Campus Drive', description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.', durationMinutes: 75, totalQuestions: 75, difficulty: 'Medium', companyTags: ['Deloitte'] },
-  { id: 'del-a3', title: 'Deloitte Assessment 3', category: 'Campus Drive', description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.', durationMinutes: 75, totalQuestions: 75, difficulty: 'Medium', companyTags: ['Deloitte'] },
-  { id: 'del-a4', title: 'Deloitte Assessment 4', category: 'Campus Drive', description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.', durationMinutes: 75, totalQuestions: 75, difficulty: 'Medium', companyTags: ['Deloitte'] },
-  { id: 'del-a5', title: 'Deloitte Assessment 5', category: 'Campus Drive', description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.', durationMinutes: 75, totalQuestions: 75, difficulty: 'Medium', companyTags: ['Deloitte'] },
+const ASSESSMENTS_RAW = [
+  ...tcsAssessments,
+  ...generatedAssessments,
 ];
 
 const ASSESSMENTS = ASSESSMENTS_RAW.map(a => ({
@@ -607,13 +592,21 @@ for (const a of ASSESSMENTS_RAW) {
   );
 
   let assignIdx = 1;
-  if (a.id.includes('ninja')) assignIdx = 2;
-  else if (a.id.includes('digital')) assignIdx = 3;
-  else if (a.id.includes('prime')) assignIdx = 4;
-  else if (a.id.includes('grand')) assignIdx = 5;
-  else {
-    const lastChar = a.id.slice(-1);
-    const parsed = parseInt(lastChar);
+  if (a.id.startsWith('tcs-')) {
+    if (a.id === 'tcs-nqt-2026') assignIdx = 1;
+    else if (a.id === 'tcs-nqt-ninja-2026') assignIdx = 2;
+    else if (a.id === 'tcs-nqt-digital-2026') assignIdx = 3;
+    else if (a.id === 'tcs-nqt-prime-2026') assignIdx = 4;
+    else if (a.id === 'tcs-nqt-grand-2026') assignIdx = 5;
+    else if (a.id === 'tcs-nqt-adv-2026') assignIdx = 6;
+    else if (a.id === 'tcs-nqt-ninja-v2') assignIdx = 7;
+    else if (a.id === 'tcs-nqt-digital-v2') assignIdx = 8;
+    else if (a.id === 'tcs-nqt-prime-v2') assignIdx = 9;
+    else if (a.id === 'tcs-nqt-grand-v2') assignIdx = 10;
+  } else {
+    // For other companies, parse trailing digits
+    const lastPart = a.id.split('-').pop(); // e.g. 'a6' or '6'
+    const parsed = parseInt(lastPart.replace('a', ''));
     if (!isNaN(parsed)) {
       assignIdx = parsed;
     }
@@ -672,15 +665,19 @@ async function seed() {
 
   // 3. Verify
   console.log('\n🔍 Verifying seeded data...');
-  const [aCount, qCount] = await Promise.all([
-    fetch(`${BASE}/assessments?select=id`, { headers: H }).then(r => r.json()),
-    fetch(`${BASE}/questions?select=id`, { headers: H }).then(r => r.json()),
+  const [aResVerify, qResVerify] = await Promise.all([
+    fetch(`${BASE}/assessments`, { method: 'HEAD', headers: { ...H, 'Prefer': 'count=exact' } }),
+    fetch(`${BASE}/questions`, { method: 'HEAD', headers: { ...H, 'Prefer': 'count=exact' } }),
   ]);
-  console.log(`   Assessments in DB: ${Array.isArray(aCount) ? aCount.length : 'error'}`);
-  console.log(`   Questions in DB:   ${Array.isArray(qCount) ? qCount.length : 'error'}`);
+  const aRange = aResVerify.headers.get('content-range');
+  const qRange = qResVerify.headers.get('content-range');
+  const aCountVal = aRange ? parseInt(aRange.split('/').pop()) : 0;
+  const qCountVal = qRange ? parseInt(qRange.split('/').pop()) : 0;
+
+  console.log(`   Assessments in DB: ${aCountVal}`);
+  console.log(`   Questions in DB:   ${qCountVal}`);
   
-  const success = Array.isArray(aCount) && aCount.length >= ASSESSMENTS.length &&
-                  Array.isArray(qCount) && qCount.length >= QUESTIONS.length;
+  const success = aCountVal >= ASSESSMENTS.length && qCountVal >= QUESTIONS.length;
   
   console.log('\n' + (success ? '✅ SEEDING COMPLETE — DB IS LIVE!' : '⚠️  Seeding incomplete, check errors above'));
 }
