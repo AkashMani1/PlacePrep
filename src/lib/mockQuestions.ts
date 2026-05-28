@@ -1,152 +1,979 @@
 import { Question } from './types';
 
-export const MOCK_QUESTIONS: Question[] = [
-  // ── TCS NQT: Quantitative ─────────────────────────────────────────────
-  { id:'tcs-q1', title:'Simple Interest', content:'A sum doubles in 10 years at simple interest. In how many years will it triple?', type:'aptitude', difficulty:'Easy', tags:['Math','Interest','TCS'], company:'TCS', topic:'Quantitative', options:['15 years','20 years','25 years','30 years'], correctAnswer:1, solutionExplanation:'Rate=100/10=10%. To triple, 200/10=20 years.', estimatedTimeSeconds:60 },
-  { id:'tcs-q2', title:'Profit & Loss', content:'A sells an article to B at 20% profit. B sells to C at 10% loss. If C pays ₹540, what did A pay?', type:'aptitude', difficulty:'Easy', tags:['Math','Profit','TCS'], company:'TCS', topic:'Quantitative', options:['₹400','₹450','₹500','₹550'], correctAnswer:2, solutionExplanation:'Let A cost=x. B=1.2x, C=1.2x*0.9=1.08x=540, x=500.', estimatedTimeSeconds:90 },
-  { id:'tcs-q3', title:'Time & Work', content:'A can do a job in 12 days, B in 15 days. Working together, how many days?', type:'aptitude', difficulty:'Easy', tags:['Math','Work','TCS'], company:'TCS', topic:'Quantitative', options:['6','6.67','7','7.5'], correctAnswer:1, solutionExplanation:'1/12+1/15=9/60=3/20. Days=20/3≈6.67.', estimatedTimeSeconds:60 },
-  { id:'tcs-q4', title:'Percentage', content:'If 40% of a number is 200, what is 75% of that number?', type:'aptitude', difficulty:'Easy', tags:['Math','Percentage','TCS'], company:'TCS', topic:'Quantitative', options:['350','375','400','425'], correctAnswer:1, solutionExplanation:'Number=200/0.4=500. 75% of 500=375.', estimatedTimeSeconds:45 },
-  { id:'tcs-q5', title:'Ratio & Proportion', content:'A:B=3:4, B:C=5:6. Find A:B:C.', type:'aptitude', difficulty:'Medium', tags:['Math','Ratio','TCS'], company:'TCS', topic:'Quantitative', options:['15:20:24','3:5:6','15:20:18','9:12:16'], correctAnswer:0, solutionExplanation:'B LCM=20. A=15, B=20, C=24.', estimatedTimeSeconds:90 },
-  { id:'tcs-q6', title:'Compound Interest', content:'Find CI on ₹10000 at 10% for 2 years compounded annually.', type:'aptitude', difficulty:'Easy', tags:['Math','CI','TCS'], company:'TCS', topic:'Quantitative', options:['₹2000','₹2100','₹2200','₹2500'], correctAnswer:1, solutionExplanation:'A=10000(1.1)²=12100. CI=2100.', estimatedTimeSeconds:60 },
-  { id:'tcs-q7', title:'Speed & Distance', content:'A train 150m long passes a pole in 15 sec. Find its speed in km/h.', type:'aptitude', difficulty:'Easy', tags:['Math','Speed','TCS'], company:'TCS', topic:'Quantitative', options:['30','36','40','45'], correctAnswer:1, solutionExplanation:'Speed=150/15=10m/s=36km/h.', estimatedTimeSeconds:45 },
-  { id:'tcs-q8', title:'Averages', content:'Average of 5 numbers is 20. If one number is excluded, average becomes 18. Find excluded number.', type:'aptitude', difficulty:'Easy', tags:['Math','Average','TCS'], company:'TCS', topic:'Quantitative', options:['24','26','28','30'], correctAnswer:2, solutionExplanation:'Sum=100, remaining=72, excluded=28.', estimatedTimeSeconds:45 },
+// Seeded deterministic shuffler for randomized stable options
+function getShuffledOptions(correctStr: string, distractors: string[], seed: number) {
+  const rawList = [correctStr, ...distractors.slice(0, 3)];
+  // Basic alphabetic sorting first to guarantee normalization
+  rawList.sort();
 
-  // ── TCS NQT: Logical ──────────────────────────────────────────────────
-  { id:'tcs-q9', title:'Pattern Series', content:'Find the missing number: 2, 6, 12, 20, 30, ?', type:'aptitude', difficulty:'Easy', tags:['Logical','Sequence','TCS'], company:'TCS', topic:'Logical', options:['40','42','44','48'], correctAnswer:1, solutionExplanation:'Differences: 4,6,8,10,12. Next=30+12=42.', estimatedTimeSeconds:60 },
-  { id:'tcs-q10', title:'Blood Relations', content:'Pointing to a photo, Arun said "He is the son of my mother\'s only daughter." How is the person related to Arun?', type:'aptitude', difficulty:'Medium', tags:['Logical','Relations','TCS'], company:'TCS', topic:'Logical', options:['Son','Nephew','Brother','Father'], correctAnswer:0, solutionExplanation:'Mother\'s only daughter = Arun\'s sister or Arun (if female). Son of that person = Arun\'s son/nephew. If Arun is male, mother\'s only daughter is his sister, so her son is his nephew. But "my mother\'s only daughter" could be Arun if female - son.', estimatedTimeSeconds:90 },
-  { id:'tcs-q11', title:'Coding-Decoding', content:'If COMPUTER=FRPSXWHU, then DATA=?', type:'aptitude', difficulty:'Easy', tags:['Logical','Coding','TCS'], company:'TCS', topic:'Logical', options:['GDWD','EDWD','FCVC','GDXD'], correctAnswer:0, solutionExplanation:'Each letter +3: D→G, A→D, T→W, A→D = GDWD.', estimatedTimeSeconds:60 },
-  { id:'tcs-q12', title:'Syllogism', content:'All dogs are animals. All animals are living beings. Conclusion: All dogs are living beings.', type:'aptitude', difficulty:'Easy', tags:['Logical','Syllogism','TCS'], company:'TCS', topic:'Logical', options:['True','False','Cannot determine','Partially true'], correctAnswer:0, solutionExplanation:'Valid syllogism - transitive relation holds.', estimatedTimeSeconds:45 },
+  const listWithIndex = rawList.map((item, index) => ({ item, index }));
+  listWithIndex.sort((a, b) => {
+    const valA = (a.item.charCodeAt(0) || 0) + a.item.length + seed + a.index;
+    const valB = (b.item.charCodeAt(0) || 0) + b.item.length + seed + b.index;
+    const hashA = Math.sin(valA) * 1000;
+    const hashB = Math.sin(valB) * 1000;
+    return (hashA - Math.floor(hashA)) - (hashB - Math.floor(hashB));
+  });
 
-  // ── TCS NQT: Verbal ───────────────────────────────────────────────────
-  { id:'tcs-q13', title:'Synonym', content:'Choose the synonym of "Ephemeral":', type:'aptitude', difficulty:'Easy', tags:['Verbal','Synonym','TCS'], company:'TCS', topic:'Verbal', options:['Permanent','Fleeting','Sturdy','Ancient'], correctAnswer:1, solutionExplanation:'Ephemeral means short-lived, fleeting.', estimatedTimeSeconds:30 },
-  { id:'tcs-q14', title:'Antonym', content:'Choose the antonym of "Benevolent":', type:'aptitude', difficulty:'Easy', tags:['Verbal','Antonym','TCS'], company:'TCS', topic:'Verbal', options:['Generous','Malevolent','Kind','Warm'], correctAnswer:1, solutionExplanation:'Benevolent=kind, opposite=malevolent.', estimatedTimeSeconds:30 },
-  { id:'tcs-q15', title:'Sentence Correction', content:'Which is grammatically correct?', type:'aptitude', difficulty:'Medium', tags:['Verbal','Grammar','TCS'], company:'TCS', topic:'Verbal', options:['He don\'t know nothing','He doesn\'t know anything','He don\'t knows anything','He doesn\'t knows nothing'], correctAnswer:1, solutionExplanation:'Correct subject-verb agreement and no double negative.', estimatedTimeSeconds:45 },
+  const options = listWithIndex.map(x => x.item);
+  const correctIdx = options.indexOf(correctStr);
+  return { options, correctAnswer: correctIdx };
+}
 
-  // ── TCS NQT: Coding ───────────────────────────────────────────────────
-  { id:'tcs-q16', title:'Two Sum', content:'Given an array of integers and a target, return indices of two numbers that add up to the target. Input: [2,7,11,15], target=9', type:'coding', difficulty:'Easy', tags:['Array','Hash','TCS'], company:'TCS', topic:'DSA', options:['O(n²) brute force only','Use HashMap for O(n)','Sort and binary search O(nlogn)','Not possible'], correctAnswer:1, solutionExplanation:'HashMap stores complement. One pass O(n).', estimatedTimeSeconds:120 },
-  { id:'tcs-q17', title:'Reverse Linked List', content:'What is the time complexity of reversing a singly linked list iteratively?', type:'coding', difficulty:'Easy', tags:['LinkedList','TCS'], company:'TCS', topic:'DSA', options:['O(1)','O(n)','O(n²)','O(log n)'], correctAnswer:1, solutionExplanation:'Single traversal with pointer manipulation.', estimatedTimeSeconds:60 },
+// ── GENERALIZED COMPANY ONLINE ASSESSMENT GENERATOR ──────────────────
+export function generateCompanyQuestions(company: string, assignIdx: number, diff: 'Easy' | 'Medium' | 'Hard'): Question[] {
+  const list: Question[] = [];
+  const prefix = company === 'Amazon' ? 'amz' : company.toLowerCase().slice(0, 3);
+  const idPrefix = `${prefix}-a${assignIdx}-q`;
 
-  // ── Infosys ───────────────────────────────────────────────────────────
-  { id:'inf-q1', title:'Number System', content:'What is the remainder when 2^100 is divided by 3?', type:'aptitude', difficulty:'Medium', tags:['Math','Number','Infosys'], company:'Infosys', topic:'Quantitative', options:['0','1','2','Cannot determine'], correctAnswer:1, solutionExplanation:'2^1=2(r2), 2^2=4(r1), 2^3=8(r2), 2^4=16(r1). Pattern: odd power→r2, even→r1. 100 is even→r1.', estimatedTimeSeconds:90 },
-  { id:'inf-q2', title:'Probability', content:'Two dice are thrown. What is the probability that the sum is 7?', type:'aptitude', difficulty:'Easy', tags:['Math','Probability','Infosys'], company:'Infosys', topic:'Quantitative', options:['1/6','5/36','1/9','7/36'], correctAnswer:0, solutionExplanation:'Favorable outcomes: (1,6)(2,5)(3,4)(4,3)(5,2)(6,1)=6. Total=36. P=6/36=1/6.', estimatedTimeSeconds:60 },
-  { id:'inf-q3', title:'Puzzle - Arrangement', content:'5 people sit in a row. In how many ways can they be arranged?', type:'aptitude', difficulty:'Easy', tags:['Math','Permutation','Infosys'], company:'Infosys', topic:'Logical', options:['60','100','120','150'], correctAnswer:2, solutionExplanation:'5!=120.', estimatedTimeSeconds:30 },
-  { id:'inf-q4', title:'Data Interpretation', content:'A company revenue: 2022=₹40Cr, 2023=₹52Cr. What is % growth?', type:'aptitude', difficulty:'Easy', tags:['Math','DI','Infosys'], company:'Infosys', topic:'Quantitative', options:['20%','25%','30%','35%'], correctAnswer:2, solutionExplanation:'Growth=(52-40)/40*100=30%.', estimatedTimeSeconds:45 },
+  // Define section question counts based on the company's real Online Assessment (OA) rules
+  let quantCount = 0;
+  let verbalCount = 0;
+  let logicalCount = 0;
+  let techCount = 0;
+  let codingCount = 0;
 
-  // ── Wipro ─────────────────────────────────────────────────────────────
-  { id:'wip-q1', title:'Ages', content:'Father is 3x son\'s age. After 12 years, he\'ll be 2x. Find son\'s current age.', type:'aptitude', difficulty:'Easy', tags:['Math','Ages','Wipro'], company:'Wipro', topic:'Quantitative', options:['10','12','14','16'], correctAnswer:1, solutionExplanation:'3x+12=2(x+12). 3x+12=2x+24. x=12.', estimatedTimeSeconds:60 },
-  { id:'wip-q2', title:'Pipes & Cisterns', content:'Pipe A fills in 20 min, B empties in 30 min. Both open, time to fill?', type:'aptitude', difficulty:'Medium', tags:['Math','Pipes','Wipro'], company:'Wipro', topic:'Quantitative', options:['50 min','60 min','45 min','40 min'], correctAnswer:1, solutionExplanation:'Net rate=1/20-1/30=1/60. Time=60 min.', estimatedTimeSeconds:60 },
+  if (company === 'TCS') {
+    quantCount = 20;   // Numerical
+    verbalCount = 25;  // Verbal
+    logicalCount = 20; // Reasoning
+    techCount = 15;    // Advanced Quant & Reasoning
+    codingCount = 2;   // Coding
+  } else if (company === 'Amazon') {
+    quantCount = 5;
+    logicalCount = 5;
+    techCount = 5;     // CS/System Design MCQ
+    codingCount = 2;   // Advanced Coding
+  } else if (company === 'Accenture') {
+    quantCount = 15;   // Cognitive Quant
+    verbalCount = 17;  // Verbal
+    logicalCount = 18; // Abstract Reasoning
+    techCount = 40;    // Common Apps (12), Pseudocode (18), Network/Cloud (10)
+  } else if (company === 'Cognizant') {
+    quantCount = 10;
+    logicalCount = 10;
+    verbalCount = 10;
+    techCount = 18;    // Debugging (15), DBMS (3)
+    codingCount = 2;   // Coding
+  } else if (company === 'Infosys') {
+    quantCount = 10;
+    logicalCount = 19; // Logical (15) + Puzzles (4)
+    verbalCount = 20;
+    techCount = 5;     // Pseudocode
+  } else if (company === 'Wipro') {
+    quantCount = 16;
+    logicalCount = 14;
+    verbalCount = 18;
+    codingCount = 2;
+  } else if (company === 'Capgemini') {
+    verbalCount = 17;  // English Communication
+    techCount = 15;    // Pseudocode
+    logicalCount = 16; // Game-based Aptitude / Logic Puzzles
+  } else if (company === 'Deloitte') {
+    quantCount = 15;
+    logicalCount = 20;
+    verbalCount = 25;
+    techCount = 15;    // Tech/CS MCQs
+  }
 
-  // ── Accenture ─────────────────────────────────────────────────────────
-  { id:'acc-q1', title:'Abstract Reasoning', content:'In a 3x3 grid, shapes rotate 90° clockwise each cell. What comes in position (3,3)?', type:'aptitude', difficulty:'Medium', tags:['Abstract','Pattern','Accenture'], company:'Accenture', topic:'Logical', options:['Circle','Triangle rotated 270°','Square','Triangle rotated 90°'], correctAnswer:1, solutionExplanation:'Following 90° clockwise rotation pattern across grid.', estimatedTimeSeconds:90 },
-  { id:'acc-q2', title:'Critical Thinking', content:'All roses are flowers. Some flowers fade quickly. Conclusion: Some roses fade quickly.', type:'aptitude', difficulty:'Easy', tags:['Logical','Critical','Accenture'], company:'Accenture', topic:'Logical', options:['Definitely true','Probably true','Probably false','Cannot be determined'], correctAnswer:3, solutionExplanation:'We cannot determine which flowers fade - could be non-rose flowers.', estimatedTimeSeconds:60 },
-  { id:'acc-q3', title:'English Comprehension', content:'"The manager, along with the workers, ___ present." Fill in:', type:'aptitude', difficulty:'Easy', tags:['Verbal','Grammar','Accenture'], company:'Accenture', topic:'Verbal', options:['were','was','are','have been'], correctAnswer:1, solutionExplanation:'"Along with" doesn\'t change subject. Manager(singular)→was.', estimatedTimeSeconds:30 },
+  let globalQIdx = 1;
 
-  // ── Cognizant ─────────────────────────────────────────────────────────
-  { id:'cog-q1', title:'Debugging', content:'int arr[5]={1,2,3,4,5}; printf("%d",arr[5]); What happens?', type:'coding', difficulty:'Medium', tags:['C','Debug','Cognizant'], company:'Cognizant', topic:'Programming', options:['Prints 5','Prints 0','Undefined behavior','Compilation error'], correctAnswer:2, solutionExplanation:'arr[5] is out of bounds (valid: 0-4). Undefined behavior.', estimatedTimeSeconds:45 },
-  { id:'cog-q2', title:'OOP Concepts', content:'Which principle allows a child class to provide specific implementation of a parent method?', type:'coding', difficulty:'Easy', tags:['OOP','Java','Cognizant'], company:'Cognizant', topic:'Programming', options:['Encapsulation','Abstraction','Polymorphism (Override)','Inheritance'], correctAnswer:2, solutionExplanation:'Method overriding is runtime polymorphism.', estimatedTimeSeconds:30 },
+  // ──── SECTION 1: QUANTITATIVE APTITUDE ────
+  for (let i = 1; i <= quantCount; i++) {
+    const qSeed = assignIdx * 1000 + globalQIdx * 100;
+    const d1 = assignIdx * 2 + i + 4;
+    const d2 = assignIdx * 3 + i + 7;
+    const baseVal = assignIdx * 150 + i * 40 + 300;
 
-  // ── Capgemini ──────────────────────────────────────────────────────────
-  { id:'cap-q1', title:'Pseudo Code', content:'x=5; y=10; x=x+y; y=x-y; x=x-y; What are x,y?', type:'coding', difficulty:'Easy', tags:['Logic','Pseudo','Capgemini'], company:'Capgemini', topic:'Programming', options:['x=5,y=10','x=10,y=5','x=15,y=5','x=10,y=10'], correctAnswer:1, solutionExplanation:'Swap without temp: x=15,y=15-10=5,x=15-5=10. Result: x=10,y=5.', estimatedTimeSeconds:60 },
-  { id:'cap-q2', title:'Automata', content:'A DFA accepts strings ending with "01". Minimum states needed?', type:'coding', difficulty:'Hard', tags:['Theory','Automata','Capgemini'], company:'Capgemini', topic:'Programming', options:['2','3','4','5'], correctAnswer:1, solutionExplanation:'3 states: start, seen 0, seen 01(accept).', estimatedTimeSeconds:90 },
+    let title = `Aptitude (Q${globalQIdx})`;
+    let content = '';
+    let correctStr = '';
+    let distractors: string[] = [];
 
-  // ── Amazon OA ─────────────────────────────────────────────────────────
-  { id:'amz-q1', title:'Maximum Subarray', content:'Find the contiguous subarray with the largest sum in [-2,1,-3,4,-1,2,1,-5,4].', type:'coding', difficulty:'Hard', tags:['Array','DP','Amazon'], company:'Amazon', topic:'DSA', options:['4','6','7','10'], correctAnswer:1, solutionExplanation:'Kadane\'s algorithm: subarray [4,-1,2,1] = 6.', estimatedTimeSeconds:120 },
-  { id:'amz-q2', title:'LRU Cache', content:'Which data structure combination is optimal for O(1) get/put LRU Cache?', type:'coding', difficulty:'Hard', tags:['Design','HashMap','Amazon'], company:'Amazon', topic:'DSA', options:['Array + Stack','HashMap + Doubly Linked List','BST + Queue','Trie + Deque'], correctAnswer:1, solutionExplanation:'HashMap for O(1) lookup, DLL for O(1) insert/delete at ends.', estimatedTimeSeconds:90 },
-  { id:'amz-q3', title:'Number of Islands', content:'Given a 2D grid of 1s and 0s, count the number of islands. Which approach?', type:'coding', difficulty:'Medium', tags:['Graph','BFS','Amazon'], company:'Amazon', topic:'DSA', options:['Dynamic Programming','BFS/DFS flood fill','Binary Search','Greedy'], correctAnswer:1, solutionExplanation:'BFS/DFS from each unvisited 1, marking visited. Count connected components.', estimatedTimeSeconds:120 },
+    if (i % 4 === 1) {
+      title = `Time & Work (Q${globalQIdx})`;
+      content = `[Quantitative] Person A can complete a task in ${d1} days, and Person B can complete it in ${d2} days. If they work together, in how many days will they finish the task?`;
+      const ans = parseFloat(((d1 * d2) / (d1 + d2)).toFixed(2));
+      correctStr = `${ans} days`;
+      distractors = [
+        `${(ans + 1.2).toFixed(2)} days`,
+        `${(ans - 0.7).toFixed(2)} days`,
+        `${(ans * 1.15).toFixed(2)} days`
+      ];
+    } else if (i % 4 === 2) {
+      title = `Upstream Boat (Q${globalQIdx})`;
+      const v = assignIdx * 2 + 10;
+      const c = assignIdx + 1;
+      const dist = (v - c) * 4;
+      content = `[Quantitative] A vessel travels upstream with a still water speed of ${v} km/h. If the current flows at ${c} km/h, what is the total travel duration to row ${dist} km upstream?`;
+      const ansVal = 4;
+      correctStr = `${ansVal} hours`;
+      distractors = [`${ansVal + 1.5} hours`, `${ansVal - 1.2} hours`, `${(ansVal * 1.25).toFixed(1)} hours`];
+    } else if (i % 4 === 3) {
+      title = `Successive Discounts (Q${i})`;
+      content = `[Quantitative] Find the net selling price of an item marked at ₹${baseVal * 5} after successive discounts of 20% and 10%.`;
+      const ans = Math.round(baseVal * 5 * 0.8 * 0.9);
+      correctStr = `₹${ans}`;
+      distractors = [`₹${ans + 40}`, `₹${ans - 30}`, `₹${Math.round(ans * 1.12)}`];
+    } else {
+      title = `Exclusion Averages (Q${i})`;
+      const count = assignIdx + 5;
+      const avg = assignIdx * 4 + 25;
+      const newAvg = avg - 3;
+      const valExcluded = count * avg - (count - 1) * newAvg;
+      content = `[Quantitative] The average score of ${count} students in an exam is ${avg}. If one score is excluded, the new average becomes ${newAvg}. Find the excluded score.`;
+      correctStr = `${valExcluded}`;
+      distractors = [`${valExcluded + 6}`, `${valExcluded - 8}`, `${Math.round(valExcluded * 1.2)}`];
+    }
 
-  // ── Deloitte ──────────────────────────────────────────────────────────
-  { id:'del-q1', title:'Data Analysis', content:'A dataset has mean=50, std=10. What % lies between 40-60 (normal dist)?', type:'aptitude', difficulty:'Medium', tags:['Stats','Analysis','Deloitte'], company:'Deloitte', topic:'Quantitative', options:['50%','68%','95%','99%'], correctAnswer:1, solutionExplanation:'40-60 is ±1 std deviation = 68% by empirical rule.', estimatedTimeSeconds:45 },
-  { id:'del-q2', title:'Logical Deduction', content:'If all managers are leaders, and some leaders are innovators, which MUST be true?', type:'aptitude', difficulty:'Easy', tags:['Logical','Deduction','Deloitte'], company:'Deloitte', topic:'Logical', options:['All managers are innovators','Some managers may be innovators','No manager is an innovator','All innovators are managers'], correctAnswer:1, solutionExplanation:'Since some leaders are innovators and all managers are leaders, some managers MAY be innovators.', estimatedTimeSeconds:60 },
-];
+    const shuffled = getShuffledOptions(correctStr, distractors, qSeed);
 
-// ── Build assessments from questions ─────────────────────────────────────
+    list.push({
+      id: `${idPrefix}${globalQIdx}`,
+      title,
+      content,
+      type: 'aptitude',
+      difficulty: diff,
+      tags: ['Math', company, diff],
+      company,
+      topic: 'Quantitative',
+      options: shuffled.options,
+      correctAnswer: shuffled.correctAnswer,
+      solutionExplanation: `Calculated deterministically. Correct: ${correctStr}.`,
+      estimatedTimeSeconds: 75,
+    });
+    globalQIdx++;
+  }
+
+  // ──── SECTION 2: VERBAL ABILITY ────
+  const vocabData = [
+    { word: 'LUCID', syn: 'Clear and easy to understand', ant: 'Vague and hard to comprehend', dist1: 'Extremely detailed and complex', dist2: 'Kind and highly generous' },
+    { word: 'EPHEMERAL', syn: 'Temporary and short-lived', ant: 'Eternal and permanent', dist1: 'Quickly rotating in circles', dist2: 'Wise and showing keen judgment' },
+    { word: 'BENEVOLENT', syn: 'Kind and charitable', ant: 'Malevolent and hostile', dist1: 'Wise and highly logical', dist2: 'Careful and precise' },
+    { word: 'METICULOUS', syn: 'Extremely careful and precise', ant: 'Careless and sloppy', dist1: 'Wise and showing good judgment', dist2: 'Short-lived and transient' },
+    { word: 'SAGACIOUS', syn: 'Wise and showing keen judgment', ant: 'Ignorant and foolish', dist1: 'Kind and extremely generous', dist2: 'Meticulous and precise' },
+    { word: 'PRAGMATIC', syn: 'Practical and realistic', ant: 'Idealistic and impractical', dist1: 'Vague and highly ambiguous', dist2: 'Temporary and short-lived' },
+    { word: 'VIGILANT', syn: 'Watchful and alert to danger', ant: 'Negligent and careless', dist1: 'Wise and highly sagacious', dist2: 'Generous and charitable' },
+    { word: 'RESILIENT', syn: 'Able to recover quickly', ant: 'Fragile and easily broken', dist1: 'Clear and easy to read', dist2: 'Extremely slow and redundant' },
+    { word: 'AMBIGUOUS', syn: 'Open to double interpretation', ant: 'Clear and unambiguous', dist1: 'Careful and highly detailed', dist2: 'Kind and benevolent' },
+    { word: 'COGNIZANT', syn: 'Fully aware and mindful', ant: 'Ignorant and unaware', dist1: 'Temporary and short-lived', dist2: 'Practical and realistic' },
+    { word: 'REDUNDANT', syn: 'Unnecessary and superfluous', ant: 'Essential and necessary', dist1: 'Able to recover quickly', dist2: 'Wise and showing keen judgment' },
+    { word: 'UBIQUITOUS', syn: 'Present everywhere at once', ant: 'Rare and scarce', dist1: 'Temporary and short-lived', dist2: 'Open to double interpretation' },
+  ];
+
+  const prepData = [
+    { verb: 'absorbed', prep: 'in', noun: 'the detailed technical manual', dist1: 'with', dist2: 'at', dist3: 'on' },
+    { verb: 'comply', prep: 'with', noun: 'the security guidelines', dist1: 'to', dist2: 'at', dist3: 'by' },
+    { verb: 'proficient', prep: 'in', noun: 'cloud architecture design', dist1: 'at', dist2: 'for', dist3: 'with' },
+    { verb: 'accustomed', prep: 'to', noun: 'working under tight deadlines', dist1: 'with', dist2: 'in', dist3: 'at' },
+    { verb: 'interested', prep: 'in', noun: 'machine learning algorithms', dist1: 'on', dist2: 'for', dist3: 'at' },
+    { verb: 'capable', prep: 'of', noun: 'handling high-concurrency traffic', dist1: 'for', dist2: 'to', dist3: 'in' },
+    { verb: 'responsible', prep: 'for', noun: 'deploying the production build', dist1: 'to', dist2: 'with', dist3: 'in' },
+    { verb: 'pleased', prep: 'with', noun: 'the candidate\'s performance', dist1: 'from', dist2: 'at', dist3: 'to' },
+    { verb: 'rely', prep: 'on', noun: 'distributed caching mechanisms', dist1: 'at', dist2: 'in', dist3: 'with' },
+    { verb: 'abstain', prep: 'from', noun: 'making unauthorized DB edits', dist1: 'to', dist2: 'by', dist3: 'with' },
+  ];
+
+  const svData = [
+    { subject: 'Every one of the applicants', verbSingular: 'has', verbPlural: 'have', predicate: 'submitted the placement form.' },
+    { subject: 'The team of expert engineers', verbSingular: 'is', verbPlural: 'are', predicate: 'currently resolving the outage.' },
+    { subject: 'Neither of the proposed solutions', verbSingular: 'meets', verbPlural: 'meet', predicate: 'the required performance metrics.' },
+    { subject: 'Each of the database transactions', verbSingular: 'requires', verbPlural: 'require', predicate: 'strict ACID verification.' },
+    { subject: 'A pack of high-performance servers', verbSingular: 'was', verbPlural: 'were', predicate: 'provisioned for the workload.' },
+    { subject: 'None of the submitted code blocks', verbSingular: 'contains', verbPlural: 'contain', predicate: 'any syntax or lint errors.' },
+    { subject: 'The collection of study modules', verbSingular: 'helps', verbPlural: 'help', predicate: 'candidates clear the placement rounds.' },
+    { subject: 'Either the team leads or the manager', verbSingular: 'approves', verbPlural: 'approve', predicate: 'the production release plan.' }
+  ];
+
+  const apData = [
+    { active: 'The manager delivered the presentation.', passive: 'The presentation was delivered by the manager.', dist1: 'The presentation is delivered by the manager.', dist2: 'The presentation has been delivered by the manager.' },
+    { active: 'The compiler detected the syntax error.', passive: 'The syntax error was detected by the compiler.', dist1: 'The syntax error is detected by the compiler.', dist2: 'The syntax error has been detected by the compiler.' },
+    { active: 'Akash wrote the optimized backend code.', passive: 'The optimized backend code was written by Akash.', dist1: 'The optimized backend code is written by Akash.', dist2: 'The optimized backend code was being write by Akash.' },
+    { active: 'The team deployed the application.', passive: 'The application was deployed by the team.', dist1: 'The application is deployed by the team.', dist2: 'The application has been deployed by the team.' },
+    { active: 'The system generated the report.', passive: 'The report was generated by the system.', dist1: 'The report is generated by the system.', dist2: 'The report has been generated by the system.' },
+    { active: 'The user clicked the button.', passive: 'The button was clicked by the user.', dist1: 'The button is clicked by the user.', dist2: 'The button has been clicked by the user.' },
+    { active: 'The server rejected the connection.', passive: 'The connection was rejected by the server.', dist1: 'The connection is rejected by the server.', dist2: 'The connection was being reject by the server.' },
+    { active: 'The algorithm sorted the dataset.', passive: 'The dataset was sorted by the algorithm.', dist1: 'The dataset is sorted by the algorithm.', dist2: 'The dataset has been sorted by the algorithm.' }
+  ];
+
+  for (let i = 1; i <= verbalCount; i++) {
+    const qSeed = assignIdx * 1000 + globalQIdx * 100;
+    let title = `Verbal (Q${globalQIdx})`;
+    let content = '';
+    let correctStr = '';
+    let distractors: string[] = [];
+
+    const mode = (assignIdx * 13 + i) % 4;
+
+    if (mode === 0) {
+      const idx = (assignIdx * 7 + i) % prepData.length;
+      const data = prepData[idx];
+      title = `Prepositions (Q${globalQIdx})`;
+      content = `[Verbal] Fill in the blank: "The candidate was fully ${data.verb} ___ ${data.noun}."`;
+      correctStr = data.prep;
+      distractors = [data.dist1, data.dist2, data.dist3];
+    } else if (mode === 1) {
+      const idx = (assignIdx * 5 + i) % svData.length;
+      const data = svData[idx];
+      title = `Subject-Verb Agreement (Q${globalQIdx})`;
+      content = `[Verbal] Choose the grammatically correct sentence structure representing Subject-Verb alignment:`;
+      correctStr = `${data.subject} ${data.verbSingular} ${data.predicate}`;
+      distractors = [
+        `${data.subject} ${data.verbPlural} ${data.predicate}`,
+        `${data.subject} ${data.verbSingular} being ${data.predicate}`,
+        `${data.subject} is submit ${data.predicate}`
+      ];
+    } else if (mode === 2) {
+      const idx = (assignIdx * 3 + i) % apData.length;
+      const data = apData[idx];
+      title = `Passive Form (Q${globalQIdx})`;
+      content = `[Verbal] Identify the correct passive voice representation for: "${data.active}"`;
+      correctStr = data.passive;
+      distractors = [data.dist1, data.dist2, 'The sentence cannot be converted.'];
+    } else {
+      const idx = (assignIdx * 11 + i) % vocabData.length;
+      const data = vocabData[idx];
+      title = `Vocabulary Synonyms (Q${globalQIdx})`;
+      content = `[Verbal] What is the closest synonym to the target vocabulary word: "${data.word}"?`;
+      correctStr = data.syn;
+      distractors = [data.ant, data.dist1, data.dist2];
+    }
+
+    const shuffled = getShuffledOptions(correctStr, distractors, qSeed);
+
+    list.push({
+      id: `${idPrefix}${globalQIdx}`,
+      title,
+      content,
+      type: 'aptitude',
+      difficulty: diff,
+      tags: ['Verbal', company, diff],
+      company,
+      topic: 'Verbal',
+      options: shuffled.options,
+      correctAnswer: shuffled.correctAnswer,
+      solutionExplanation: `Calculated grammatically. Correct: ${correctStr}.`,
+      estimatedTimeSeconds: 45,
+    });
+    globalQIdx++;
+  }
+
+  // ──── SECTION 3: LOGICAL REASONING ────
+  const decWords = ['RECURSION', 'ALGORITHM', 'DATABASE', 'POINTERS', 'COMPILER', 'SOFTWARE', 'NETWORK', 'FUNCTION', 'VARIABLE', 'ITERATION'];
+  const names = [['A', 'B', 'C', 'D'], ['W', 'X', 'Y', 'Z'], ['P', 'Q', 'R', 'S'], ['K', 'L', 'M', 'N']];
+  const syllogisms = [
+    { s1: 'software', s2: 'tools', s3: 'programs', term: 'software', follows: 'Both I and II follow' },
+    { s1: 'trees', s2: 'green things', s3: 'plants', term: 'trees', follows: 'Both I and II follow' },
+    { s1: 'books', s2: 'pages', s3: 'words', term: 'books', follows: 'Both I and II follow' },
+    { s1: 'cars', s2: 'vehicles', s3: 'engines', term: 'cars', follows: 'Both I and II follow' },
+  ];
+
+  for (let i = 1; i <= logicalCount; i++) {
+    const qSeed = assignIdx * 1000 + globalQIdx * 100;
+    let title = `Logical (Q${globalQIdx})`;
+    let content = '';
+    let correctStr = '';
+    let distractors: string[] = [];
+
+    const mode = (assignIdx * 11 + i) % 3;
+
+    if (mode === 0) {
+      title = `Coding-Decoding (Q${globalQIdx})`;
+      const wIdx = (assignIdx * 7 + i) % decWords.length;
+      const word = decWords[wIdx];
+      
+      // Simple swap adjacent characters encoding
+      let encoded = '';
+      for (let k = 0; k < word.length; k += 2) {
+        if (k + 1 < word.length) {
+          encoded += word[k + 1] + word[k];
+        } else {
+          encoded += word[k];
+        }
+      }
+      content = `[Logical] If COMPUTER is encoded as OCPMTURE, then how is "${word}" coded in this logic?`;
+      correctStr = encoded;
+      
+      // Plausible distractors
+      const rev = word.split('').reverse().join('');
+      const wrong1 = encoded.slice(1) + encoded[0];
+      const wrong2 = word.slice(1) + word[0];
+      distractors = [rev, wrong1, wrong2];
+    } else if (mode === 1) {
+      title = `Arrangements (Q${globalQIdx})`;
+      const group = names[(assignIdx + i) % names.length];
+      content = `[Logical] ${group[0]}, ${group[1]}, ${group[2]}, ${group[3]} sit in a row facing North. ${group[0]} is to the immediate right of ${group[1]}. ${group[2]} is between ${group[0]} and ${group[3]}. Who is sitting immediate left of ${group[3]}?`;
+      correctStr = group[2];
+      distractors = [group[0], group[1], 'Cannot be determined'];
+    } else {
+      title = `Syllogisms (Q${globalQIdx})`;
+      const syl = syllogisms[(assignIdx + i) % syllogisms.length];
+      content = `[Logical] Statements: All ${syl.s1} are ${syl.s2}. All ${syl.s2} are ${syl.s3}. Conclusions:\nI. All ${syl.term} are ${syl.s3}.\nII. Some ${syl.s2} are ${syl.term}.`;
+      correctStr = syl.follows;
+      distractors = ['Only I follows', 'Only II follows', 'Neither I nor II follows'];
+    }
+
+    const shuffled = getShuffledOptions(correctStr, distractors, qSeed);
+
+    list.push({
+      id: `${idPrefix}${globalQIdx}`,
+      title,
+      content,
+      type: 'aptitude',
+      difficulty: diff,
+      tags: ['Logical', company, diff],
+      company,
+      topic: 'Logical',
+      options: shuffled.options,
+      correctAnswer: shuffled.correctAnswer,
+      solutionExplanation: `Solved logically. Correct: ${correctStr}.`,
+      estimatedTimeSeconds: 60,
+    });
+    globalQIdx++;
+  }
+
+  // ──── SECTION 4: TECHNICAL / CS CORE MCQs ────
+  for (let i = 1; i <= techCount; i++) {
+    const qSeed = assignIdx * 1000 + globalQIdx * 100;
+    let title = `Technical (Q${globalQIdx})`;
+    let content = '';
+    let correctStr = '';
+    let distractors: string[] = [];
+
+    const mode = (assignIdx * 17 + i) % 20;
+
+    if (mode === 0) {
+      title = `Database Normalization (Q${globalQIdx})`;
+      content = `[Technical] Which normal form (NF) handles removing transitive dependencies to maintain high database consistency?`;
+      correctStr = 'Third Normal Form (3NF)';
+      distractors = ['Second Normal Form (2NF)', 'First Normal Form (1NF)', 'Boyce-Codd Normal Form (BCNF)'];
+    } else if (mode === 1) {
+      title = `Object Oriented Principles (Q${globalQIdx})`;
+      content = `[Technical] What OOP concept is exemplified when a child class implements a customized method inherited from its parent?`;
+      correctStr = 'Method Overriding (Runtime Polymorphism)';
+      distractors = ['Method Overloading (Compile-time)', 'Data Encapsulation', 'Multiple Inheritance'];
+    } else if (mode === 2) {
+      const bitX = (assignIdx * 3 + i + 4) % 15;
+      const bitY = (assignIdx * 2 + i + 6) % 15;
+      const bitAns = bitX & bitY;
+      title = `Bitwise Operations (Q${globalQIdx})`;
+      content = `[Technical] Pseudocode: What is the resulting decimal value of the bitwise expression: ${bitX} & ${bitY}?`;
+      correctStr = `${bitAns}`;
+      distractors = [`${bitX | bitY}`, `${bitX ^ bitY}`, `${bitAns + 3}`];
+    } else if (mode === 3) {
+      title = `Network Layers (Q${globalQIdx})`;
+      content = `[Technical] Which ISO/OSI model layer is responsible for safe, end-to-end transport routing, congestion management, and logical addressing?`;
+      correctStr = 'Network Layer';
+      distractors = ['Transport Layer', 'Data Link Layer', 'Physical Layer'];
+    } else if (mode === 4) {
+      title = `Unsorted Search Complexity (Q${globalQIdx})`;
+      content = `[Technical] What is the worst-case time complexity of finding an element in a raw, unsorted array of size N?`;
+      correctStr = 'O(N)';
+      distractors = ['O(log N)', 'O(N log N)', 'O(1)'];
+    } else if (mode === 5) {
+      title = `ACID Atomicity (Q${globalQIdx})`;
+      content = `[Technical] Which database ACID property ensures that all queries within a transaction block are executed successfully, or none are at all?`;
+      correctStr = 'Atomicity';
+      distractors = ['Consistency', 'Isolation', 'Durability'];
+    } else if (mode === 6) {
+      title = `Deadlock Conditions (Q${globalQIdx})`;
+      content = `[Technical] Which of the following is NOT one of Coffman\'s four necessary conditions for generating an operating system deadlock?`;
+      correctStr = 'Preemption';
+      distractors = ['Mutual Exclusion', 'Hold and Wait', 'Circular Wait'];
+    } else if (mode === 7) {
+      title = `CPU Scheduling (Q${globalQIdx})`;
+      content = `[Technical] Which CPU scheduling algorithm minimizes average response times specifically inside interactive, time-sharing multi-user OS environments?`;
+      correctStr = 'Round Robin (RR)';
+      distractors = ['First Come First Served (FCFS)', 'Shortest Job First (SJF)', 'Priority Scheduling'];
+    } else if (mode === 8) {
+      title = `Virtual Memory Paging (Q${globalQIdx})`;
+      content = `[Technical] Which operating system hardware/software management technique divides virtual memory spaces into fixed-size block frames?`;
+      correctStr = 'Paging';
+      distractors = ['Segmentation', 'Swapping', 'Dynamic Relocation'];
+    } else if (mode === 9) {
+      title = `SQL aggregate filter (Q${globalQIdx})`;
+      content = `[Technical] Which standard SQL query clause is utilized specifically to filter rows based on aggregated values or group functions?`;
+      correctStr = 'HAVING';
+      distractors = ['WHERE', 'GROUP BY', 'ORDER BY'];
+    } else if (mode === 10) {
+      title = `OOP Abstraction (Q${globalQIdx})`;
+      content = `[Technical] Which major object-oriented program design concept hides internal process implementation details, displaying only outer interface behavior?`;
+      correctStr = 'Abstraction';
+      distractors = ['Encapsulation', 'Inheritance', 'Polymorphism'];
+    } else if (mode === 11) {
+      title = `Graph Cycles (Q${globalQIdx})`;
+      content = `[Technical] Which graph traversal strategy is most standard for detecting back-edges or cycles inside a directed graph in linear time?`;
+      correctStr = 'Depth-First Search (DFS)';
+      distractors = ['Breadth-First Search (BFS)', 'Dijkstra\'s shortest algorithm', 'Binary Search'];
+    } else if (mode === 12) {
+      title = `Stack Data Structure (Q${globalQIdx})`;
+      content = `[Technical] Which application represents a core, primary real-world usage of a LIFO Stack data structure?`;
+      correctStr = 'Function call activation records tracking';
+      distractors = ['Process queue job scheduler', 'Printer buffer requests pool', 'Graph shortest path execution'];
+    } else if (mode === 13) {
+      title = `Hashing Collisions (Q${globalQIdx})`;
+      content = `[Technical] Which collision resolution strategy allocates a separate linked list for every bucket address inside a hash table?`;
+      correctStr = 'Chaining (Separate Chaining)';
+      distractors = ['Linear Probing', 'Quadratic Probing', 'Double Hashing'];
+    } else if (mode === 14) {
+      title = `HTTP Server Errors (Q${globalQIdx})`;
+      content = `[Technical] Which HTTP response status code indicates a generic Internal Server Error occurred on the server-side?`;
+      correctStr = '500';
+      distractors = ['404', '403', '200'];
+    } else if (mode === 15) {
+      title = `Process vs Thread (Q${globalQIdx})`;
+      content = `[Technical] What is the fundamental memory difference between an operating system process and a thread?`;
+      correctStr = 'Threads share process memory; processes possess isolated memory namespaces.';
+      distractors = ['Processes share memory; threads possess isolated memory namespaces.', 'Both processes and threads possess completely isolated memory namespaces.', 'Both processes and threads share a single system-wide memory namespace.'];
+    } else if (mode === 16) {
+      title = `Cache Mapping (Q${globalQIdx})`;
+      content = `[Technical] Which computer cache mapping strategy maps a memory block to one specific block line index exclusively?`;
+      correctStr = 'Direct Mapped Cache';
+      distractors = ['Fully Associative Cache', 'Set-Associative Cache', 'Random Cache'];
+    } else if (mode === 17) {
+      title = `AES Cryptography (Q${globalQIdx})`;
+      content = `[Technical] Which algorithm represents a widely utilized, highly secure symmetric-key block cryptographic standard?`;
+      correctStr = 'Advanced Encryption Standard (AES)';
+      distractors = ['Rivest-Shamir-Adleman (RSA)', 'Diffie-Hellman Key Exchange', 'Elliptic Curve Cryptography (ECC)'];
+    } else if (mode === 18) {
+      title = `Cache Evictions (Q${globalQIdx})`;
+      content = `[Technical] Which hardware cache replacement policy evicts the block that has not been accessed for the longest duration of time?`;
+      correctStr = 'Least Recently Used (LRU)';
+      distractors = ['Least Frequently Used (LFU)', 'First-In First-Out (FIFO)', 'Random Replacement'];
+    } else {
+      title = `Singleton Pattern (Q${globalQIdx})`;
+      content = `[Technical] Which software design pattern guarantees that a class has exactly one global instance and provides a single access point?`;
+      correctStr = 'Singleton Pattern';
+      distractors = ['Factory Pattern', 'Observer Pattern', 'Decorator Pattern'];
+    }
+
+    const shuffled = getShuffledOptions(correctStr, distractors, qSeed);
+
+    list.push({
+      id: `${idPrefix}${globalQIdx}`,
+      title,
+      content,
+      type: 'aptitude',
+      difficulty: diff,
+      tags: ['Technical', company, diff],
+      company,
+      topic: 'Logical', // Maps to logical/technical sections
+      options: shuffled.options,
+      correctAnswer: shuffled.correctAnswer,
+      solutionExplanation: `Calculated technically. Correct: ${correctStr}.`,
+      estimatedTimeSeconds: 60,
+    });
+    globalQIdx++;
+  }
+
+  // ──── SECTION 5: ADVANCED CODING (2 Questions) ────
+  const codingData = [
+    { title: 'Subarray Sum Kadane', content: 'Which optimal programmatic paradigm or technique computes the maximum contiguous subarray sum in O(N) linear time?', correct: "Kadane's Dynamic Programming Algorithm", dist1: 'Recursive Divide and Conquer', dist2: 'Two-pointer sliding sum' },
+    { title: 'Shortest Path Dijkstra', content: 'Which graph algorithm handles finding the single-source shortest path correctly on graphs containing positive edges in O(V^2 + E) or O(E log V) time?', correct: "Dijkstra's Greedy Shortest Path Algorithm", dist1: 'Floyd-Warshall All-Pairs Algorithm', dist2: 'Bellman-Ford Dynamic Algorithm' },
+    { title: 'MST Kruskal Strategy', content: 'Which greedy algorithm calculates the Minimum Spanning Tree (MST) of a connected, weighted graph by sorting all edges and adding them sequentially?', correct: "Kruskal's Greedy MST Algorithm", dist1: 'Prim\'s Dense Matrix MST Algorithm', dist2: 'Dijkstra\'s Shortest Path Algorithm' },
+    { title: 'LCS DP Complexity', content: 'What is the optimal worst-case time complexity to calculate the Longest Common Subsequence (LCS) of two strings of lengths M and N using dynamic programming?', correct: "O(M * N)", dist1: 'O(2^(M+N))', dist2: 'O(M + N)' },
+    { title: 'Floyd-Warshall DP', content: 'Which algorithmic strategy utilizes three nested loops to calculate shortest paths between all pairs of vertices on a graph containing vertices V?', correct: "Floyd-Warshall Dynamic All-Pairs Algorithm", dist1: 'Dijkstra\'s Greedy Strategy', dist2: 'Bellman-Ford Dynamic Relaxation' },
+    { title: 'BST Traversal Queue', content: 'Which data structure is utilized within level-order traversal of a Binary Search Tree (BST) to explore all nodes level-by-level starting from the root?', correct: "First-In First-Out (FIFO) Queue", dist1: 'Last-In First-Out (LIFO) Stack', dist2: 'Priority Heap Queue' },
+    { title: 'Matrix Chain DP', content: 'What paradigm calculates the most optimal parenthesization sequence for a chain of matrix multiplications minimizing total scalar multiplications?', correct: "Dynamic Programming (Matrix Chain Multiplication)", dist1: 'Greedy Interval Scheduling', dist2: 'Divide and Conquer partitioning' },
+    { title: 'Knapsack DP Complexity', content: 'What is the optimal time complexity to solve the 0/1 Knapsack problem using dynamic programming with N items and maximum weight capacity W?', correct: "O(N * W)", dist1: 'O(2^N)', dist2: 'O(N log N)' }
+  ];
+
+  for (let i = 1; i <= codingCount; i++) {
+    const qSeed = assignIdx * 1000 + globalQIdx * 100;
+    const cIdx = (assignIdx * 7 + i) % codingData.length;
+    const data = codingData[cIdx];
+
+    const shuffled = getShuffledOptions(data.correct, [data.dist1, data.dist2, 'Brute force selection'], qSeed);
+
+    list.push({
+      id: `${idPrefix}${globalQIdx}`,
+      title: `${data.title} [Part B: Advanced Coding]`,
+      content: `[Coding] ${data.content}`,
+      type: 'coding',
+      difficulty: diff,
+      tags: ['Coding', company, diff],
+      company,
+      topic: 'DSA',
+      options: shuffled.options,
+      correctAnswer: shuffled.correctAnswer,
+      solutionExplanation: `Calculated algorithmically. Correct: ${data.correct}.`,
+      estimatedTimeSeconds: 120,
+    });
+    globalQIdx++;
+  }
+
+  return list;
+}
+
+// ── MOCK QUESTIONS STATIC EXPORTS ────────────────────────────────────
+export const MOCK_QUESTIONS: Question[] = [];
+
+const companiesList = ['TCS', 'Amazon', 'Accenture', 'Cognizant', 'Infosys', 'Wipro', 'Capgemini', 'Deloitte'] as const;
+const diffsList: ('Easy' | 'Medium' | 'Hard')[] = ['Medium', 'Easy', 'Medium', 'Hard', 'Medium'];
+
+for (const comp of companiesList) {
+  for (let idx = 1; idx <= 5; idx++) {
+    const diff = diffsList[idx - 1];
+    MOCK_QUESTIONS.push(...generateCompanyQuestions(comp, idx, diff));
+  }
+}
+
+// ── SEED ASSESSMENTS ──────────────────────────────────────────────────
 export const SEED_ASSESSMENTS: import('./types').Assessment[] = [
+  // TCS
   {
     id: 'tcs-nqt-2026',
     title: 'TCS NQT Simulator',
     category: 'Campus Drive',
     description: 'Complete simulation of TCS NQT: Quant, Verbal, Logical & Coding.',
-    durationMinutes: 180,
-    totalQuestions: 17,
+    durationMinutes: 190,
+    totalQuestions: 82,
     difficulty: 'Medium',
     companyTags: ['TCS'],
-    questions: MOCK_QUESTIONS.filter(q => q.company === 'TCS'),
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('tcs-a1-q')),
   },
   {
-    id: 'amazon-oa-2026',
-    title: 'Amazon OA Engine',
+    id: 'tcs-nqt-ninja-2026',
+    title: 'TCS NQT Ninja Prep Mock',
+    category: 'Campus Drive',
+    description: 'Foundation and Advanced sections targeted for TCS Ninja placement (approx. 3.6 LPA). Duration 190 mins.',
+    durationMinutes: 190,
+    totalQuestions: 82,
+    difficulty: 'Easy',
+    companyTags: ['TCS'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('tcs-a2-q')),
+  },
+  {
+    id: 'tcs-nqt-digital-2026',
+    title: 'TCS NQT Digital Prep Mock',
+    category: 'Campus Drive',
+    description: 'Foundation and Advanced sections targeted for TCS Digital placement (approx. 7.0 LPA). Duration 190 mins.',
+    durationMinutes: 190,
+    totalQuestions: 82,
+    difficulty: 'Medium',
+    companyTags: ['TCS'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('tcs-a3-q')),
+  },
+  {
+    id: 'tcs-nqt-prime-2026',
+    title: 'TCS NQT Prime Prep Mock',
+    category: 'Campus Drive',
+    description: 'Foundation and Advanced sections targeted for TCS Prime placement (approx. 9.0-11.5 LPA). Duration 190 mins.',
+    durationMinutes: 190,
+    totalQuestions: 82,
+    difficulty: 'Hard',
+    companyTags: ['TCS'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('tcs-a4-q')),
+  },
+  {
+    id: 'tcs-nqt-grand-2026',
+    title: 'TCS NQT Grand Simulation Mock',
+    category: 'Campus Drive',
+    description: 'Ultimate simulated TCS NQT mixed exam with mixed difficulty covering all Ninja, Digital, and Prime roles.',
+    durationMinutes: 190,
+    totalQuestions: 82,
+    difficulty: 'Medium',
+    companyTags: ['TCS'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('tcs-a5-q')),
+  },
+
+  // Amazon
+  {
+    id: 'amz-a1',
+    title: 'Amazon OA Simulator 1',
     category: 'FAANG OA',
-    description: 'High-intensity coding OA with Hard problems.',
+    description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.',
     durationMinutes: 90,
-    totalQuestions: 3,
+    totalQuestions: 17,
+    difficulty: 'Medium',
+    companyTags: ['Amazon'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('amz-a1-q')),
+  },
+  {
+    id: 'amz-a2',
+    title: 'Amazon OA Simulator 2',
+    category: 'FAANG OA',
+    description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.',
+    durationMinutes: 90,
+    totalQuestions: 17,
+    difficulty: 'Medium',
+    companyTags: ['Amazon'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('amz-a2-q')),
+  },
+  {
+    id: 'amz-a3',
+    title: 'Amazon OA Simulator 3',
+    category: 'FAANG OA',
+    description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.',
+    durationMinutes: 90,
+    totalQuestions: 17,
     difficulty: 'Hard',
     companyTags: ['Amazon'],
-    questions: MOCK_QUESTIONS.filter(q => q.company === 'Amazon'),
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('amz-a3-q')),
   },
   {
-    id: 'accenture-2026',
-    title: 'Accenture Assessment',
-    category: 'Campus Drive',
-    description: 'Critical Thinking, Abstract Reasoning, and Communication.',
+    id: 'amz-a4',
+    title: 'Amazon OA Simulator 4',
+    category: 'FAANG OA',
+    description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.',
     durationMinutes: 90,
-    totalQuestions: 3,
+    totalQuestions: 17,
+    difficulty: 'Hard',
+    companyTags: ['Amazon'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('amz-a4-q')),
+  },
+  {
+    id: 'amz-a5',
+    title: 'Amazon OA Simulator 5',
+    category: 'FAANG OA',
+    description: 'Amazon OA: Advanced Aptitude, Data Structures, and 2 Elite Coding Questions.',
+    durationMinutes: 90,
+    totalQuestions: 17,
+    difficulty: 'Hard',
+    companyTags: ['Amazon'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('amz-a5-q')),
+  },
+
+  // Accenture
+  {
+    id: 'acc-a1',
+    title: 'Accenture Cognitive Prep 1',
+    category: 'Campus Drive',
+    description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).',
+    durationMinutes: 90,
+    totalQuestions: 90,
     difficulty: 'Easy',
     companyTags: ['Accenture'],
-    questions: MOCK_QUESTIONS.filter(q => q.company === 'Accenture'),
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('acc-a1-q')),
   },
   {
-    id: 'cognizant-2026',
-    title: 'Cognizant GenC Next',
+    id: 'acc-a2',
+    title: 'Accenture Cognitive Prep 2',
     category: 'Campus Drive',
-    description: 'Programming fundamentals and debugging assessment.',
+    description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).',
+    durationMinutes: 90,
+    totalQuestions: 90,
+    difficulty: 'Easy',
+    companyTags: ['Accenture'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('acc-a2-q')),
+  },
+  {
+    id: 'acc-a3',
+    title: 'Accenture Cognitive Prep 3',
+    category: 'Campus Drive',
+    description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).',
+    durationMinutes: 90,
+    totalQuestions: 90,
+    difficulty: 'Medium',
+    companyTags: ['Accenture'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('acc-a3-q')),
+  },
+  {
+    id: 'acc-a4',
+    title: 'Accenture Cognitive Prep 4',
+    category: 'Campus Drive',
+    description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).',
+    durationMinutes: 90,
+    totalQuestions: 90,
+    difficulty: 'Medium',
+    companyTags: ['Accenture'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('acc-a4-q')),
+  },
+  {
+    id: 'acc-a5',
+    title: 'Accenture Cognitive Prep 5',
+    category: 'Campus Drive',
+    description: 'Accenture Cognitive and Technical assessment (Common Apps, Cloud, Network, Pseudocode).',
+    durationMinutes: 90,
+    totalQuestions: 90,
+    difficulty: 'Medium',
+    companyTags: ['Accenture'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('acc-a5-q')),
+  },
+
+  // Cognizant
+  {
+    id: 'cog-a1',
+    title: 'Cognizant GenC Mock 1',
+    category: 'Campus Drive',
+    description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.',
     durationMinutes: 120,
-    totalQuestions: 2,
+    totalQuestions: 50,
+    difficulty: 'Easy',
+    companyTags: ['Cognizant'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cog-a1-q')),
+  },
+  {
+    id: 'cog-a2',
+    title: 'Cognizant GenC Mock 2',
+    category: 'Campus Drive',
+    description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.',
+    durationMinutes: 120,
+    totalQuestions: 50,
     difficulty: 'Medium',
     companyTags: ['Cognizant'],
-    questions: MOCK_QUESTIONS.filter(q => q.company === 'Cognizant'),
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cog-a2-q')),
   },
   {
-    id: 'infosys-2026',
-    title: 'Infosys InfyTQ',
+    id: 'cog-a3',
+    title: 'Cognizant GenC Mock 3',
     category: 'Campus Drive',
-    description: 'Quantitative, Logical and Data Interpretation.',
+    description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.',
     durationMinutes: 120,
-    totalQuestions: 4,
+    totalQuestions: 50,
+    difficulty: 'Medium',
+    companyTags: ['Cognizant'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cog-a3-q')),
+  },
+  {
+    id: 'cog-a4',
+    title: 'Cognizant GenC Mock 4',
+    category: 'Campus Drive',
+    description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.',
+    durationMinutes: 120,
+    totalQuestions: 50,
+    difficulty: 'Hard',
+    companyTags: ['Cognizant'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cog-a4-q')),
+  },
+  {
+    id: 'cog-a5',
+    title: 'Cognizant GenC Mock 5',
+    category: 'Campus Drive',
+    description: 'Cognizant mock simulation: Quantitative, Verbal, Logical, SQL, OOPs and Coding.',
+    durationMinutes: 120,
+    totalQuestions: 50,
+    difficulty: 'Medium',
+    companyTags: ['Cognizant'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cog-a5-q')),
+  },
+
+  // Infosys
+  {
+    id: 'inf-a1',
+    title: 'Infosys OA Engine 1',
+    category: 'Campus Drive',
+    description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.',
+    durationMinutes: 100,
+    totalQuestions: 54,
     difficulty: 'Medium',
     companyTags: ['Infosys'],
-    questions: MOCK_QUESTIONS.filter(q => q.company === 'Infosys'),
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('inf-a1-q')),
   },
   {
-    id: 'wipro-2026',
-    title: 'Wipro NLTH',
+    id: 'inf-a2',
+    title: 'Infosys OA Engine 2',
     category: 'Campus Drive',
-    description: 'National Level Talent Hunt aptitude simulation.',
-    durationMinutes: 60,
-    totalQuestions: 2,
+    description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.',
+    durationMinutes: 100,
+    totalQuestions: 54,
+    difficulty: 'Medium',
+    companyTags: ['Infosys'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('inf-a2-q')),
+  },
+  {
+    id: 'inf-a3',
+    title: 'Infosys OA Engine 3',
+    category: 'Campus Drive',
+    description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.',
+    durationMinutes: 100,
+    totalQuestions: 54,
+    difficulty: 'Medium',
+    companyTags: ['Infosys'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('inf-a3-q')),
+  },
+  {
+    id: 'inf-a4',
+    title: 'Infosys OA Engine 4',
+    category: 'Campus Drive',
+    description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.',
+    durationMinutes: 100,
+    totalQuestions: 54,
+    difficulty: 'Hard',
+    companyTags: ['Infosys'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('inf-a4-q')),
+  },
+  {
+    id: 'inf-a5',
+    title: 'Infosys OA Engine 5',
+    category: 'Campus Drive',
+    description: 'Infosys assessment: Quant, Logical, Verbal, Pseudocode and Puzzles.',
+    durationMinutes: 100,
+    totalQuestions: 54,
+    difficulty: 'Medium',
+    companyTags: ['Infosys'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('inf-a5-q')),
+  },
+
+  // Wipro
+  {
+    id: 'wip-a1',
+    title: 'Wipro NLTH Mock 1',
+    category: 'Campus Drive',
+    description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.',
+    durationMinutes: 115,
+    totalQuestions: 50,
     difficulty: 'Easy',
     companyTags: ['Wipro'],
-    questions: MOCK_QUESTIONS.filter(q => q.company === 'Wipro'),
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('wip-a1-q')),
   },
   {
-    id: 'capgemini-2026',
-    title: 'Capgemini Exceller',
+    id: 'wip-a2',
+    title: 'Wipro NLTH Mock 2',
     category: 'Campus Drive',
-    description: 'Pseudo code, automata and game-based assessment.',
-    durationMinutes: 90,
-    totalQuestions: 2,
+    description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.',
+    durationMinutes: 115,
+    totalQuestions: 50,
+    difficulty: 'Easy',
+    companyTags: ['Wipro'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('wip-a2-q')),
+  },
+  {
+    id: 'wip-a3',
+    title: 'Wipro NLTH Mock 3',
+    category: 'Campus Drive',
+    description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.',
+    durationMinutes: 115,
+    totalQuestions: 50,
+    difficulty: 'Medium',
+    companyTags: ['Wipro'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('wip-a3-q')),
+  },
+  {
+    id: 'wip-a4',
+    title: 'Wipro NLTH Mock 4',
+    category: 'Campus Drive',
+    description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.',
+    durationMinutes: 115,
+    totalQuestions: 50,
+    difficulty: 'Medium',
+    companyTags: ['Wipro'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('wip-a4-q')),
+  },
+  {
+    id: 'wip-a5',
+    title: 'Wipro NLTH Mock 5',
+    category: 'Campus Drive',
+    description: 'Wipro NLTH/Turbo: Aptitude (Quant, Verbal, Logical) + 2 coding questions.',
+    durationMinutes: 115,
+    totalQuestions: 50,
+    difficulty: 'Medium',
+    companyTags: ['Wipro'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('wip-a5-q')),
+  },
+
+  // Capgemini
+  {
+    id: 'cap-a1',
+    title: 'Capgemini Exceller 1',
+    category: 'Campus Drive',
+    description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.',
+    durationMinutes: 84,
+    totalQuestions: 48,
+    difficulty: 'Easy',
+    companyTags: ['Capgemini'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cap-a1-q')),
+  },
+  {
+    id: 'cap-a2',
+    title: 'Capgemini Exceller 2',
+    category: 'Campus Drive',
+    description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.',
+    durationMinutes: 84,
+    totalQuestions: 48,
     difficulty: 'Medium',
     companyTags: ['Capgemini'],
-    questions: MOCK_QUESTIONS.filter(q => q.company === 'Capgemini'),
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cap-a2-q')),
   },
   {
-    id: 'deloitte-2026',
-    title: 'Deloitte Assessment',
+    id: 'cap-a3',
+    title: 'Capgemini Exceller 3',
     category: 'Campus Drive',
-    description: 'Data analysis, logical deduction and quantitative skills.',
-    durationMinutes: 90,
-    totalQuestions: 2,
+    description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.',
+    durationMinutes: 84,
+    totalQuestions: 48,
+    difficulty: 'Medium',
+    companyTags: ['Capgemini'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cap-a3-q')),
+  },
+  {
+    id: 'cap-a4',
+    title: 'Capgemini Exceller 4',
+    category: 'Campus Drive',
+    description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.',
+    durationMinutes: 84,
+    totalQuestions: 48,
+    difficulty: 'Medium',
+    companyTags: ['Capgemini'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cap-a4-q')),
+  },
+  {
+    id: 'cap-a5',
+    title: 'Capgemini Exceller 5',
+    category: 'Campus Drive',
+    description: 'Capgemini Exceller: English communication, Pseudocode, and Game Aptitude.',
+    durationMinutes: 84,
+    totalQuestions: 48,
+    difficulty: 'Medium',
+    companyTags: ['Capgemini'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('cap-a5-q')),
+  },
+
+  // Deloitte
+  {
+    id: 'del-a1',
+    title: 'Deloitte Assessment 1',
+    category: 'Campus Drive',
+    description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.',
+    durationMinutes: 75,
+    totalQuestions: 75,
+    difficulty: 'Easy',
+    companyTags: ['Deloitte'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('del-a1-q')),
+  },
+  {
+    id: 'del-a2',
+    title: 'Deloitte Assessment 2',
+    category: 'Campus Drive',
+    description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.',
+    durationMinutes: 75,
+    totalQuestions: 75,
     difficulty: 'Medium',
     companyTags: ['Deloitte'],
-    questions: MOCK_QUESTIONS.filter(q => q.company === 'Deloitte'),
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('del-a2-q')),
+  },
+  {
+    id: 'del-a3',
+    title: 'Deloitte Assessment 3',
+    category: 'Campus Drive',
+    description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.',
+    durationMinutes: 75,
+    totalQuestions: 75,
+    difficulty: 'Medium',
+    companyTags: ['Deloitte'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('del-a3-q')),
+  },
+  {
+    id: 'del-a4',
+    title: 'Deloitte Assessment 4',
+    category: 'Campus Drive',
+    description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.',
+    durationMinutes: 75,
+    totalQuestions: 75,
+    difficulty: 'Medium',
+    companyTags: ['Deloitte'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('del-a4-q')),
+  },
+  {
+    id: 'del-a5',
+    title: 'Deloitte Assessment 5',
+    category: 'Campus Drive',
+    description: 'Deloitte OA: Quant, Verbal, Logical, and Core CS (DBMS, Networking, OOPs) MCQs.',
+    durationMinutes: 75,
+    totalQuestions: 75,
+    difficulty: 'Medium',
+    companyTags: ['Deloitte'],
+    questions: MOCK_QUESTIONS.filter(q => q.id.startsWith('del-a5-q')),
   },
 ];
+

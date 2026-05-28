@@ -315,7 +315,7 @@ export function AssessmentPortal() {
             <LayoutGrid className="w-5 h-5 text-muted-foreground hidden md:block" />
           </div>
 
-          <div className="grid grid-cols-4 gap-3 lg:gap-4 overflow-y-auto custom-scrollbar pr-2">
+          <div className="grid grid-cols-4 gap-3 lg:gap-4 flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2">
             {questions.map((q, i) => (
               <motion.button
                 key={i}
