@@ -7,59 +7,69 @@ import { Target, Brain, Code2, Clock, Zap, BarChart3, ChevronRight, ChevronLeft,
 import { useMockStore } from '@/store/useMockStore';
 import { toast } from 'sonner';
 
-const COMPANY_COLORS: Record<string, string> = {
-  TCS: 'from-blue-500 to-indigo-600',
-  Amazon: 'from-orange-400 to-amber-600',
-  Accenture: 'from-purple-500 to-violet-600',
-  Cognizant: 'from-cyan-500 to-teal-600',
-  Infosys: 'from-emerald-500 to-green-600',
-  Wipro: 'from-rose-500 to-pink-600',
-  Capgemini: 'from-sky-500 to-blue-600',
-  Deloitte: 'from-amber-500 to-yellow-600',
+// Real brand accent colors (hex) for glow & accents
+const COMPANY_BRAND: Record<string, { hex: string; gradient: string; initials: string }> = {
+  TCS:        { hex: '#003087', gradient: 'from-blue-700 to-blue-900',    initials: 'TC' },
+  Amazon:     { hex: '#FF9900', gradient: 'from-amber-400 to-orange-500', initials: 'AM' },
+  Accenture:  { hex: '#A100FF', gradient: 'from-purple-500 to-violet-700',initials: 'AC' },
+  Cognizant:  { hex: '#1F5FA6', gradient: 'from-sky-600 to-blue-800',     initials: 'CG' },
+  Infosys:    { hex: '#007CC3', gradient: 'from-cyan-500 to-blue-700',    initials: 'IN' },
+  Wipro:      { hex: '#341F97', gradient: 'from-violet-600 to-indigo-800', initials: 'WI' },
+  Capgemini:  { hex: '#0070AD', gradient: 'from-blue-500 to-blue-700',    initials: 'CA' },
+  Deloitte:   { hex: '#86BC25', gradient: 'from-lime-500 to-green-600',   initials: 'DE' },
 };
 
-const COMPANY_LOGOS: Record<string, string> = {
-  TCS: '/logos/tcs.svg',
-  Amazon: '/logos/amazon.svg',
-  Accenture: '/logos/accenture.svg',
-  Cognizant: '/logos/cognizant.svg',
-  Infosys: '/logos/infosys.svg',
-  Wipro: '/logos/wipro.svg',
-  Capgemini: '/logos/capgemini.svg',
-  Deloitte: '/logos/deloitte.svg',
+// logo.dev provides real PNG logos — works in-browser & on Vercel
+const LOGO_DOMAINS: Record<string, string> = {
+  TCS:       'tcs.com',
+  Amazon:    'amazon.com',
+  Accenture: 'accenture.com',
+  Cognizant: 'cognizant.com',
+  Infosys:   'infosys.com',
+  Wipro:     'wipro.com',
+  Capgemini: 'capgemini.com',
+  Deloitte:  'deloitte.com',
 };
+
+function getLogoUrl(company: string) {
+  const domain = LOGO_DOMAINS[company];
+  if (domain) return `https://img.logo.dev/${domain}?token=pk_X7y82LAnR-yog7jFtkHpqg&size=200&format=png`;
+  return null;
+}
 
 function getColor(tags: string[]) {
   for (const tag of tags) {
-    if (COMPANY_COLORS[tag]) return COMPANY_COLORS[tag];
+    if (COMPANY_BRAND[tag]) return COMPANY_BRAND[tag].gradient;
   }
   return 'from-primary to-indigo-600';
 }
 
 function getCompanyColor(company: string) {
-  return COMPANY_COLORS[company] || 'from-primary to-indigo-600';
+  return COMPANY_BRAND[company]?.gradient || 'from-primary to-indigo-600';
 }
 
-function getCompanyLogo(company: string) {
-  return COMPANY_LOGOS[company] || null;
+function getCompanyHex(company: string) {
+  return COMPANY_BRAND[company]?.hex || '#6366f1';
 }
 
-function CompanyLogoImg({ company, size = 12 }: { company: string; size?: number }) {
-  const logo = getCompanyLogo(company);
-  const initials = company.slice(0, 2).toUpperCase();
-  const color = COMPANY_COLORS[company] || 'from-primary to-indigo-600';
-  if (logo) {
+function CompanyLogoImg({ company }: { company: string }) {
+  const [errored, setErrored] = useState(false);
+  const logoUrl = getLogoUrl(company);
+  const brand = COMPANY_BRAND[company];
+
+  if (!errored && logoUrl) {
     return (
       <img
-        src={logo}
-        alt={company}
-        className={`w-full h-full object-contain`}
+        src={logoUrl}
+        alt={`${company} logo`}
+        className="w-full h-full object-contain"
+        onError={() => setErrored(true)}
       />
     );
   }
   return (
-    <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${color} rounded-lg`}>
-      <span className="text-white font-black text-xs">{initials}</span>
+    <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${brand?.gradient || 'from-primary to-indigo-600'} rounded-xl`}>
+      <span className="text-white font-black text-sm tracking-wide">{brand?.initials || company.slice(0,2).toUpperCase()}</span>
     </div>
   );
 }
@@ -234,33 +244,53 @@ export function AssessmentEngine() {
                       <h3 className="font-bold text-lg text-white">Select Company</h3>
                     </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {companies.map((company, i) => {
                         const count = assessments.filter(a => {
                           const tags = Array.isArray(a.companyTags) ? a.companyTags : ((a as any).company_tags || []);
                           return tags.includes(company);
                         }).length;
+                        const hex = getCompanyHex(company);
                         return (
                           <motion.div
                             key={company}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.06, ease: [0.32, 0.72, 0, 1] }}
+                            transition={{ delay: i * 0.055, ease: [0.32, 0.72, 0, 1] }}
                             onClick={() => { setSelectedCompany(company); setHubView('assignments'); }}
-                            className="group relative flex items-center p-5 rounded-[20px] border border-white/8 bg-card/40 backdrop-blur-xl cursor-pointer hover:border-white/20 transition-all duration-300 overflow-hidden"
+                            className="group relative flex items-center gap-4 p-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] backdrop-blur-xl cursor-pointer hover:bg-white/[0.06] hover:border-white/[0.14] transition-all duration-200 overflow-hidden"
                           >
-                            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${getCompanyColor(company)} opacity-[0.05] blur-2xl group-hover:opacity-[0.1] transition-opacity`} />
-                            
-                            <div className={`w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-lg shrink-0 mr-4 overflow-hidden p-1`}>
+                            <div
+                              className="absolute -top-6 -right-6 w-20 h-20 rounded-full opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-500 pointer-events-none"
+                              style={{ background: hex }}
+                            />
+                            <div
+                              className="absolute bottom-0 left-4 right-4 h-[1.5px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                              style={{ background: `linear-gradient(90deg, transparent, ${hex}88, transparent)` }}
+                            />
+
+                            <div className="relative shrink-0 w-14 h-14 rounded-[14px] bg-white shadow-md overflow-hidden p-[7px] border border-black/[0.06]">
                               <CompanyLogoImg company={company} />
                             </div>
-                            
+
                             <div className="flex-1 min-w-0">
-                              <h3 className="text-base font-black text-white truncate">{company}</h3>
-                              <p className="text-[10px] text-muted-foreground/70 font-bold uppercase tracking-widest mt-0.5">{count} Assignments Available</p>
+                              <h3 className="text-[15px] font-bold text-white/90 leading-tight tracking-tight">{company}</h3>
+                              <div className="flex items-center gap-1.5 mt-1.5">
+                                <span
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-[0.12em] border"
+                                  style={{
+                                    color: hex,
+                                    borderColor: `${hex}40`,
+                                    background: `${hex}14`,
+                                  }}
+                                >
+                                  <span className="w-1 h-1 rounded-full" style={{ background: hex }} />
+                                  {count} {count === 1 ? 'Assessment' : 'Assessments'}
+                                </span>
+                              </div>
                             </div>
-                            
-                            <ChevronRight className="w-5 h-5 text-muted-foreground/30 group-hover:text-white transition-colors" />
+
+                            <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all duration-200 shrink-0" />
                           </motion.div>
                         );
                       })}
@@ -291,13 +321,13 @@ export function AssessmentEngine() {
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
-                      <div className={`w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg overflow-hidden p-1`}>
+                    <div className="flex items-center gap-4 bg-white/[0.03] border border-white/[0.08] p-4 rounded-2xl">
+                      <div className="w-12 h-12 rounded-[14px] bg-white shadow-md overflow-hidden p-[7px] border border-black/[0.06] shrink-0">
                         <CompanyLogoImg company={selectedCompany!} />
                       </div>
                       <div>
-                        <h2 className="text-lg font-black text-white">{selectedCompany}</h2>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Available Assignments</p>
+                        <h2 className="text-base font-bold text-white tracking-tight">{selectedCompany}</h2>
+                        <p className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-semibold mt-0.5">Available Assessments</p>
                       </div>
                     </div>
 
