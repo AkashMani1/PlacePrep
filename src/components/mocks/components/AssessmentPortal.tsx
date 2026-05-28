@@ -303,7 +303,7 @@ export function AssessmentPortal() {
         {isPaletteOpen && (
           <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={() => setIsPaletteOpen(false)} />
         )}
-        <aside className={`${isPaletteOpen ? 'flex' : 'hidden'} md:flex fixed md:relative inset-y-0 right-0 z-50 w-[85vw] md:w-80 lg:w-96 border-l border-white/5 bg-[#09090b] md:bg-black/40 backdrop-blur-3xl p-6 lg:p-10 flex-col gap-8 lg:gap-10 shadow-2xl md:shadow-none transition-transform`}>
+        <aside className={`${isPaletteOpen ? 'flex' : 'hidden'} md:flex fixed md:relative inset-y-0 right-0 z-50 w-[85vw] md:w-80 lg:w-96 h-full md:min-h-0 border-l border-white/5 bg-[#09090b] md:bg-black/40 backdrop-blur-3xl p-6 lg:p-10 flex-col gap-8 lg:gap-10 shadow-2xl md:shadow-none transition-transform`}>
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground">Execution Flow</h3>
@@ -315,7 +315,7 @@ export function AssessmentPortal() {
             <LayoutGrid className="w-5 h-5 text-muted-foreground hidden md:block" />
           </div>
 
-          <div className="grid grid-cols-4 gap-3 lg:gap-4 flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2">
+          <div className="grid grid-cols-4 auto-rows-max gap-3 lg:gap-4 flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2">
             {questions.map((q, i) => (
               <motion.button
                 key={i}
