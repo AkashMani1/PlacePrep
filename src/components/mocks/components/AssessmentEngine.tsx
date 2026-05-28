@@ -19,14 +19,14 @@ const COMPANY_COLORS: Record<string, string> = {
 };
 
 const COMPANY_LOGOS: Record<string, string> = {
-  TCS: 'https://logo.clearbit.com/tcs.com',
-  Amazon: 'https://logo.clearbit.com/amazon.com',
-  Accenture: 'https://logo.clearbit.com/accenture.com',
-  Cognizant: 'https://logo.clearbit.com/cognizant.com',
-  Infosys: 'https://logo.clearbit.com/infosys.com',
-  Wipro: 'https://logo.clearbit.com/wipro.com',
-  Capgemini: 'https://logo.clearbit.com/capgemini.com',
-  Deloitte: 'https://logo.clearbit.com/deloitte.com',
+  TCS: '/logos/tcs.svg',
+  Amazon: '/logos/amazon.svg',
+  Accenture: '/logos/accenture.svg',
+  Cognizant: '/logos/cognizant.svg',
+  Infosys: '/logos/infosys.svg',
+  Wipro: '/logos/wipro.svg',
+  Capgemini: '/logos/capgemini.svg',
+  Deloitte: '/logos/deloitte.svg',
 };
 
 function getColor(tags: string[]) {
@@ -41,8 +41,27 @@ function getCompanyColor(company: string) {
 }
 
 function getCompanyLogo(company: string) {
-  if (COMPANY_LOGOS[company]) return COMPANY_LOGOS[company];
-  return `https://logo.clearbit.com/${company.toLowerCase().replace(/\s+/g, '')}.com`;
+  return COMPANY_LOGOS[company] || null;
+}
+
+function CompanyLogoImg({ company, size = 12 }: { company: string; size?: number }) {
+  const logo = getCompanyLogo(company);
+  const initials = company.slice(0, 2).toUpperCase();
+  const color = COMPANY_COLORS[company] || 'from-primary to-indigo-600';
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt={company}
+        className={`w-full h-full object-contain`}
+      />
+    );
+  }
+  return (
+    <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${color} rounded-lg`}>
+      <span className="text-white font-black text-xs">{initials}</span>
+    </div>
+  );
 }
 
 const DIFF_STYLES: Record<string, string> = {
@@ -233,16 +252,7 @@ export function AssessmentEngine() {
                             <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${getCompanyColor(company)} opacity-[0.05] blur-2xl group-hover:opacity-[0.1] transition-opacity`} />
                             
                             <div className={`w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-lg shrink-0 mr-4 overflow-hidden p-1`}>
-                              <img 
-                                src={getCompanyLogo(company)} 
-                                alt={company} 
-                                className="w-full h-full object-contain"
-                                onError={(e) => {
-                                  (e.target as HTMLElement).style.display = 'none';
-                                  const parent = (e.target as HTMLElement).parentElement;
-                                  if (parent) parent.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-800 w-6 h-6"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>';
-                                }}
-                              />
+                              <CompanyLogoImg company={company} />
                             </div>
                             
                             <div className="flex-1 min-w-0">
@@ -283,16 +293,7 @@ export function AssessmentEngine() {
 
                     <div className="flex items-center gap-3 bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
                       <div className={`w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg overflow-hidden p-1`}>
-                        <img 
-                          src={getCompanyLogo(selectedCompany!)} 
-                          alt={selectedCompany!} 
-                          className="w-full h-full object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = 'none';
-                            const parent = (e.target as HTMLElement).parentElement;
-                            if (parent) parent.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-800 w-5 h-5"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>';
-                          }}
-                        />
+                        <CompanyLogoImg company={selectedCompany!} />
                       </div>
                       <div>
                         <h2 className="text-lg font-black text-white">{selectedCompany}</h2>
