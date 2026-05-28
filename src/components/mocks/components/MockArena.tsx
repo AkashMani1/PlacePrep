@@ -133,6 +133,12 @@ export function MockArena() {
     }
   };
 
+  const sortedRooms = [...availableRooms].sort((a, b) => {
+    const aCount = a.participants?.length || (a as any).room_participants?.length || 0;
+    const bCount = b.participants?.length || (b as any).room_participants?.length || 0;
+    return bCount - aCount;
+  });
+
   return (
     <div className="grid grid-cols-12 gap-8 mt-12">
       {/* ── Live Mock Rooms ────────────────────────────────────────────── */}
@@ -168,7 +174,7 @@ export function MockArena() {
             </div>
           ) : (
             <AnimatePresence>
-              {availableRooms.map((room) => {
+              {sortedRooms.map((room) => {
                 const isLocked = (room as any).is_private && (room as any).has_passcode;
                 return (
                 <motion.div
@@ -214,7 +220,7 @@ export function MockArena() {
                       </div>
                       <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
                         <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {room.duration || '45m'}</span>
-                        <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {room.participants?.length || 0} Joined</span>
+                        <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {room.participants?.length || (room as any).room_participants?.length || 0} Joined</span>
                         {isLocked && (
                           <span className="text-[9px] font-black text-amber-500/70 uppercase tracking-widest">
                             Passcode Required
@@ -283,52 +289,24 @@ export function MockArena() {
 
         <BentoCard className="bg-card/40 backdrop-blur-3xl border-white/5 shadow-2xl !p-0 overflow-hidden">
           <div className="p-8 space-y-6">
-            {/* Matchmaking */}
+            {/* Create Room */}
             <div className="bg-primary/10 p-5 rounded-[28px] border border-primary/20 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform">
                 <Users className="w-16 h-16 text-primary" />
               </div>
-              <h3 className="text-base font-black text-primary tracking-tight mb-2 uppercase">Match with Peer</h3>
+              <h3 className="text-base font-black text-primary tracking-tight mb-2 uppercase">Create a Session</h3>
               <p className="text-[10px] font-semibold text-primary/70 mb-5 leading-relaxed">
-                Automatically find a partner for a bidirectional technical mock interview.
+                Create a new mock interview room and share the link with your peers to practice together.
               </p>
-              {isMatchmaking ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    <span className="text-[10px] font-black text-primary uppercase tracking-widest">{matchmakingStatus}</span>
-                  </div>
-                  <button
-                    onClick={() => cancelMatchmaking(user?.id || 'anon')}
-                    className="w-full py-3.5 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-rose-500/20 transition-all"
-                  >
-                    Cancel Search
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <button
-                    onClick={() => startMatchmaking(user?.id || 'anon', user?.user_metadata?.full_name || 'Anonymous')}
-                    className="w-full py-3.5 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-[0.3em] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                  >
-                    Find Match Now
-                  </button>
-                  
-                  <div className="flex items-center gap-2 my-1">
-                    <div className="h-px bg-white/10 flex-1" />
-                    <span className="text-[8px] font-black text-muted-foreground uppercase">OR</span>
-                    <div className="h-px bg-white/10 flex-1" />
-                  </div>
-
-                  <button
-                    onClick={() => setShowCreateRoomModal(true)}
-                    className="w-full py-3.5 rounded-xl bg-white/5 border border-white/10 text-primary hover:bg-white/10 text-[10px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2"
-                  >
-                    <Globe className="w-3.5 h-3.5" />
-                    Create & Share Link
-                  </button>
-                </div>
-              )}
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => setShowCreateRoomModal(true)}
+                  className="w-full py-3.5 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-[0.3em] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <Globe className="w-4 h-4" />
+                  Create & Share Link
+                </button>
+              </div>
             </div>
 
             {/* Scheduled Sessions */}
