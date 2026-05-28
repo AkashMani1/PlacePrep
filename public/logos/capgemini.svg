@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <rect width="200" height="200" rx="20" fill="#0070AD"/>
-  <circle cx="68" cy="90" r="22" fill="#00BFFF" opacity="0.9"/>
-  <circle cx="100" cy="90" r="22" fill="#003087" opacity="0.9"/>
-  <circle cx="132" cy="90" r="22" fill="#00BFFF" opacity="0.9"/>
-  <text x="100" y="150" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="white" text-anchor="middle">Capgemini</text>
+  <rect width="200" height="200" fill="white"/>
+  <!-- Three overlapping ovals — Capgemini brand mark -->
+  <ellipse cx="72" cy="82" rx="30" ry="22" fill="#0070AD" opacity="0.9"/>
+  <ellipse cx="100" cy="82" rx="30" ry="22" fill="#12ABDB" opacity="0.85"/>
+  <ellipse cx="128" cy="82" rx="30" ry="22" fill="#0070AD" opacity="0.9"/>
+  <text x="100" y="132" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" fill="#0070AD" text-anchor="middle" letter-spacing="-0.3">Capgemini</text>
 </svg>

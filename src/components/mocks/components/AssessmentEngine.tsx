@@ -19,51 +19,32 @@ const COMPANY_BRAND: Record<string, { hex: string; gradient: string; initials: s
   Deloitte:   { hex: '#86BC25', gradient: 'from-lime-500 to-green-600',   initials: 'DE' },
 };
 
-// logo.dev provides real PNG logos — works in-browser & on Vercel
-const LOGO_DOMAINS: Record<string, string> = {
-  TCS:       'tcs.com',
-  Amazon:    'amazon.com',
-  Accenture: 'accenture.com',
-  Cognizant: 'cognizant.com',
-  Infosys:   'infosys.com',
-  Wipro:     'wipro.com',
-  Capgemini: 'capgemini.com',
-  Deloitte:  'deloitte.com',
+// Local SVG logos — always available, zero network dependency
+const LOGO_PATHS: Record<string, string> = {
+  TCS:       '/logos/tcs.svg',
+  Amazon:    '/logos/amazon.svg',
+  Accenture: '/logos/accenture.svg',
+  Cognizant: '/logos/cognizant.svg',
+  Infosys:   '/logos/infosys.svg',
+  Wipro:     '/logos/wipro.svg',
+  Capgemini: '/logos/capgemini.svg',
+  Deloitte:  '/logos/deloitte.svg',
 };
 
 function getLogoUrl(company: string) {
-  const domain = LOGO_DOMAINS[company];
-  if (domain) return `https://img.logo.dev/${domain}?token=pk_X7y82LAnR-yog7jFtkHpqg&size=200&format=png`;
-  return null;
-}
-
-function getColor(tags: string[]) {
-  for (const tag of tags) {
-    if (COMPANY_BRAND[tag]) return COMPANY_BRAND[tag].gradient;
-  }
-  return 'from-primary to-indigo-600';
-}
-
-function getCompanyColor(company: string) {
-  return COMPANY_BRAND[company]?.gradient || 'from-primary to-indigo-600';
-}
-
-function getCompanyHex(company: string) {
-  return COMPANY_BRAND[company]?.hex || '#6366f1';
+  return LOGO_PATHS[company] || null;
 }
 
 function CompanyLogoImg({ company }: { company: string }) {
-  const [errored, setErrored] = useState(false);
-  const logoUrl = getLogoUrl(company);
+  const logo = getLogoUrl(company);
   const brand = COMPANY_BRAND[company];
 
-  if (!errored && logoUrl) {
+  if (logo) {
     return (
       <img
-        src={logoUrl}
+        src={logo}
         alt={`${company} logo`}
         className="w-full h-full object-contain"
-        onError={() => setErrored(true)}
       />
     );
   }

@@ -1,6 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <rect width="200" height="200" rx="20" fill="#341F97"/>
-  <circle cx="100" cy="90" r="35" fill="none" stroke="#96C93D" stroke-width="7"/>
-  <circle cx="100" cy="90" r="18" fill="#96C93D"/>
-  <text x="100" y="150" font-family="Arial, sans-serif" font-size="28" font-weight="900" fill="white" text-anchor="middle">WIPRO</text>
+  <rect width="200" height="200" fill="white"/>
+  <!-- Wipro sunflower petals -->
+  <g transform="translate(52,96)">
+    <ellipse cx="0" cy="-28" rx="9" ry="16" fill="#D32011" transform="rotate(0)"/>
+    <ellipse cx="0" cy="-28" rx="9" ry="16" fill="#F37021" transform="rotate(45)"/>
+    <ellipse cx="0" cy="-28" rx="9" ry="16" fill="#FECC02" transform="rotate(90)"/>
+    <ellipse cx="0" cy="-28" rx="9" ry="16" fill="#97C83C" transform="rotate(135)"/>
+    <ellipse cx="0" cy="-28" rx="9" ry="16" fill="#009A4E" transform="rotate(180)"/>
+    <ellipse cx="0" cy="-28" rx="9" ry="16" fill="#009FDB" transform="rotate(225)"/>
+    <ellipse cx="0" cy="-28" rx="9" ry="16" fill="#0052A2" transform="rotate(270)"/>
+    <ellipse cx="0" cy="-28" rx="9" ry="16" fill="#8B2FC9" transform="rotate(315)"/>
+    <circle cx="0" cy="0" r="10" fill="#341F97"/>
+  </g>
+  <text x="124" y="106" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#341F97" text-anchor="middle" letter-spacing="-1">wipro</text>
 </svg>

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <rect width="200" height="200" rx="20" fill="#A100FF"/>
-  <text x="94" y="115" font-family="Arial, sans-serif" font-size="28" font-weight="900" fill="white" text-anchor="middle">Accenture</text>
-  <polygon points="148,60 162,82 148,82" fill="white"/>
+  <rect width="200" height="200" fill="white"/>
+  <text x="94" y="116" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#000000" text-anchor="middle" letter-spacing="0">Accenture</text>
+  <polygon points="154,46 178,74 154,102" fill="#A100FF"/>
 </svg>
