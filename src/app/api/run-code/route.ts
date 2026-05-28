@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const LANGUAGE_MAP: Record<string, { language: string; version: string }> = {
-  javascript: { language: 'javascript', version: '18.15.0' },
-  python: { language: 'python', version: '3.10.0' },
-  cpp: { language: 'cpp', version: '10.2.0' },
-  java: { language: 'java', version: '15.0.2' },
+const LANGUAGE_MAP: Record<string, string> = {
+  javascript: 'nodejs-20.17.0',
+  python: 'cpython-3.10.15',
+  cpp: 'gcc-13.2.0',
+  java: 'openjdk-jdk-21+35',
 };
 
 export async function POST(req: NextRequest) {
@@ -26,46 +26,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payload too large. Code limit is 50KB.' }, { status: 413 });
     }
 
-    const pistonLang = LANGUAGE_MAP[language];
-    if (!pistonLang) {
+    const wandboxCompiler = LANGUAGE_MAP[language];
+    if (!wandboxCompiler) {
       return NextResponse.json({ error: 'Unsupported language' }, { status: 400 });
     }
 
-    const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+    const response = await fetch('https://wandbox.org/api/compile.json', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        language: pistonLang.language,
-        version: pistonLang.version,
-        files: [
-          {
-            content: trimmedCode,
-          },
-        ],
+        compiler: wandboxCompiler,
+        code: trimmedCode,
       }),
-      // Abort signal could be added here for robust timeout handling, but fetch is generally fine on Vercel (times out based on maxDuration)
     });
 
     if (!response.ok) {
-      // If piston returns a JSON error, we try to parse it
-      let errorMsg = 'Execution engine failed';
-      try {
-        const errData = await response.json();
-        if (errData.message) errorMsg = errData.message;
-      } catch (e) {
-        errorMsg = `Execution engine returned status ${response.status}`;
-      }
-      return NextResponse.json({ error: errorMsg }, { status: response.status });
+      return NextResponse.json({ error: `Execution engine returned status ${response.status}` }, { status: response.status });
     }
 
     const data = await response.json();
 
+    // Combine wandbox outputs
+    const stdout = (data.compiler_output || '') + (data.program_output || '');
+    const stderr = (data.compiler_error || '') + (data.program_error || '');
+
     return NextResponse.json({
-      stdout: data.run?.stdout || '',
-      stderr: data.run?.stderr || '',
-      code: data.run?.code || 0,
+      stdout: stdout,
+      stderr: stderr,
+      code: parseInt(data.status || "0", 10),
     });
   } catch (error: any) {
     console.error('Run code error:', error);
