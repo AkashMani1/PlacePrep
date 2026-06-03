@@ -7,6 +7,7 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Toaster } from 'sonner';
 import { env } from '@/lib/env';
 import GuidedTour from '@/components/common/GuidedTour';
+import LoginGateModal from '@/components/common/LoginGateModal';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -89,6 +90,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} font-sans antialiased`} suppressHydrationWarning={true}>
         <ErrorBoundary>
           <AuthProvider>
+            {/* LoginGateModal reads AuthContext directly — must be inside AuthProvider */}
+            <LoginGateModal />
             <AppProvider>
               {/* mobile-viewport-shell applies ONLY on <768px via CSS — no-op on desktop */}
               <div className="mobile-viewport-shell">
